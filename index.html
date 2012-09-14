@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style='background: #131313;'>
+
+<canvas id="display" style='display: block; border: solid 1px #333; margin-top: 50px; margin-left: auto; margin-right: auto;' width="800" height="450" style="background: #000"></canvas>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+<script src='requestAnimationFrame.js'></script>
+<script src='stepper.js'></script>
+<script src='particle.js'></script>
+<script src='particleSystem.js'></script>
+<script>
+
+  // Constants
+  var WIDTH = 800;
+  var HEIGHT = 450;
+  var COLORS = ['#118888', '#3FC1A6', '#8EFFEC', '#FFFFFF', '#F10C5C'];
+  var CIRCLE_RADIUS = 2 * Math.PI;
+  var NEW_BATCHES = 30;
+
+  // Globals
+  var ctx, stepper, system, mouse = {x: 0, y: 0, mass: 0};
+
+  // GO!
+  start();
+
+
+  // Primary functions
+
+  function start() {
+    ctx = document.getElementById('display').getContext('2d');
+    stepper = new Stepper(frame);
+    system = new ParticleSystem();
+    stepper.start();
+  }
+
+  function frame(time, correction) {
+    clear();
+    system.each(drawParticle)
+    system.each(applyForces(time, correction));
+    drawMouse();
+    shrinkMouse();
+    drawParticleCount();
+  }
+
+
+  // Supporting functions
+
+  function addParticles(x, y, n) {
+    var dot;
+    for (var i = 0; i < n; i++) {
+      dot = new Particle(Math.random() * 20 + x - 10, Math.random() * 20 + y - 10, Math.random() * 3 + 1);
+      dot.boundaries(0, 0, WIDTH, HEIGHT);
+      dot.color = COLORS[~~(Math.random() * COLORS.length)];
+      system.add(dot);
+    }
+  }
+
+  function drawParticle(dot) {
+    ctx.save();
+    ctx.fillStyle = dot.color;
+    ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
+    ctx.restore();
+  }
+
+  function drawParticleCount() {
+    var text = system.particles.length ? 'Particles: ' + system.particles.length : '(click to add particles)';
+    ctx.save();
+    ctx.fillStyle = '#fff';
+    ctx.font = '10pt Helvetica';
+    ctx.fillText(text, 10, 20);
+    ctx.restore();
+  }
+
+  function drawMouse() {
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, mouse.mass * 5 + 1, 0, CIRCLE_RADIUS, false);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function shrinkMouse() {
+    if (mouse.mass > 0) {
+      mouse.mass -= 0.1;
+    }
+  }
+
+  function applyForces(time, correction) {
+    return function(dot) {
+      dot.accelerate(0, 0.00005);        // Gravity
+      dot.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull
+      dot.integrate(time, correction);  // Apply forces
+      dot.constrain(time, correction);  // Keep inside display
+    };
+  }
+
+  function clear() {
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.restore();
+  }
+
+  // jQuery
+  jQuery(document).ready(function(){
+    $('#display').mousemove(function(e){
+      mouse = {
+        x: e.pageX - this.offsetLeft,
+        y: e.pageY - this.offsetTop,
+        mass: 5
+      };
+    });
+    $('#display').mousedown(function(e) {
+      addParticles(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, NEW_BATCHES);
+    });
+  });
+
+</script>
+
+</body>
+</html>
