@@ -121,7 +121,7 @@
       };
     });
     $('#display').mousedown(function(e) {
-      mouse.mass = 0;
+      mouse.mass = 0.3;
       addParticles(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, NEW_BATCHES);
       return false;
     });
