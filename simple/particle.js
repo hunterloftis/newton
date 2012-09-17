@@ -48,11 +48,45 @@ Particle.prototype.boundaries = function(minX, minY, maxX, maxY) {
   this.maxY = maxY;
 };
 
-Particle.prototype.constrain = function(time, correction) {
+Particle.prototype.contain = function(time, correction) {
   if (this.x > this.maxX) this.x = this.maxX;
   else if (this.x < this.minX) this.x = this.minX;
   if (this.y > this.maxY) this.y = this.maxY;
   else if (this.y < this.minY) this.y = this.minY;
+};
+
+Particle.prototype.collide = function(segments) {
+  var nearest;
+  var i = segments.length;
+  while (i--) {
+    var intersect = segments[i].intersection(this.x1, this.y1, this.x, this.y);
+    var dx = intersect.x - this.x1;
+    var dy = intersect.y - this.y1;
+    if (intersect) {
+      if (nearest) {
+        var oldDistance = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
+        var newDistance = Math.sqrt(dx * dx + dy * dy);
+        if (newDistance < oldDistance) {
+          nearest = {
+            dx: dx,
+            dy: dy
+          };
+        }
+      }
+      else {
+        nearest = {
+          dx: dx,
+          dy: dy
+        };
+      }
+    }
+  }
+  if (nearest) {
+    var compensationX = nearest.dx > 3 ? nearest.dx * 0.9 : 0;
+    var compensationY = nearest.dy > 3 ? nearest.dy * 0.9 : 0;
+    this.x = this.x1 + compensationX;
+    this.y = this.y1 + compensationY;
+  }
 };
 
 Particle.prototype.force = function(x, y) {

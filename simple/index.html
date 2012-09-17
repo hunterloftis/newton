@@ -20,17 +20,21 @@
 <script src='stepper.js'></script>
 <script src='particle.js'></script>
 <script src='particleSystem.js'></script>
+<script src='segment.js'></script>
 <script>
 
   // Constants
   var WIDTH = 800;
   var HEIGHT = 450;
   var COLORS = ['#118888', '#3FC1A6', '#8EFFEC', '#FFFFFF', '#F10C5C'];
+  var CLEAR = 'rgba(0, 0, 0, 0.5)';
   var CIRCLE_RADIUS = 2 * Math.PI;
   var NEW_BATCHES = 30;
+  var GRAVITY = 0.2;
 
   // Globals
-  var ctx, stepper, system, mouse = {x: 0, y: 0, mass: 0};
+  var ctx, stepper, system, segments;
+  var mouse = {x: 0, y: 0, mass: 0};
 
   // GO!
   start();
@@ -40,8 +44,9 @@
 
   function start() {
     ctx = document.getElementById('display').getContext('2d');
-    stepper = new Stepper(frame);
     system = new ParticleSystem();
+    segments = createSegments();
+    stepper = new Stepper(frame);
     stepper.start();
   }
 
@@ -49,6 +54,7 @@
     clear();
     system.each(drawParticle)
     system.each(applyForces(time, correction));
+    segments.forEach(drawSegment);
     drawMouse();
     shrinkMouse();
     drawParticleCount();
@@ -67,10 +73,33 @@
     }
   }
 
+  function createSegments() {
+    var s = [];
+    s.push(new Segment(200, 100, 300, 200));
+    s.push(new Segment(300, 200, 400, 100));
+    s.push(new Segment(400, 100, 450, 150));
+    s.push(new Segment(450, 150, 300, 300));
+    s.push(new Segment(300, 300, 150, 150));
+    s.push(new Segment(150, 150, 200, 100));
+    return s;
+  }
+
   function drawParticle(dot) {
     ctx.save();
     ctx.fillStyle = dot.color;
     ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
+    ctx.restore();
+  }
+
+  function drawSegment(segment) {
+    ctx.save();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(segment.x1, segment.y1);
+    ctx.lineTo(segment.x2, segment.y2);
+    ctx.closePath();
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -101,16 +130,20 @@
 
   function applyForces(time, correction) {
     return function(dot) {
-      dot.accelerate(0, 0.00005);        // Gravity
+      // Change acceleration
+      dot.accelerate(0, GRAVITY);        // Gravity
       dot.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull
+      // Apply acceleration -> velocity -> position
       dot.integrate(time, correction);  // Apply forces
-      dot.constrain(time, correction);  // Keep inside display
+      // Apply constraints
+      dot.collide(segments);            // Handle collisions with line segments
+      dot.contain(time, correction);  // Keep inside display
     };
   }
 
   function clear() {
     ctx.save();
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillStyle = CLEAR;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.restore();
   }
