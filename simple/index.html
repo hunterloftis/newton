@@ -26,39 +26,44 @@
   // Constants
   var WIDTH = 1280;
   var HEIGHT = 450;
-  var COLORS = ['#118888', '#3FC1A6', '#8EFFEC', '#FFFFFF', '#F10C5C'];
   var CLEAR = 'rgba(0, 0, 0, 0.5)';
   var CIRCLE_RADIUS = 2 * Math.PI;
-  var NEW_BATCHES = 300;
+  var NEW_BATCHES = 100;
   var GRAVITY = 0.00001;
+  var MASS_MIN = 1;
+  var MASS_MAX = 5;
+  var COLORS = {
+    1: '#118888',
+    2: '#3FC1A6',
+    3: '#8EFFEC',
+    4: '#FFFFFF',
+    5: '#F10C5C'
+  };
   var POLYS = [
-    // S
-    100, 100, 300, 100,
-    300, 100, 300, 200,
-    300, 200, 200, 200,
-    200, 200, 200, 300,
-    200, 300, 300, 300,
-    300, 300, 300, 600,
-    300, 600, 100, 600,
-    100, 600, 100, 500,
-    100, 500, 200, 500,
-    200, 500, 200, 400,
-    200, 400, 100, 400,
-    100, 400, 100, 100,
-    // K
-    400, 100, 500, 100,
-    500, 100, 500, 300,
-    500, 300, 600, 100,
-    600, 100, 700, 100,
-    700, 100, 550, 350,
-    550, 350, 700, 600,
-    700, 600, 600, 600,
-    600, 600, 500, 400,
-    500, 400, 500, 600,
-    500, 600, 400, 600,
-    400, 600, 400, 100
+    // X
+    150, 150, 200, 100,
+    200, 100, 250, 150,
+    250, 150, 300, 100,
+    300, 100, 350, 150,
+    350, 150, 300, 200,
+    300, 200, 350, 250,
+    350, 250, 300, 300,
+    300, 300, 250, 250,
+    250, 250, 200, 300,
+    200, 300, 150, 250,
+    150, 250, 200, 200,
+    200, 200, 150, 150,
+    // Triangle
+    600, 125, 725, 275,
+    725, 275, 475, 275,
+    475, 275, 600, 125,
+    // Box
+    875, 125, 1050, 125,
+    1050, 125, 1050, 275,
+    1050, 275, 875, 275,
+    875, 275, 875, 125
   ];
-  var SCALE = 0.5;
+  var SCALE = 1.0;
 
   // Globals
   var ctx, stepper, system, segments;
@@ -82,7 +87,6 @@
     clear();
     drawParticles();
     drawSegments();
-    drawMouse();
     drawParticleCount();
     shrinkMouse();
     applyForces(time, correction);
@@ -94,10 +98,9 @@
   function addParticles(x, y, n) {
     var dot;
     for (var i = 0; i < n; i++) {
-      var random = Math.random();
-      dot = new Particle(Math.random() * 20 + x - 10, Math.random() * 20 + y - 10, random * 3 + 1);
+      var mass = Math.random() * (MASS_MAX - MASS_MIN) + MASS_MIN;
+      dot = new Particle(Math.random() * 20 + x - 10, Math.random() * 20 + y - 10, mass);
       dot.boundaries(0, 0, WIDTH, HEIGHT);
-      dot.color = COLORS[~~(random * COLORS.length)];
       system.add(dot);
     }
   }
@@ -113,18 +116,38 @@
   function drawParticles() {
     ctx.save();
     var dot, i = system.particles.length;
+    // stationary
     while (i--) {
       dot = system.particles[i];
-      ctx.fillStyle = dot.color;
-      ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
+      if(Math.abs(dot.x - dot.x1) < 1 && Math.abs(dot.y - dot.y1) < 1) {
+        ctx.fillStyle = COLORS[~~dot.mass + 1];
+        ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
+      }
+    }
+    // each color
+    for (m = MASS_MIN; m <= MASS_MAX; m++) {
+      ctx.strokeStyle = COLORS[m];
+      ctx.lineWidth = m;
+      ctx.beginPath();
+      i = system.particles.length;
+      while (i--) {
+        dot = system.particles[i];
+        if ((dot.mass > m-1) && (dot.mass <= m)) {
+          ctx.moveTo(dot.x1, dot.y1);
+          ctx.lineTo(dot.x, dot.y);
+        }
+      }
+      ctx.stroke();
     }
     ctx.restore();
   }
 
   function drawSegments() {
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+    ctx.lineWidth = 1;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = 'rgba(100, 200, 255, 1)';
     var segment, i = segments.length;
     while (i--) {
       segment = segments[i];
@@ -132,6 +155,7 @@
       ctx.moveTo(segment.x1, segment.y1);
       ctx.lineTo(segment.x2, segment.y2);
       ctx.closePath();
+      ctx.stroke();
       ctx.stroke();
     }
     ctx.restore();
@@ -143,16 +167,6 @@
     ctx.fillStyle = '#fff';
     ctx.font = '10pt Helvetica';
     ctx.fillText(text, 10, 20);
-    ctx.restore();
-  }
-
-  function drawMouse() {
-    ctx.save();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.beginPath();
-    ctx.arc(mouse.x, mouse.y, mouse.mass * 5 + 1, 0, CIRCLE_RADIUS, false);
-    ctx.closePath();
-    ctx.fill();
     ctx.restore();
   }
 
