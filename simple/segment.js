@@ -35,6 +35,8 @@ Segment.prototype.nAngle = function(x1, y1, x2, y2) {
 };
 
 Segment.prototype.intersection = function(x1, y1, x2, y2) {
+  // Quick escape if they aren't even close
+
   // This line
   var a1 = this.y2 - this.y1;
   var b1 = this.x1 - this.x2;

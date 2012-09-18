@@ -7,7 +7,7 @@
 <body>
 
 <div class='wrap'>
-  <canvas id="display" width="800" height="450"></canvas>
+  <canvas id="display" width="1280" height="450"></canvas>
   <p class='caption'>
     Particle system demonstrating <a href='http://lonesock.net/article/verlet.html'>Time-Corrected Verlet integration</a> (TCV) with bounding constraints and gravitational forces.
   </p>
@@ -24,13 +24,16 @@
 <script>
 
   // Constants
-  var WIDTH = 800;
+  var WIDTH = 1280;
   var HEIGHT = 450;
   var COLORS = ['#118888', '#3FC1A6', '#8EFFEC', '#FFFFFF', '#F10C5C'];
   var CLEAR = 'rgba(0, 0, 0, 0.5)';
   var CIRCLE_RADIUS = 2 * Math.PI;
-  var NEW_BATCHES = 30;
+  var NEW_BATCHES = 300;
   var GRAVITY = 0.00001;
+  var POLYS = [
+
+  ];
 
   // Globals
   var ctx, stepper, system, segments;
@@ -52,12 +55,12 @@
 
   function frame(time, correction) {
     clear();
-    system.each(drawParticle)
-    system.each(applyForces(time, correction));
-    segments.forEach(drawSegment);
+    drawParticles();
+    drawSegments();
     drawMouse();
     shrinkMouse();
     drawParticleCount();
+    applyForces(time, correction);
   }
 
 
@@ -66,9 +69,10 @@
   function addParticles(x, y, n) {
     var dot;
     for (var i = 0; i < n; i++) {
-      dot = new Particle(Math.random() * 20 + x - 10, Math.random() * 20 + y - 10, Math.random() * 3 + 1);
+      var random = Math.random();
+      dot = new Particle(Math.random() * 20 + x - 10, Math.random() * 20 + y - 10, random * 3 + 1);
       dot.boundaries(0, 0, WIDTH, HEIGHT);
-      dot.color = COLORS[~~(Math.random() * COLORS.length)];
+      dot.color = COLORS[~~(random * COLORS.length)];
       system.add(dot);
     }
   }
@@ -84,22 +88,30 @@
     return s;
   }
 
-  function drawParticle(dot) {
+  function drawParticles() {
     ctx.save();
-    ctx.fillStyle = dot.color;
-    ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
+    var dot, i = system.particles.length;
+    while (i--) {
+      dot = system.particles[i];
+      ctx.fillStyle = dot.color;
+      ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
+    }
     ctx.restore();
   }
 
-  function drawSegment(segment) {
+  function drawSegments() {
     ctx.save();
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(segment.x1, segment.y1);
-    ctx.lineTo(segment.x2, segment.y2);
-    ctx.closePath();
-    ctx.stroke();
+    var segment, i = segments.length;
+    while (i--) {
+      segment = segments[i];
+      ctx.beginPath();
+      ctx.moveTo(segment.x1, segment.y1);
+      ctx.lineTo(segment.x2, segment.y2);
+      ctx.closePath();
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
@@ -129,7 +141,9 @@
   }
 
   function applyForces(time, correction) {
-    return function(dot) {
+    var dot, i = system.particles.length;
+    while (i--) {
+      dot = system.particles[i];
       // Change acceleration
       dot.accelerate(0, GRAVITY);        // Gravity
       dot.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull

@@ -106,6 +106,7 @@ Particle.prototype.gravitate = function(x, y, m) {
   var dy = y - this.y;
   var r = Math.sqrt(dx * dx + dy * dy);
   var f = (m * this.mass) / (r * r);
-  this.accX += f * (dx / r);
-  this.accY += f * (dy / r);
+  var ratio = m / (m + this.mass);
+  this.accX += f * (dx / r) * ratio;
+  this.accY += f * (dy / r) * ratio;
 };
