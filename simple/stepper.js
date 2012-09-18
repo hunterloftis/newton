@@ -20,6 +20,7 @@ Stepper.prototype.getStep = function() {
   return function generatedStep() {
     var time = Date.now();
     var step = self.lastTime ? time - self.lastTime : 0;
+    if (step > 100) step = 100; // in case you leave / return
     var correction = (step && self.lastStep) ? step / self.lastStep : 1;
     self.callback(step, correction);
     self.lastTime = time;
