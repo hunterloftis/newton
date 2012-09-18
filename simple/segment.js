@@ -1,11 +1,38 @@
-var COLLISION_TOLERANCE = 0.001;
+var COLLISION_TOLERANCE = 0.5;
+var CIRCLE_RADS = Math.PI * 2;
+var QUARTER = Math.PI * 0.5;
 
-function Segment(x1, y1, x2, y2) {
+function Segment(x1, y1, x2, y2, oneWay) {
   this.x1 = x1;
   this.y1 = y1;
   this.x2 = x2;
   this.y2 = y2;
+  this.oneWay = oneWay || false;
+  this.size = Segment.size(x1, y1, x2, y2);
 }
+
+Segment.size = function(x1, y1, x2, y2) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+Segment.angle = function(x1, y1, x2, y2) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  return Math.atan2(dy, dx);
+};
+
+// Get the angle between this vector's normal and another vector
+Segment.prototype.nAngle = function(x1, y1, x2, y2) {
+  var dxA = -(this.y2 - this.y1); // normal.x = -dy
+  var dyA = this.x2 - this.x1;    // normal.y = dx
+  var dxB = x2 - x1;
+  var dyB = y2 - y1;
+  var dotProduct = dxA * dxB + dyA * dyB;
+  var size = this.size * Segment.size(x1, y1, x2, y2);
+  return Math.acos(dotProduct / size);
+};
 
 Segment.prototype.intersection = function(x1, y1, x2, y2) {
   // This line
@@ -34,8 +61,16 @@ Segment.prototype.intersection = function(x1, y1, x2, y2) {
   var within = withinOtherX && withinOtherY && withinThisX && withinThisY;
   if (!within) return false;
 
+  // If this is a one-way barrier, determine if the motion through the segment is in a colliding direction
+  var incidence;
+  if (this.oneWay) {
+    incidence = this.nAngle(x1, y1, x2, y2);
+    if (incidence < -QUARTER || incidence > QUARTER) return false;
+  }
+
   return {
     x: x,
-    y: y
+    y: y,
+    angle: incidence
   };
 };

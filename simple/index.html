@@ -30,7 +30,7 @@
   var CLEAR = 'rgba(0, 0, 0, 0.5)';
   var CIRCLE_RADIUS = 2 * Math.PI;
   var NEW_BATCHES = 30;
-  var GRAVITY = 0.2;
+  var GRAVITY = 0.00001;
 
   // Globals
   var ctx, stepper, system, segments;
@@ -75,12 +75,12 @@
 
   function createSegments() {
     var s = [];
-    s.push(new Segment(200, 100, 300, 200));
-    s.push(new Segment(300, 200, 400, 100));
-    s.push(new Segment(400, 100, 450, 150));
-    s.push(new Segment(450, 150, 300, 300));
-    s.push(new Segment(300, 300, 150, 150));
-    s.push(new Segment(150, 150, 200, 100));
+    s.push(new Segment(200, 100, 300, 200, true));
+    s.push(new Segment(300, 200, 400, 100, true));
+    s.push(new Segment(400, 100, 450, 150, true));
+    s.push(new Segment(450, 150, 300, 300, true));
+    s.push(new Segment(300, 300, 150, 150, true));
+    s.push(new Segment(150, 150, 200, 100, true));
     return s;
   }
 

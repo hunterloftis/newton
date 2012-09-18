@@ -17,7 +17,7 @@ Stepper.prototype.stop = function() {
 
 Stepper.prototype.getStep = function() {
   var self = this;
-  return function() {
+  return function generatedStep() {
     var time = Date.now();
     var step = self.lastTime ? time - self.lastTime : 0;
     var correction = (step && self.lastStep) ? step / self.lastStep : 1;

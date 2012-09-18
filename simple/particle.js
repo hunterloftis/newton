@@ -56,36 +56,38 @@ Particle.prototype.contain = function(time, correction) {
 };
 
 Particle.prototype.collide = function(segments) {
-  var nearest;
+  var nearest, intersect;
   var i = segments.length;
   while (i--) {
-    var intersect = segments[i].intersection(this.x1, this.y1, this.x, this.y);
-    var dx = intersect.x - this.x1;
-    var dy = intersect.y - this.y1;
+    intersect = segments[i].intersection(this.x1, this.y1, this.x, this.y);
     if (intersect) {
+      var dx = intersect.x - this.x1;
+      var dy = intersect.y - this.y1;
       if (nearest) {
         var oldDistance = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
         var newDistance = Math.sqrt(dx * dx + dy * dy);
         if (newDistance < oldDistance) {
           nearest = {
             dx: dx,
-            dy: dy
+            dy: dy,
+            x: intersect.x,
+            y: intersect.y
           };
         }
       }
       else {
         nearest = {
           dx: dx,
-          dy: dy
+          dy: dy,
+          x: intersect.x,
+          y: intersect.y
         };
       }
     }
   }
   if (nearest) {
-    var compensationX = nearest.dx > 3 ? nearest.dx * 0.9 : 0;
-    var compensationY = nearest.dy > 3 ? nearest.dy * 0.9 : 0;
-    this.x = this.x1 + compensationX;
-    this.y = this.y1 + compensationY;
+    this.x = nearest.x;
+    this.y = nearest.y;
   }
 };
 
