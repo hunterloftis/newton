@@ -36,6 +36,11 @@ Segment.prototype.nAngle = function(x1, y1, x2, y2) {
 
 Segment.prototype.intersection = function(x1, y1, x2, y2) {
   // Quick escape if they aren't even close
+  var toRight = x1 > this.x1 && x1 > this.x2 && x2 > this.x1 && x2 > this.x2;
+  var toLeft = x1 < this.x1 && x1 < this.x2 && x2 < this.x1 && x2 < this.x2;
+  var toTop = y1 < this.y1 && y1 < this.y2 && y2 < this.y1 && y2 < this.y2;
+  var toBottom = y1 > this.y1 && y1 > this.y2 && y2 > this.y1 && y2 > this.y2;
+  if (toRight || toLeft || toTop || toBottom) return false;
 
   // This line
   var a1 = this.y2 - this.y1;
