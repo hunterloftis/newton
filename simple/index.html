@@ -32,8 +32,33 @@
   var NEW_BATCHES = 300;
   var GRAVITY = 0.00001;
   var POLYS = [
-
+    // S
+    100, 100, 300, 100,
+    300, 100, 300, 200,
+    300, 200, 200, 200,
+    200, 200, 200, 300,
+    200, 300, 300, 300,
+    300, 300, 300, 600,
+    300, 600, 100, 600,
+    100, 600, 100, 500,
+    100, 500, 200, 500,
+    200, 500, 200, 400,
+    200, 400, 100, 400,
+    100, 400, 100, 100,
+    // K
+    400, 100, 500, 100,
+    500, 100, 500, 300,
+    500, 300, 600, 100,
+    600, 100, 700, 100,
+    700, 100, 550, 350,
+    550, 350, 700, 600,
+    700, 600, 600, 600,
+    600, 600, 500, 400,
+    500, 400, 500, 600,
+    500, 600, 400, 600,
+    400, 600, 400, 100
   ];
+  var SCALE = 0.5;
 
   // Globals
   var ctx, stepper, system, segments;
@@ -58,8 +83,8 @@
     drawParticles();
     drawSegments();
     drawMouse();
-    shrinkMouse();
     drawParticleCount();
+    shrinkMouse();
     applyForces(time, correction);
   }
 
@@ -79,12 +104,9 @@
 
   function createSegments() {
     var s = [];
-    s.push(new Segment(200, 100, 300, 200, true));
-    s.push(new Segment(300, 200, 400, 100, true));
-    s.push(new Segment(400, 100, 450, 150, true));
-    s.push(new Segment(450, 150, 300, 300, true));
-    s.push(new Segment(300, 300, 150, 150, true));
-    s.push(new Segment(150, 150, 200, 100, true));
+    for (var i = 0; i < POLYS.length; i += 4) {
+      s.push(new Segment(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, true));
+    }
     return s;
   }
 
@@ -101,7 +123,7 @@
 
   function drawSegments() {
     ctx.save();
-    ctx.strokeStyle = '#fff';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 2;
     var segment, i = segments.length;
     while (i--) {
@@ -150,8 +172,8 @@
       // Apply acceleration -> velocity -> position
       dot.integrate(time, correction);  // Apply forces
       // Apply constraints
-      dot.collide(segments);            // Handle collisions with line segments
       dot.contain(time, correction);  // Keep inside display
+      dot.collide(segments);            // Handle collisions with line segments
     };
   }
 
