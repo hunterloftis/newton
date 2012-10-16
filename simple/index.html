@@ -108,7 +108,7 @@
   function createSegments() {
     var s = [];
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Segment(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, true));
+      s.push(new Segment(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE));
     }
     return s;
   }
@@ -154,7 +154,6 @@
       ctx.beginPath();
       ctx.moveTo(segment.x1, segment.y1);
       ctx.lineTo(segment.x2, segment.y2);
-      ctx.closePath();
       ctx.stroke();
       ctx.stroke();
     }

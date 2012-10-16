@@ -1,14 +1,14 @@
 var COLLISION_TOLERANCE = 0.5;
-var CIRCLE_RADS = Math.PI * 2;
 var QUARTER = Math.PI * 0.5;
+var CIRCLE = Math.pI * 2;
 
-function Segment(x1, y1, x2, y2, oneWay) {
+function Segment(x1, y1, x2, y2) {
   this.x1 = x1;
   this.y1 = y1;
   this.x2 = x2;
   this.y2 = y2;
-  this.oneWay = oneWay || false;
   this.size = Segment.size(x1, y1, x2, y2);
+  this.friction = 0.5;
 }
 
 Segment.size = function(x1, y1, x2, y2) {
@@ -61,16 +61,19 @@ Segment.prototype.intersection = function(x1, y1, x2, y2) {
   var within = withinOtherX && withinOtherY && withinThisX && withinThisY;
   if (!within) return false;
 
-  // If this is a one-way barrier, determine if the motion through the segment is in a colliding direction
-  var incidence;
-  if (this.oneWay) {
-    incidence = this.nAngle(x1, y1, x2, y2);
-    if (incidence < -QUARTER || incidence > QUARTER) return false;
-  }
+  // Determine if the motion through the segment is within 90 degrees either way of the normal
+  var incidence = this.nAngle(x1, y1, x2, y2);
+  if (incidence < -QUARTER || incidence > QUARTER) return false;
+
+  // Find the component vector (if the line were to keep moving parallel to this boundary)
+  var componentX, componentY;
+  var component = (this.incidence + Math.PI + CIRCLE) % CIRCLE;
+
 
   return {
     x: x,
     y: y,
-    angle: incidence
+    incidence: incidence,
+    component: component
   };
 };
