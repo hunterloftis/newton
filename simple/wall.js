@@ -57,7 +57,6 @@ Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
   var det = l1.a * l2.b - l2.a * l1.b;
 
   if (det === 0) return false;
-  console.log('det:', det);
 
   var x = (l2.b * l1.c  - l1.b * l2.c) / det;
   var y = (l1.a * l2.c - l2.a * l1.c) / det;
