@@ -105,8 +105,9 @@ Particle.prototype.collide = function(segments) {
     this.x = nearest.x;
     this.y = nearest.y;
 
-    this.x += projection.x * remainingMotion;
-    this.y += projection.y * remainingMotion;
+    // TODO: no checks here make it possible to accidentally cross over another segment
+    // this.x += projection.x * remainingMotion;
+    // this.y += projection.y * remainingMotion;
 
     this.x1 = this.x - projection.x;
     this.y1 = this.y - projection.y;
