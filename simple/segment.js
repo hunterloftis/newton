@@ -23,6 +23,30 @@ Segment.angle = function(x1, y1, x2, y2) {
   return Math.atan2(dy, dx);
 };
 
+Segment.prototype.normal = function() {
+  var dx = this.x2 - this.x1;
+  var dy = this.y2 - this.y1;
+  return {
+    x: dy,
+    y: -dx
+  };
+};
+
+Segment.prototype.dotProduct = function(x1, y1, x2, y2) {
+  var thisDx = this.x2 - this.x1;
+  var thisDy = this.y2 - this.y1;
+  var ux = thisDx / this.size;
+  var uy = thisDy / this.size;
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  var scalar = ux * dx + uy * dy;
+
+  return {
+    x: ux * scalar,
+    y: uy * scalar
+  }
+};
+
 // Get the angle between this vector's normal and another vector
 Segment.prototype.nAngle = function(x1, y1, x2, y2) {
   var dxA = -(this.y2 - this.y1); // normal.x = -dy
@@ -74,3 +98,5 @@ Segment.prototype.intersection = function(x1, y1, x2, y2) {
     angle: incidence
   };
 };
+
+if (module) module.exports = Segment;

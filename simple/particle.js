@@ -41,6 +41,13 @@ Particle.prototype.getChangeY = function() {
   return this.y - this.y1;
 };
 
+Particle.prototype.move = function(dx, dy) {
+  this.x1 = this.x;
+  this.y1 = this.y;
+  this.x += dx;
+  this.y += dy;
+};
+
 Particle.prototype.boundaries = function(minX, minY, maxX, maxY) {
   this.minX = minX;
   this.minY = minY;
@@ -80,7 +87,8 @@ Particle.prototype.collide = function(segments) {
           dx: dx,
           dy: dy,
           x: intersect.x,
-          y: intersect.y
+          y: intersect.y,
+          segment: segments[i]
         };
       }
     }
@@ -88,7 +96,20 @@ Particle.prototype.collide = function(segments) {
   if (nearest) {
     this.x = nearest.x;
     this.y = nearest.y;
+
+    var d = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
+    var ux = nearest.dx / d;
+    var uy = nearest.dy / d;
+    var normal = nearest.segment.normal();
+    var dot = nearest.segment.dotProduct(this.x1, this.y1, this.x, this.y);
+
+    console.log('d:', d);
+    console.log('ux:', ux);
+    console.log('uy:', uy);
+    console.log('normal:', normal);
+    console.log('dot:', dot);
   }
+  return nearest;
 };
 
 Particle.prototype.force = function(x, y) {
@@ -110,3 +131,5 @@ Particle.prototype.gravitate = function(x, y, m) {
   this.accX += f * (dx / r) * ratio;
   this.accY += f * (dy / r) * ratio;
 };
+
+if (module) module.exports = Particle;
