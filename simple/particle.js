@@ -78,7 +78,8 @@ Particle.prototype.collide = function(segments) {
             dx: dx,
             dy: dy,
             x: intersect.x,
-            y: intersect.y
+            y: intersect.y,
+            segment: segments[i]
           };
         }
       }
@@ -94,22 +95,24 @@ Particle.prototype.collide = function(segments) {
     }
   }
   if (nearest) {
+    var projection = nearest.segment.project(this.x1, this.y1, this.x, this.y);
+    var totalDx = this.x - this.x1;
+    var totalDy = this.y - this.y1;
+    var totalMotion = Math.sqrt(totalDx * totalDx + totalDy * totalDy);
+    var spentMotion = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
+    var remainingMotion = 1 - spentMotion / totalMotion;
+
     this.x = nearest.x;
     this.y = nearest.y;
 
-    var d = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
-    var ux = nearest.dx / d;
-    var uy = nearest.dy / d;
-    var normal = nearest.segment.normal();
-    var dot = nearest.segment.dotProduct(this.x1, this.y1, this.x, this.y);
+    this.x += projection.x * remainingMotion;
+    this.y += projection.y * remainingMotion;
 
-    console.log('d:', d);
-    console.log('ux:', ux);
-    console.log('uy:', uy);
-    console.log('normal:', normal);
-    console.log('dot:', dot);
+    this.x1 = this.x - projection.x;
+    this.y1 = this.y - projection.y;
+
+    return nearest;
   }
-  return nearest;
 };
 
 Particle.prototype.force = function(x, y) {
@@ -132,4 +135,4 @@ Particle.prototype.gravitate = function(x, y, m) {
   this.accY += f * (dy / r) * ratio;
 };
 
-if (module) module.exports = Particle;
+if (typeof module !== 'undefined') module.exports = Particle;
