@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Verlet Particles - SDW</title>
+  <link rel='stylesheet' type='text/css' href='styles/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <canvas id="display" width="1280" height="450"></canvas>
+  <p class='caption'>
+    Particle system demonstrating <a href='http://lonesock.net/article/verlet.html'>Time-Corrected Verlet integration</a> (TCV) with bounding constraints and gravitational forces.
+  </p>
+  <p class='caption'>by <a href='http://skookum.com'>Skookum Digital Works</a></p>
+</div>
+<a href="https://github.com/skookum/verlet"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub"></a>
+
+<script type="text/javascript" src="vendor/jquery-2.0.3.js"></script>
+
+<script src='js/vector.js'></script>
+<script src='js/rectangle.js'></script>
+<script src='js/wall.js'></script>
+<script src='js/particle.js'></script>
+
+<script src='js/gameloop.js'></script>
+<script src='js/particlesystem.js'></script>
+<script src='js/renderer.js'></script>
+
+<script>
+
+  // Constants
+  var WIDTH = 1280;
+  var HEIGHT = 450;
+  var CLEAR = 'rgba(0, 0, 0, 0.5)';
+  var CIRCLE_RADIUS = 2 * Math.PI;
+  var NEW_BATCHES = 250;
+  var GRAVITY = 0.0001;
+  var POLYS = [
+    // X
+    150, 150, 200, 100,
+    200, 100, 250, 150,
+    250, 150, 300, 100,
+    300, 100, 350, 150,
+    350, 150, 300, 200,
+    300, 200, 350, 250,
+    350, 250, 300, 300,
+    300, 300, 250, 250,
+    250, 250, 200, 300,
+    200, 300, 150, 250,
+    150, 250, 200, 200,
+    200, 200, 150, 150,
+    // Triangle
+    600, 125, 725, 275,
+    725, 275, 475, 275,
+    475, 275, 600, 125,
+    // Box
+    875, 125, 1050, 125,
+    1050, 125, 1050, 275,
+    1050, 275, 875, 275,
+    875, 275, 875, 125
+  ];
+  var SCALE = 1.0;
+
+  // Globals
+  var gameloop, system, walls, renderer;
+  var mouse = {x: 0, y: 0, mass: 0};
+  var adding = false;
+
+  // GO!
+  start();
+
+
+  // Primary functions
+
+  function start() {
+    system = new ParticleSystem();
+    walls = createWalls();
+    renderer = new Renderer(document.getElementById('display'));
+    gameloop = new Gameloop(frame);
+    gameloop.start();
+  }
+
+  function frame(time, correction) {
+    renderer.render();
+    shrinkMouse();
+    sprayParticles();
+    applyForces(time, correction);
+  }
+
+
+  // Supporting functions
+
+  function addParticles(x, y, n) {
+    var dot;
+    for (var i = 0; i < n; i++) {
+      dot = Particle.createRandom(x, y);
+      dot.setBounds(new Rectangle(0, 0, WIDTH, HEIGHT));
+      system.add(dot);
+    }
+  }
+
+  function createWalls() {
+    var s = [];
+    for (var i = 0; i < POLYS.length; i += 4) {
+      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, true));
+    }
+    return s;
+  }
+
+  function shrinkMouse() {
+    if (mouse.mass > 0) {
+      mouse.mass -= 0.1;
+    }
+  }
+
+  function applyForces(time, correction) {
+    var particle, i = system.particles.length;
+    while (i--) {
+      particle = system.particles[i];
+      // Change acceleration
+      particle.force(0, GRAVITY, 1);        // Gravity
+      particle.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull
+      // Apply acceleration -> velocity -> position
+      particle.integrate(time, correction);  // Apply forces
+      // Apply constraints
+      particle.contain(time, correction);  // Keep inside display
+      particle.collide(walls);            // Handle collisions with line walls
+    };
+  }
+
+  function sprayParticles() {
+    if (!adding) return;
+    mouse.mass = 2;
+    addParticles(mouse.x, mouse.y, 3);
+  }
+
+  // jQuery
+  jQuery(document).ready(function(){
+    $('#display').mousemove(function(e){
+      mouse = {
+        x: e.pageX - this.offsetLeft,
+        y: e.pageY - this.offsetTop,
+        mass: 2
+      };
+    });
+    $('#display').mousedown(function(e) {
+      adding = true;
+      return false;
+    });
+    $(document).mouseup(function(e) {
+      adding = false;
+    })
+  });
+
+</script>
+
+</body>
+</html>

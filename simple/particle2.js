@@ -1,68 +1,82 @@
 function Particle(x, y, m) {
+  this.position = new Vector(x, y);
+  this.lastPosition = this.position.clone();
+  this.acceleration = new Vector(0, 0);
   this.mass = m || 1.0;
   this.elasticity = 0.5;
   this.drag = 0.9999;
-  this.velX = this.velY = 0;
-  this.accX = this.accY = 0;
-  this.minX = 0;
-  this.minY = 0;
-  this.maxX = 100;
-  this.maxY = 100;
-  this.setPos(x, y);
+  this.bounds = undefined;
 }
 
-Particle.prototype.setPos = function(x, y) {
-  this.x = this.x1 = x;
-  this.y = this.y1 = y;
-};
-
 Particle.prototype.integrate = function(time, correction) {
-  this.velX = this.getChangeX();
-  this.velY = this.getChangeY();
-  var tSquared = time * time;
+
+  // Find velocity
+  var velocity = this.position.clone()
+    .sub(this.lastPosition)
+    .scale(correction);
+
+  // Set acceleration based on time squared
+  this.acceleration.scale(time * time);
 
   // Record last location
-  this.x1 = this.x;
-  this.y1 = this.y;
+  this.lastPosition = this.position;
 
   // Time-Corrected Verlet integration (TCV)
-  this.x = this.x + this.velX * correction + this.accX * tSquared;
-  this.y = this.y + this.velY * correction + this.accY * tSquared;
+  this.position
+    .add(velocity)
+    .add(this.acceleration);
 
   // Reset acceleration after integration
-  this.accX = this.accY = 0;
+  this.acceleration = new Vector(0, 0);
 };
 
-Particle.prototype.getChangeX = function() {
-  return this.x - this.x1;
+Particle.prototype.placeAt = function(x, y) {
+  this.position.x = this.lastPosition.x = x;
+  this.position.y = this.lastPosition.y = y;
+  return this;
 };
 
-Particle.prototype.getChangeY = function() {
-  return this.y - this.y1;
+Particle.prototype.moveBy = function(dx, dy) {
+  this.lastPosition = this.position.clone();
+  this.position.add(dx, dy);
+  return this;
 };
 
-Particle.prototype.move = function(dx, dy) {
-  this.x1 = this.x;
-  this.y1 = this.y;
-  this.x += dx;
-  this.y += dy;
-};
-
-Particle.prototype.boundaries = function(minX, minY, maxX, maxY) {
-  this.minX = minX;
-  this.minY = minY;
-  this.maxX = maxX;
-  this.maxY = maxY;
+Particle.prototype.setBounds = function(rect) {
+  this.bounds = rect ? rect : undefined;
 };
 
 Particle.prototype.contain = function(time, correction) {
-  if (this.x > this.maxX) this.x = this.maxX;
-  else if (this.x < this.minX) this.x = this.minX;
-  if (this.y > this.maxY) this.y = this.maxY;
-  else if (this.y < this.minY) this.y = this.minY;
+  if (this.x > this.bounds.right) this.x = this.bounds.right;
+  else if (this.x < this.bounds.left) this.x = this.bounds.left;
+  if (this.y > this.bounds.bottom) this.y = this.bounds.bottom;
+  else if (this.y < this.bounds.top) this.y = this.bounds.top;
 };
 
+Particle.prototype.force = function(x, y, mass) {
+  mass = mass || this.mass;
+  this.acceleration.add({
+    x: x / mass,
+    y: y / mass
+  });
+};
+
+Particle.prototype.gravitate = function(x, y, m) {
+  var delta = this.position.clone().sub(new Vector(x, y));
+  var r = delta.getLength();
+  var f = (m * this.mass) / (r * r);
+  var ratio = m / (m + this.mass);
+
+  this.acceleration.add({
+    x: f * (delta.x / r) * ratio,
+    y: f * (delta.y / r) * ratio
+  });
+};
+
+
 Particle.prototype.collide = function(segments) {
+  return;
+
   var nearest, intersect;
   var i = segments.length;
   while (i--) {
@@ -116,24 +130,5 @@ Particle.prototype.collide = function(segments) {
   }
 };
 
-Particle.prototype.force = function(x, y) {
-  this.accX += (x / this.mass);
-  this.accY += (y / this.mass);
-};
-
-Particle.prototype.accelerate = function(x, y) {
-  this.accX += x;
-  this.accY += y;
-};
-
-Particle.prototype.gravitate = function(x, y, m) {
-  var dx = x - this.x;
-  var dy = y - this.y;
-  var r = Math.sqrt(dx * dx + dy * dy);
-  var f = (m * this.mass) / (r * r);
-  var ratio = m / (m + this.mass);
-  this.accX += f * (dx / r) * ratio;
-  this.accY += f * (dy / r) * ratio;
-};
 
 if (typeof module !== 'undefined') module.exports = Particle;

@@ -41,13 +41,6 @@ Particle.prototype.getChangeY = function() {
   return this.y - this.y1;
 };
 
-Particle.prototype.move = function(dx, dy) {
-  this.x1 = this.x;
-  this.y1 = this.y;
-  this.x += dx;
-  this.y += dy;
-};
-
 Particle.prototype.boundaries = function(minX, minY, maxX, maxY) {
   this.minX = minX;
   this.minY = minY;
@@ -78,8 +71,7 @@ Particle.prototype.collide = function(segments) {
             dx: dx,
             dy: dy,
             x: intersect.x,
-            y: intersect.y,
-            segment: segments[i]
+            y: intersect.y
           };
         }
       }
@@ -88,31 +80,14 @@ Particle.prototype.collide = function(segments) {
           dx: dx,
           dy: dy,
           x: intersect.x,
-          y: intersect.y,
-          segment: segments[i]
+          y: intersect.y
         };
       }
     }
   }
   if (nearest) {
-    var projection = nearest.segment.project(this.x1, this.y1, this.x, this.y);
-    var totalDx = this.x - this.x1;
-    var totalDy = this.y - this.y1;
-    var totalMotion = Math.sqrt(totalDx * totalDx + totalDy * totalDy);
-    var spentMotion = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
-    var remainingMotion = 1 - spentMotion / totalMotion;
-
     this.x = nearest.x;
     this.y = nearest.y;
-
-    // TODO: no checks here make it possible to accidentally cross over another segment
-    // this.x += projection.x * remainingMotion;
-    // this.y += projection.y * remainingMotion;
-
-    this.x1 = this.x - projection.x;
-    this.y1 = this.y - projection.y;
-
-    return nearest;
   }
 };
 
@@ -135,5 +110,3 @@ Particle.prototype.gravitate = function(x, y, m) {
   this.accX += f * (dx / r) * ratio;
   this.accY += f * (dy / r) * ratio;
 };
-
-if (typeof module !== 'undefined') module.exports = Particle;

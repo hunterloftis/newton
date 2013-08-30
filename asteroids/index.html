@@ -20,7 +20,7 @@
 <script src='stepper.js'></script>
 <script src='particle.js'></script>
 <script src='particleSystem.js'></script>
-<script src='segment.js'></script>
+<script src='ship.js'></script>
 <script>
 
   // Constants
@@ -66,7 +66,7 @@
   var SCALE = 1.0;
 
   // Globals
-  var ctx, stepper, system, segments;
+  var ctx, stepper, system, ship;
   var mouse = {x: 0, y: 0, mass: 0};
 
   // GO!
@@ -78,7 +78,6 @@
   function start() {
     ctx = document.getElementById('display').getContext('2d');
     system = new ParticleSystem();
-    segments = createSegments();
     stepper = new Stepper(frame);
     stepper.start();
   }
@@ -86,8 +85,8 @@
   function frame(time, correction) {
     clear();
     drawParticles();
-    drawSegments();
     drawParticleCount();
+    drawShip();
     shrinkMouse();
     applyForces(time, correction);
   }
@@ -144,7 +143,7 @@
 
   function drawSegments() {
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
     ctx.lineWidth = 1;
     ctx.shadowBlur = 12;
     ctx.shadowColor = 'rgba(100, 200, 255, 1)';
@@ -158,6 +157,10 @@
       ctx.stroke();
     }
     ctx.restore();
+  }
+
+  function drawShip() {
+
   }
 
   function drawParticleCount() {
@@ -186,7 +189,6 @@
       dot.integrate(time, correction);  // Apply forces
       // Apply constraints
       dot.contain(time, correction);  // Keep inside display
-      dot.collide(segments);            // Handle collisions with line segments
     };
   }
 

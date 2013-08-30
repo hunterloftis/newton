@@ -2,6 +2,7 @@ function Particle(x, y, m) {
   this.mass = m || 1.0;
   this.elasticity = 0.5;
   this.drag = 0.9999;
+  this.maxVel = 2;
   this.velX = this.velY = 0;
   this.accX = this.accY = 0;
   this.minX = 0;
@@ -19,6 +20,7 @@ Particle.prototype.setPos = function(x, y) {
 Particle.prototype.integrate = function(time, correction) {
   this.velX = this.getChangeX();
   this.velY = this.getChangeY();
+
   var tSquared = time * time;
 
   // Record last location
@@ -26,8 +28,26 @@ Particle.prototype.integrate = function(time, correction) {
   this.y1 = this.y;
 
   // Time-Corrected Verlet integration (TCV)
-  this.x = this.x + this.velX * correction + this.accX * tSquared;
-  this.y = this.y + this.velY * correction + this.accY * tSquared;
+  var moveX = this.velX * correction + this.accX * tSquared;
+  var moveY = this.velY * correction + this.accY * tSquared;
+
+  // Limit speed
+  /*
+  var stepX = moveX / time;
+  var stepY = moveY / time;
+  var vel = Math.sqrt(stepX * stepX + stepY * stepY);
+  if (vel > this.maxVel) {
+    var ratio = this.maxVel / vel;
+    moveX *= ratio;
+    moveY *= ratio;
+  }
+  */
+  //moveX *= this.drag;
+  //moveY *= this.drag;
+
+  // Update position
+  this.x += moveX;
+  this.y += moveY;
 
   // Reset acceleration after integration
   this.accX = this.accY = 0;
@@ -39,13 +59,6 @@ Particle.prototype.getChangeX = function() {
 
 Particle.prototype.getChangeY = function() {
   return this.y - this.y1;
-};
-
-Particle.prototype.move = function(dx, dy) {
-  this.x1 = this.x;
-  this.y1 = this.y;
-  this.x += dx;
-  this.y += dy;
 };
 
 Particle.prototype.boundaries = function(minX, minY, maxX, maxY) {
@@ -78,8 +91,7 @@ Particle.prototype.collide = function(segments) {
             dx: dx,
             dy: dy,
             x: intersect.x,
-            y: intersect.y,
-            segment: segments[i]
+            y: intersect.y
           };
         }
       }
@@ -88,31 +100,14 @@ Particle.prototype.collide = function(segments) {
           dx: dx,
           dy: dy,
           x: intersect.x,
-          y: intersect.y,
-          segment: segments[i]
+          y: intersect.y
         };
       }
     }
   }
   if (nearest) {
-    var projection = nearest.segment.project(this.x1, this.y1, this.x, this.y);
-    var totalDx = this.x - this.x1;
-    var totalDy = this.y - this.y1;
-    var totalMotion = Math.sqrt(totalDx * totalDx + totalDy * totalDy);
-    var spentMotion = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
-    var remainingMotion = 1 - spentMotion / totalMotion;
-
     this.x = nearest.x;
     this.y = nearest.y;
-
-    // TODO: no checks here make it possible to accidentally cross over another segment
-    // this.x += projection.x * remainingMotion;
-    // this.y += projection.y * remainingMotion;
-
-    this.x1 = this.x - projection.x;
-    this.y1 = this.y - projection.y;
-
-    return nearest;
   }
 };
 
@@ -135,5 +130,3 @@ Particle.prototype.gravitate = function(x, y, m) {
   this.accX += f * (dx / r) * ratio;
   this.accY += f * (dy / r) * ratio;
 };
-
-if (typeof module !== 'undefined') module.exports = Particle;

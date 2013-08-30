@@ -7,12 +7,6 @@ function Segment(x1, y1, x2, y2) {
   this.y1 = y1;
   this.x2 = x2;
   this.y2 = y2;
-<<<<<<< HEAD
-=======
-  this.dx = x2 - x1;
-  this.dy = y2 - y1;
-  this.oneWay = oneWay || false;
->>>>>>> deflection
   this.size = Segment.size(x1, y1, x2, y2);
   this.friction = 0.5;
 }
@@ -27,34 +21,6 @@ Segment.angle = function(x1, y1, x2, y2) {
   var dx = x2 - x1;
   var dy = y2 - y1;
   return Math.atan2(dy, dx);
-};
-
-Segment.prototype.normal = function() {
-  var dx = this.x2 - this.x1;
-  var dy = this.y2 - this.y1;
-  return {
-    x: dy,
-    y: -dx
-  };
-};
-
-Segment.prototype.unit = function() {
-  return {
-    x: this.dx / this.size,
-    y: this.dy / this.size
-  };
-}
-
-Segment.prototype.project = function(x1, y1, x2, y2) {
-  var unit = this.unit();
-  var dx = x2 - x1;
-  var dy = y2 - y1;
-  var dot = dx * unit.x + dy * unit.y;
-
-  return {
-    x: unit.x * dot,
-    y: unit.y * dot
-  };
 };
 
 // Get the angle between this vector's normal and another vector
@@ -111,5 +77,3 @@ Segment.prototype.intersection = function(x1, y1, x2, y2) {
     component: component
   };
 };
-
-if (typeof module !== 'undefined') module.exports = Segment;

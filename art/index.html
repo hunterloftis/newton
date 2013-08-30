@@ -78,15 +78,13 @@
   function start() {
     ctx = document.getElementById('display').getContext('2d');
     system = new ParticleSystem();
-    segments = createSegments();
     stepper = new Stepper(frame);
     stepper.start();
   }
 
   function frame(time, correction) {
-    clear();
+    //clear();
     drawParticles();
-    drawSegments();
     drawParticleCount();
     shrinkMouse();
     applyForces(time, correction);
@@ -116,18 +114,11 @@
   function drawParticles() {
     ctx.save();
     var dot, i = system.particles.length;
-    // stationary
-    while (i--) {
-      dot = system.particles[i];
-      if(Math.abs(dot.x - dot.x1) < 1 && Math.abs(dot.y - dot.y1) < 1) {
-        ctx.fillStyle = COLORS[~~dot.mass + 1];
-        ctx.fillRect(dot.x - dot.mass, dot.y - dot.mass, dot.mass * 2, dot.mass * 2);
-      }
-    }
     // each color
     for (m = MASS_MIN; m <= MASS_MAX; m++) {
       ctx.strokeStyle = COLORS[m];
       ctx.lineWidth = m;
+      ctx.globalAlpha = 0.1;
       ctx.beginPath();
       i = system.particles.length;
       while (i--) {
@@ -144,7 +135,7 @@
 
   function drawSegments() {
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
     ctx.lineWidth = 1;
     ctx.shadowBlur = 12;
     ctx.shadowColor = 'rgba(100, 200, 255, 1)';
@@ -186,7 +177,6 @@
       dot.integrate(time, correction);  // Apply forces
       // Apply constraints
       dot.contain(time, correction);  // Keep inside display
-      dot.collide(segments);            // Handle collisions with line segments
     };
   }
 
