@@ -30,10 +30,14 @@
     this.lastTime = 0;
     this.lastStep = 0;
     this.started = false;
+    this.fps = 0;
+    this.frames = 0;
+    this.countTime = 0;
   }
 
   Gameloop.prototype.start = function() {
     this.started = true;
+    this.countTime = Date.now() + 1000;
     requestAnimationFrame(this.step);
   };
 
@@ -49,6 +53,12 @@
       if (step > 100) step = 100; // in case you leave / return
       var correction = (step && self.lastStep) ? step / self.lastStep : 1;
       self.callback(step, correction);
+      self.frames++;
+      if (time >= self.countTime) {
+        self.fps = (self.frames / (1000 + time - self.countTime) * 1000).toFixed(0);
+        self.frames = 0;
+        self.countTime = time + 1000;
+      }
       self.lastTime = time;
       self.lastStep = step;
       if (self.started) requestAnimationFrame(self.step);

@@ -15,7 +15,7 @@
 </div>
 <a href="https://github.com/skookum/verlet"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub"></a>
 
-<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="vendor/jquery-2.0.3.js"></script>
 
 <script src='js/vector.js'></script>
 <script src='js/rectangle.js'></script>
@@ -24,6 +24,7 @@
 
 <script src='js/gameloop.js'></script>
 <script src='js/particlesystem.js'></script>
+<script src='js/renderer.js'></script>
 
 <script>
 
@@ -32,17 +33,8 @@
   var HEIGHT = 450;
   var CLEAR = 'rgba(0, 0, 0, 0.5)';
   var CIRCLE_RADIUS = 2 * Math.PI;
-  var NEW_BATCHES = 100;
-  var GRAVITY = 0.00001;
-  var MASS_MIN = 1;
-  var MASS_MAX = 5;
-  var COLORS = {
-    1: '#118888',
-    2: '#3FC1A6',
-    3: '#8EFFEC',
-    4: '#FFFFFF',
-    5: '#F10C5C'
-  };
+  var NEW_BATCHES = 250;
+  var GRAVITY = 0.0001;
   var POLYS = [
     // X
     150, 150, 200, 100,
@@ -70,7 +62,7 @@
   var SCALE = 1.0;
 
   // Globals
-  var ctx, gameloop, system, segments;
+  var gameloop, system, segments, renderer;
   var mouse = {x: 0, y: 0, mass: 0};
 
   // GO!
@@ -80,18 +72,15 @@
   // Primary functions
 
   function start() {
-    ctx = document.getElementById('display').getContext('2d');
     system = new ParticleSystem();
     segments = createWalls();
+    renderer = new Renderer(document.getElementById('display'));
     gameloop = new Gameloop(frame);
     gameloop.start();
   }
 
   function frame(time, correction) {
-    clear();
-    drawParticles();
-    drawWalls();
-    drawParticleCount();
+    renderer.render();
     shrinkMouse();
     applyForces(time, correction);
   }
@@ -102,8 +91,7 @@
   function addParticles(x, y, n) {
     var dot;
     for (var i = 0; i < n; i++) {
-      var mass = Math.random() * (MASS_MAX - MASS_MIN) + MASS_MIN;
-      dot = new Particle(Math.random() * 20 + x - 10, Math.random() * 20 + y - 10, mass);
+      dot = Particle.createRandom(x, y);
       dot.setBounds(new Rectangle(0, 0, WIDTH, HEIGHT));
       system.add(dot);
     }
@@ -115,65 +103,6 @@
       s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, true));
     }
     return s;
-  }
-
-  function drawParticles() {
-    ctx.save();
-    var dot, pos, last, i = system.particles.length;
-    // stationary
-    while (i--) {
-      dot = system.particles[i];
-      pos = dot.position;
-      last = dot.lastPosition;
-      if(Math.abs(pos.x - last.x) < 1 && Math.abs(pos.y - last.y) < 1) {
-        ctx.fillStyle = COLORS[~~dot.mass + 1];
-        ctx.fillRect(pos.x - dot.mass, pos.y - dot.mass, dot.mass * 2, dot.mass * 2);
-      }
-    }
-    // each color
-    for (m = MASS_MIN; m <= MASS_MAX; m++) {
-      ctx.strokeStyle = COLORS[m];
-      ctx.lineWidth = m;
-      ctx.beginPath();
-      i = system.particles.length;
-      while (i--) {
-        dot = system.particles[i];
-        if ((dot.mass > m-1) && (dot.mass <= m)) {
-          ctx.moveTo(last.x, last.y);
-          ctx.lineTo(pos.x, pos.y);
-        }
-      }
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawWalls() {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
-    ctx.lineWidth = 1;
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = 'rgba(100, 200, 255, 1)';
-    var segment, i = segments.length;
-    while (i--) {
-      segment = segments[i];
-      ctx.beginPath();
-      ctx.moveTo(segment.x1, segment.y1);
-      ctx.lineTo(segment.x2, segment.y2);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawParticleCount() {
-    var text = system.particles.length ? 'Particles: ' + system.particles.length : '(click to add particles)';
-    ctx.save();
-    ctx.fillStyle = '#fff';
-    ctx.font = '10pt Helvetica';
-    ctx.fillText(text, 10, 20);
-    ctx.restore();
   }
 
   function shrinkMouse() {
@@ -195,13 +124,6 @@
       dot.contain(time, correction);  // Keep inside display
       dot.collide(segments);            // Handle collisions with line segments
     };
-  }
-
-  function clear() {
-    ctx.save();
-    ctx.fillStyle = CLEAR;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    ctx.restore();
   }
 
   // jQuery

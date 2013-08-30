@@ -8,6 +8,20 @@ function Particle(x, y, m) {
   this.bounds = undefined;
 }
 
+Particle.MASS_MIN = 1;
+Particle.MASS_MAX = 5;
+
+Particle.createRandom = function(x, y) {
+  var mass = Math.random() * (Particle.MASS_MAX - Particle.MASS_MIN) + Particle.MASS_MIN;
+  var x = Math.random() * 20 + x - 10;
+  var y = Math.random() * 20 + y - 10;
+  return new Particle(x, y, mass);
+};
+
+Particle.getMassRange = function() {
+  return Particle.MASS_MAX - Particle.MASS_MIN;
+};
+
 Particle.prototype.integrate = function(time, correction) {
 
   // Find velocity
@@ -47,10 +61,10 @@ Particle.prototype.setBounds = function(rect) {
 };
 
 Particle.prototype.contain = function(time, correction) {
-  if (this.x > this.bounds.right) this.x = this.bounds.right;
-  else if (this.x < this.bounds.left) this.x = this.bounds.left;
-  if (this.y > this.bounds.bottom) this.y = this.bounds.bottom;
-  else if (this.y < this.bounds.top) this.y = this.bounds.top;
+  if (this.position.x > this.bounds.right) this.position.x = this.bounds.right;
+  else if (this.position.x < this.bounds.left) this.position.x = this.bounds.left;
+  if (this.position.y > this.bounds.bottom) this.position.y = this.bounds.bottom;
+  else if (this.position.y < this.bounds.top) this.position.y = this.bounds.top;
 };
 
 Particle.prototype.force = function(x, y, mass) {
@@ -62,7 +76,7 @@ Particle.prototype.force = function(x, y, mass) {
 };
 
 Particle.prototype.gravitate = function(x, y, m) {
-  var delta = this.position.clone().sub(new Vector(x, y));
+  var delta = new Vector(x, y).sub(this.position);
   var r = delta.getLength();
   var f = (m * this.mass) / (r * r);
   var ratio = m / (m + this.mass);
