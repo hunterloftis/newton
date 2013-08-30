@@ -64,6 +64,7 @@
   // Globals
   var gameloop, system, walls, renderer;
   var mouse = {x: 0, y: 0, mass: 0};
+  var adding = false;
 
   // GO!
   start();
@@ -82,6 +83,7 @@
   function frame(time, correction) {
     renderer.render();
     shrinkMouse();
+    sprayParticles();
     applyForces(time, correction);
   }
 
@@ -126,6 +128,12 @@
     };
   }
 
+  function sprayParticles() {
+    if (!adding) return;
+    mouse.mass = 2;
+    addParticles(mouse.x, mouse.y, 3);
+  }
+
   // jQuery
   jQuery(document).ready(function(){
     $('#display').mousemove(function(e){
@@ -136,10 +144,12 @@
       };
     });
     $('#display').mousedown(function(e) {
-      mouse.mass = 0.3;
-      addParticles(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, NEW_BATCHES);
+      adding = true;
       return false;
     });
+    $(document).mouseup(function(e) {
+      adding = false;
+    })
   });
 
 </script>
