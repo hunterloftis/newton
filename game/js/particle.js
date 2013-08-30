@@ -1,6 +1,7 @@
 function Particle(x, y, m) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
+  this.velocity = new Vector(0, 0);
   this.acceleration = new Vector(0, 0);
   this.mass = m || 1.0;
   this.elasticity = 0.5;
@@ -22,10 +23,14 @@ Particle.getMassRange = function() {
   return Particle.MASS_MAX - Particle.MASS_MIN;
 };
 
+Particle.prototype.isSlow = function() {
+  return this.velocity.getSquaredLength() <= 1;
+};
+
 Particle.prototype.integrate = function(time, correction) {
 
   // Find velocity
-  var velocity = this.position.clone()
+  this.velocity = this.position.clone()
     .sub(this.lastPosition)
     .scale(correction);
 
@@ -37,7 +42,7 @@ Particle.prototype.integrate = function(time, correction) {
 
   // Time-Corrected Verlet integration (TCV)
   this.position
-    .add(velocity)
+    .add(this.velocity)
     .add(this.acceleration);
 
   // Reset acceleration after integration
@@ -87,14 +92,14 @@ Particle.prototype.gravitate = function(x, y, m) {
   });
 };
 
-
-Particle.prototype.collide = function(segments) {
-  return;
-
+Particle.prototype.collide = function(walls) {
   var nearest, intersect;
-  var i = segments.length;
+  var i = walls.length;
   while (i--) {
-    intersect = segments[i].intersection(this.x1, this.y1, this.x, this.y);
+    intersect = walls[i].findIntersection(
+      this.lastPosition.x, this.lastPosition.y,
+      this.position.x, this.position.y);
+
     if (intersect) {
       var dx = intersect.x - this.x1;
       var dy = intersect.y - this.y1;
@@ -107,7 +112,7 @@ Particle.prototype.collide = function(segments) {
             dy: dy,
             x: intersect.x,
             y: intersect.y,
-            segment: segments[i]
+            wall: walls[i]
           };
         }
       }
@@ -117,13 +122,18 @@ Particle.prototype.collide = function(segments) {
           dy: dy,
           x: intersect.x,
           y: intersect.y,
-          segment: segments[i]
+          wall: walls[i]
         };
       }
     }
   }
   if (nearest) {
-    var projection = nearest.segment.project(this.x1, this.y1, this.x, this.y);
+    var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
+    this.acceleration.zero();
+    this.placeAt(bouncePoint.x, bouncePoint.y);
+    return nearest;
+
+    var projection = nearest.wall.getProjection(this.velocity);
     var totalDx = this.x - this.x1;
     var totalDy = this.y - this.y1;
     var totalMotion = Math.sqrt(totalDx * totalDx + totalDy * totalDy);

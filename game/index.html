@@ -62,7 +62,7 @@
   var SCALE = 1.0;
 
   // Globals
-  var gameloop, system, segments, renderer;
+  var gameloop, system, walls, renderer;
   var mouse = {x: 0, y: 0, mass: 0};
 
   // GO!
@@ -73,7 +73,7 @@
 
   function start() {
     system = new ParticleSystem();
-    segments = createWalls();
+    walls = createWalls();
     renderer = new Renderer(document.getElementById('display'));
     gameloop = new Gameloop(frame);
     gameloop.start();
@@ -112,17 +112,17 @@
   }
 
   function applyForces(time, correction) {
-    var dot, i = system.particles.length;
+    var particle, i = system.particles.length;
     while (i--) {
-      dot = system.particles[i];
+      particle = system.particles[i];
       // Change acceleration
-      dot.force(0, GRAVITY, 1);        // Gravity
-      dot.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull
+      particle.force(0, GRAVITY, 1);        // Gravity
+      particle.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull
       // Apply acceleration -> velocity -> position
-      dot.integrate(time, correction);  // Apply forces
+      particle.integrate(time, correction);  // Apply forces
       // Apply constraints
-      dot.contain(time, correction);  // Keep inside display
-      dot.collide(segments);            // Handle collisions with line segments
+      particle.contain(time, correction);  // Keep inside display
+      particle.collide(walls);            // Handle collisions with line walls
     };
   }
 

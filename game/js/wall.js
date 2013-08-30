@@ -8,7 +8,7 @@ function Wall(x1, y1, x2, y2, oneWay) {
   this.oneWay = oneWay || false;
   this.length = this.vector.getLength();
   this.angle = this.vector.getAngle();
-  this.normal = this.vector.clone().turnLeft();
+  this.normal = this.vector.clone().turnLeft().unit();
   this.unit = this.vector.clone().unit();
 };
 
@@ -18,6 +18,10 @@ Wall.getAbc = function(x1, y1, x2, y2) {
   var c = a * x1 + b * y1;
 
   return { a: a, b: b, c: c };
+};
+
+Wall.prototype.getRepelled = function(x, y) {
+  return new Vector(x, y).add(this.normal);
 };
 
 Wall.prototype.getProjection = function(vector) {

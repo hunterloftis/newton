@@ -28,7 +28,7 @@ Renderer.prototype = {
       plen = particles.length;
 
       ctx.beginPath();
-      ctx.strokeStyle = group.color;
+      ctx.strokeStyle = ctx.fillStyle = group.color;
       ctx.lineWidth = 1;
 
       for (j = 0; j < plen; j++) {
@@ -36,9 +36,16 @@ Renderer.prototype = {
         pos = particle.position;
         last = particle.lastPosition;
 
-        for (var k = 0; k < particle.mass; k++) {
-          ctx.moveTo(last.x - k, last.y);
-          ctx.lineTo(pos.x - k, pos.y);
+        if (particle.isSlow()) {
+          ctx.fillRect(
+            pos.x - particle.mass * 0.5, pos.y - particle.mass * 0.5,
+            particle.mass, particle.mass);
+        }
+        else {
+          for (var k = 0; k < particle.mass; k++) {
+            ctx.moveTo(last.x - k, last.y);
+            ctx.lineTo(pos.x - k, pos.y);
+          }
         }
       }
       ctx.stroke();
@@ -46,32 +53,6 @@ Renderer.prototype = {
 
     ctx.restore();
     return;
-
-    while (i--) {
-      dot = system.particles[i];
-      pos = dot.position;
-      last = dot.lastPosition;
-      if(Math.abs(pos.x - last.x) < 1 && Math.abs(pos.y - last.y) < 1) {
-        ctx.fillStyle = COLORS[~~dot.mass + 1];
-        ctx.fillRect(pos.x - dot.mass, pos.y - dot.mass, dot.mass * 2, dot.mass * 2);
-      }
-    }
-    // each color
-    for (m = MASS_MIN; m <= MASS_MAX; m++) {
-      ctx.strokeStyle = COLORS[m];
-      ctx.lineWidth = m;
-      ctx.beginPath();
-      i = system.particles.length;
-      while (i--) {
-        dot = system.particles[i];
-        if ((dot.mass > m-1) && (dot.mass <= m)) {
-          ctx.moveTo(last.x, last.y);
-          ctx.lineTo(pos.x, pos.y);
-        }
-      }
-      ctx.stroke();
-    }
-    ctx.restore();
   },
   drawWalls: function(ctx) {
     ctx.save();
@@ -79,12 +60,12 @@ Renderer.prototype = {
     ctx.lineWidth = 1;
     ctx.shadowBlur = 12;
     ctx.shadowColor = 'rgba(100, 200, 255, 1)';
-    var segment, i = segments.length;
+    var wall, i = walls.length;
     while (i--) {
-      segment = segments[i];
+      wall = walls[i];
       ctx.beginPath();
-      ctx.moveTo(segment.x1, segment.y1);
-      ctx.lineTo(segment.x2, segment.y2);
+      ctx.moveTo(wall.x1, wall.y1);
+      ctx.lineTo(wall.x2, wall.y2);
       ctx.closePath();
       ctx.stroke();
       ctx.stroke();
