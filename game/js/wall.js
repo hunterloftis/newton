@@ -10,6 +10,7 @@ function Wall(x1, y1, x2, y2, oneWay) {
   this.angle = this.vector.getAngle();
   this.normal = this.vector.clone().turnLeft().unit();
   this.unit = this.vector.clone().unit();
+  this.bounds = new Rectangle(x1, y1, x2, y2);
 };
 
 Wall.getAbc = function(x1, y1, x2, y2) {
@@ -33,21 +34,11 @@ Wall.prototype.getAngleDelta = function(vector) {
   return this.angle - vector.getAngle();
 };
 
-Wall.prototype.getBounds = function() {
-  return {
-    left: Math.min(this.x1, this.x2),
-    right: Math.max(this.x1, this.x2),
-    top: Math.min(this.y1, this.y2),
-    bottom: Math.max(this.y1, this.y2)
-  };
-};
-
 Wall.prototype.getAbc = function() {
   return Wall.getAbc(this.x1, this.y1, this.x2, this.y2);
 }
 
 Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
-
   /*
   var bounds = this.getBounds();
 
@@ -68,7 +59,10 @@ Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
   var x = (l2.b * l1.c  - l1.b * l2.c) / det;
   var y = (l1.a * l2.c - l2.a * l1.c) / det;
 
-  if ((x < x1 && x < x2) || (x > x1 && x > x2) || (y < y1 && y < y2) || (y > y1 && y > y2)) return false;
+  var bounds1 = this.bounds;
+  var bounds2 = new Rectangle(x1, y1, x2, y2);
+
+  if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 
   return {
     x: x,
