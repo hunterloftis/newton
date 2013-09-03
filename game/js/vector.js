@@ -5,11 +5,18 @@ function Vector(x, y) {
 
 Vector.prototype.clone = function() {
   return new Vector(this.x, this.y);
-}
+};
+
+Vector.prototype.copy = function(v) {
+  this.x = v.x;
+  this.y = v.y;
+  return this;
+};
 
 Vector.prototype.zero = function() {
   this.x = 0;
   this.y = 0;
+  return this;
 };
 
 Vector.prototype.add = function(v) {
@@ -21,6 +28,12 @@ Vector.prototype.add = function(v) {
 Vector.prototype.sub = function(v) {
   this.x -= v.x;
   this.y -= v.y;
+  return this;
+};
+
+Vector.prototype.subXY = function(x, y) {
+  this.x -= x;
+  this.y -= y;
   return this;
 };
 

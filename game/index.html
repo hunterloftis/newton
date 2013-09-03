@@ -34,7 +34,7 @@
   var CLEAR = 'rgba(0, 0, 0, 0.5)';
   var CIRCLE_RADIUS = 2 * Math.PI;
   var NEW_BATCHES = 250;
-  var GRAVITY = 0.0001;
+  var GRAVITY = 0.00001;
   var POLYS = [
     // X
     150, 150, 200, 100,
@@ -130,7 +130,7 @@
 
   function sprayParticles() {
     if (!adding) return;
-    mouse.mass = 2;
+    mouse.mass = 4;
     addParticles(mouse.x, mouse.y, 3);
   }
 
@@ -140,7 +140,7 @@
       mouse = {
         x: e.pageX - this.offsetLeft,
         y: e.pageY - this.offsetTop,
-        mass: 2
+        mass: 4
       };
     });
     $('#display').mousedown(function(e) {

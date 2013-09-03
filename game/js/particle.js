@@ -61,6 +61,11 @@ Particle.prototype.moveBy = function(dx, dy) {
   return this;
 };
 
+Particle.prototype.setVelocity = function(x, y) {
+  this.lastPosition.copy(this.position).subXY(x, y);
+  return this;
+};
+
 Particle.prototype.setBounds = function(rect) {
   this.bounds = rect ? rect : undefined;
 };
@@ -130,8 +135,9 @@ Particle.prototype.collide = function(walls) {
   }
   if (nearest) {
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
-    this.acceleration.zero();
     this.placeAt(bouncePoint.x, bouncePoint.y);
+    this.setVelocity(0, 0);
+
     return nearest;
 
     var projection = nearest.wall.getProjection(this.velocity);
