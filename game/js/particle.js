@@ -134,9 +134,11 @@ Particle.prototype.collide = function(walls) {
     }
   }
   if (nearest) {
+    var velocity = this.position.clone().sub(this.lastPosition);
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
+    var reflectedVelocity = nearest.wall.getReflection(velocity, 0, 1);
     this.placeAt(bouncePoint.x, bouncePoint.y);
-    this.setVelocity(0, 0);
+    this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
 
     return nearest;
 

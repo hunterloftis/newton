@@ -63,4 +63,14 @@ Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
   };
 };
 
+Wall.prototype.getReflection = function(velocity, friction, restitution) {
+  var normal = this.normal.clone();
+  var normalVelocity = velocity.clone().getDot(this.unit);
+  var projectedVelocity = this.unit.clone().scale(normalVelocity);
+  //var tangentialVelocity = velocity.clone().sub(normalVelocity);
+  //var reflectedVelocity = tangentialVelocity.sub(normalVelocity);
+  //return reflectedVelocity;
+  return projectedVelocity;
+};
+
 if (typeof module !== 'undefined') global.Wall = Wall;
