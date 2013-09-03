@@ -95,6 +95,7 @@ Particle.prototype.gravitate = function(x, y, m) {
 Particle.prototype.collide = function(walls) {
   var nearest, intersect;
   var i = walls.length;
+
   while (i--) {
     intersect = walls[i].findIntersection(
       this.lastPosition.x, this.lastPosition.y,

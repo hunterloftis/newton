@@ -10,8 +10,10 @@ function Wall(x1, y1, x2, y2, oneWay) {
   this.angle = this.vector.getAngle();
   this.normal = this.vector.clone().turnLeft().unit();
   this.unit = this.vector.clone().unit();
-  this.bounds = new Rectangle(x1, y1, x2, y2);
+  this.bounds = new Rectangle(x1, y1, x2, y2).expand(Wall.COLLISION_TOLERANCE);
 };
+
+Wall.COLLISION_TOLERANCE = 0.5;
 
 Wall.getAbc = function(x1, y1, x2, y2) {
   var a = y2 - y1;
@@ -39,16 +41,10 @@ Wall.prototype.getAbc = function() {
 }
 
 Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
-  /*
-  var bounds = this.getBounds();
+  var bounds1 = this.bounds;
+  var bounds2 = new Rectangle(x1, y1, x2, y2).expand(Wall.COLLISION_TOLERANCE);
 
-  var toLeft = x1 < bounds.left && x2 < bounds.left;
-  var toRight = x1 > bounds.right && x2 > bounds.right;
-  var toTop = y1 < bounds.top && y2 < bounds.top;
-  var toBottom = y1 > bounds.bottom && y2 > bounds.bottom;
-
-  if (toLeft || toRight || toTop || toBottom) return false;
-  */
+  if (!bounds1.overlaps(bounds2)) return false;
 
   var l1 = this.getAbc();
   var l2 = Wall.getAbc(x1, y1, x2, y2);
@@ -58,9 +54,6 @@ Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
 
   var x = (l2.b * l1.c  - l1.b * l2.c) / det;
   var y = (l1.a * l2.c - l2.a * l1.c) / det;
-
-  var bounds1 = this.bounds;
-  var bounds2 = new Rectangle(x1, y1, x2, y2);
 
   if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 

@@ -36,16 +36,10 @@ Renderer.prototype = {
         pos = particle.position;
         last = particle.lastPosition;
 
-        if (particle.isSlow()) {
-          ctx.fillRect(
-            pos.x - particle.mass * 0.5, pos.y - particle.mass * 0.5,
-            particle.mass, particle.mass);
-        }
-        else {
-          for (var k = 0; k < particle.mass; k++) {
-            ctx.moveTo(last.x - k, last.y);
-            ctx.lineTo(pos.x - k, pos.y);
-          }
+        var ty = Math.abs(pos.y - last.y) < 1 ? last.y + 1 : pos.y;
+        for (var k = 0; k < particle.mass; k++) {
+          ctx.moveTo(last.x - k, last.y);
+          ctx.lineTo(pos.x - k, ty);
         }
       }
       ctx.stroke();
