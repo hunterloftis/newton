@@ -37,7 +37,7 @@ Vector.prototype.subXY = function(x, y) {
   return this;
 };
 
-Vector.prototype.mult = function(v) {
+Vector.prototype.mult = Vector.prototype.multVector = function(v) {
   this.x *= v.x;
   this.y *= v.y;
   return this;
@@ -49,7 +49,7 @@ Vector.prototype.div = function(v) {
   return this;
 };
 
-Vector.prototype.scale = function(scalar) {
+Vector.prototype.multScalar = Vector.prototype.scale = function(scalar) {
   this.x *= scalar;
   this.y *= scalar;
   return this;

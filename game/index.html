@@ -102,7 +102,7 @@
   function createWalls() {
     var s = [];
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, true));
+      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, 0));
     }
     return s;
   }

@@ -1,11 +1,11 @@
-function Wall(x1, y1, x2, y2, oneWay) {
+function Wall(x1, y1, x2, y2, friction) {
   this.x1 = x1;
   this.y1 = y1;
   this.x2 = x2;
   this.y2 = y2;
   this.anchor = new Vector(x1, y1);
   this.vector = new Vector(x2 - x1, y2 - y1);
-  this.oneWay = oneWay || false;
+  this.friction = friction || 0;
   this.length = this.vector.getLength();
   this.angle = this.vector.getAngle();
   this.normal = this.vector.clone().turnLeft().unit();
@@ -63,14 +63,14 @@ Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
   };
 };
 
+// friction = range(0, 1)
+// restitution = range(0.1, 1)
 Wall.prototype.getReflection = function(velocity, friction, restitution) {
-  var normal = this.normal.clone();
-  var normalVelocity = velocity.clone().getDot(this.unit);
-  var projectedVelocity = this.unit.clone().scale(normalVelocity);
-  //var tangentialVelocity = velocity.clone().sub(normalVelocity);
-  //var reflectedVelocity = tangentialVelocity.sub(normalVelocity);
-  //return reflectedVelocity;
-  return projectedVelocity;
+  var dir = this.normal.clone();
+  var velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution);
+  var velT = velocity.clone().sub(velN).multScalar(1 - friction);
+  var reflectedVel = velT.sub(velN);
+  return reflectedVel;
 };
 
 if (typeof module !== 'undefined') global.Wall = Wall;

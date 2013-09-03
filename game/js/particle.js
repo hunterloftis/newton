@@ -1,10 +1,10 @@
-function Particle(x, y, m) {
+function Particle(x, y, m, restitution) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
   this.velocity = new Vector(0, 0);
   this.acceleration = new Vector(0, 0);
   this.mass = m || 1.0;
-  this.elasticity = 0.5;
+  this.restitution = 1;
   this.drag = 0.9999;
   this.bounds = undefined;
 }
@@ -136,7 +136,7 @@ Particle.prototype.collide = function(walls) {
   if (nearest) {
     var velocity = this.position.clone().sub(this.lastPosition);
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
-    var reflectedVelocity = nearest.wall.getReflection(velocity, 0, 1);
+    var reflectedVelocity = nearest.wall.getReflection(velocity, nearest.wall.friction, this.restitution);
     this.placeAt(bouncePoint.x, bouncePoint.y);
     this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
 
