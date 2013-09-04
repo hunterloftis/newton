@@ -140,14 +140,9 @@ Particle.prototype.collide = function(walls) {
   if (nearest) {
     var velocity = this.position.clone().sub(this.lastPosition);
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
-    var totalDx = this.position.x - this.lastPosition.x;
-    var totalDy = this.position.y - this.lastPosition.y;
-    var spentPercent = (nearest.dx / totalDx + nearest.dy / totalDy) * 0.5;
-    var remainingPercent = 1 - spentPercent;
     var reflectedVelocity = nearest.wall.getReflection(velocity, nearest.wall.friction, this.restitution);
-    var remainingVelocity = reflectedVelocity.clone().multScalar(remainingPercent);
 
-    this.position.copy(bouncePoint).add(remainingVelocity);
+    this.position.copy(bouncePoint);
     this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
     this.lastValidPosition = bouncePoint;
 
