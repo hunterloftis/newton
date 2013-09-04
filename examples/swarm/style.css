@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: #131313;
   font-family: 'helvetica', 'arial', sans-serif;
@@ -32,4 +36,18 @@ a:hover {
 
 .caption {
   text-align: center;
+}
+
+.controls {
+  padding: 10px;
+}
+
+.controls > label {
+  padding: 10px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+label > input {
+  margin-left: 10px;
 }

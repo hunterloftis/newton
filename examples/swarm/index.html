@@ -8,10 +8,11 @@
 
 <div class='wrap'>
   <canvas id="display" width="1280" height="450"></canvas>
-  <p class='caption'>
-    Particle system demonstrating <a href='http://lonesock.net/article/verlet.html'>Time-Corrected Verlet integration</a> (TCV) with bounding constraints and gravitational forces.
-  </p>
-  <p class='caption'>by <a href='http://skookum.com'>Skookum Digital Works</a></p>
+  <form class='controls'>
+    <label>Gravity
+      <input type='range' min='0' max='0.001' step='0.00001' data-bind='GRAVITY'>
+    </label>
+  </form>
 </div>
 <a href="https://github.com/skookum/verlet"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub"></a>
 
@@ -29,13 +30,14 @@
 
 <script>
 
+  // User-controlled
+  var GRAVITY = 0.00003;
+
   // Constants
   var WIDTH = 1280;
   var HEIGHT = 450;
   var CLEAR = 'rgba(0, 0, 0, 0.33)';
-  var CIRCLE_RADIUS = 2 * Math.PI;
   var NEW_BATCHES = 25;
-  var GRAVITY = 0.00003;
   var POLYS = [
     // X
     150, 150, 200, 100,
@@ -113,18 +115,13 @@
   }
 
   function applyForces(time, correction) {
-    var particle, i = system.particles.length;
-    while (i--) {
-      particle = system.particles[i];
-      // Change acceleration
-      particle.force(0, GRAVITY, 1);        // Gravity
-      particle.gravitate(mouse.x, mouse.y, mouse.mass);   // Mouse pull
-      // Apply acceleration -> velocity -> position
-      particle.integrate(time, correction);  // Apply forces
-      // Apply constraints
-      particle.collide(walls);            // Handle collisions with line walls
-      particle.contain(container);        // Keep inside display
-    };
+    system.each('force', [0, GRAVITY, 1]);
+    system.each('gravitate', [mouse.x, mouse.y, mouse.mass]);
+
+    system.integrate(time, correction);
+
+    system.each('collide', [walls]);
+    system.each('contain', [container]);
   }
 
   function sprayParticles() {
@@ -148,7 +145,17 @@
     });
     $(document).mouseup(function(e) {
       adding = false;
+    });
+    $('input[data-bind]').each(function() {
+      updateData(this);
     })
+    $(document).on('change', 'input[data-bind]', function(e) {
+      updateData(this);
+    });
+    function updateData(input) {
+      var key = $(input).data('bind');
+      window[key] = +$(input).val();
+    }
   });
 
 </script>

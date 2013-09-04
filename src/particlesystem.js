@@ -27,9 +27,11 @@ ParticleSystem.prototype.integrate = function(time, correction) {
   }
 };
 
-ParticleSystem.prototype.each = function(callback) {
+ParticleSystem.prototype.each = function(method, args) {
   var i = this.particles.length;
+  var particle;
   while(i--) {
-    callback(this.particles[i]);
+    particle = this.particles[i];
+    particle[method].apply(particle, args);
   }
 };
