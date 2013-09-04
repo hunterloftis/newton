@@ -7,6 +7,7 @@ function Particle(x, y, m, restitution) {
   this.mass = m || 1.0;
   this.restitution = restitution || 1;
   this.drag = 0;
+  this.randomDrag = Math.random() * 0.02;
 }
 
 Particle.MASS_MIN = 1;
@@ -34,7 +35,7 @@ Particle.prototype.integrate = function(time, correction) {
     .copy(this.position)
     .sub(this.lastPosition)
     .scale(correction)
-    .scale(1 - this.drag);
+    .scale(1 - this.drag - this.randomDrag);
 
   // Set acceleration based on time squared
   this.acceleration
@@ -89,6 +90,10 @@ Particle.prototype.contain = function(bounds) {
   }
 };
 
+Particle.prototype.accelerateVector = function(vector) {
+  this.acceleration.add(vector);
+};
+
 Particle.prototype.force = function(x, y, mass) {
   mass = mass || this.mass;
   this.acceleration.add({
@@ -97,7 +102,7 @@ Particle.prototype.force = function(x, y, mass) {
   });
 };
 
-Particle.prototype.gravitate = function(x, y, m) {
+Particle.prototype.attractSquare = function(x, y, m) {
   var delta = new Vector(x, y).sub(this.position);
   var r = delta.getLength();
   var f = (m * this.mass) / (r * r);

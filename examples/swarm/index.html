@@ -15,6 +15,9 @@
     <label>Gravity
       <input type='range' min='0' max='0.001' step='0.00001' value='0' data-bind='GRAVITY'>
     </label>
+    <label>Gravity Angle
+      <input type='range' min='0' max='1' step='0.01' value='0' data-bind='GRAVITY_ANGLE'>
+    </label>
     <label>Restitution
       <input type='range' min='0.1' max='1' step='0.01' value='1' data-bind='RESTITUTION'>
     </label>
@@ -46,7 +49,7 @@
 <script>
 
   // User-controlled
-  var GRAVITY, RESTITUTION, FRICTION, DRAG, MOUSE;
+  var GRAVITY, RESTITUTION, FRICTION, DRAG, MOUSE, GRAVITY_ANGLE;
   var needsUpdate = true;
 
   // Constants
@@ -144,12 +147,13 @@
   }
 
   function applyForces(time, correction) {
+    var gravity = new Vector(0, GRAVITY).rotate(GRAVITY_ANGLE * Math.PI);
     var i = system.particles.length;
     var particle;
     while (i--) {
       particle = system.particles[i];
-      particle.force(0, GRAVITY, 1);
-      particle.gravitate(mouse.x, mouse.y, mouse.mass);
+      particle.accelerateVector(gravity);
+      particle.attractSquare(mouse.x, mouse.y, mouse.mass);
       particle.integrate(time, correction);
       particle.collide(walls);
       particle.contain(container);
