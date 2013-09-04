@@ -119,8 +119,8 @@ Particle.prototype.collide = function(walls) {
       var dx = intersect.x - this.lastPosition.x;
       var dy = intersect.y - this.lastPosition.y;
       if (nearest) {
-        var oldDistance = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
-        var newDistance = Math.sqrt(dx * dx + dy * dy);
+        var oldDistance = nearest.dx * nearest.dx + nearest.dy * nearest.dy;
+        var newDistance = dx * dx + dy * dy;
         if (newDistance < oldDistance) {
           nearest = {
             dx: dx,
