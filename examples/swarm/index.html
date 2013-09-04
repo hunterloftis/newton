@@ -34,7 +34,7 @@
   var HEIGHT = 450;
   var CLEAR = 'rgba(0, 0, 0, 0.33)';
   var CIRCLE_RADIUS = 2 * Math.PI;
-  var NEW_BATCHES = 250;
+  var NEW_BATCHES = 25;
   var GRAVITY = 0.00003;
   var POLYS = [
     // X
@@ -130,7 +130,7 @@
   function sprayParticles() {
     if (!adding) return;
     mouse.mass = 4;
-    addParticles(mouse.x, mouse.y, 3);
+    addParticles(mouse.x, mouse.y, NEW_BATCHES);
   }
 
   // jQuery

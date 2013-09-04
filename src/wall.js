@@ -11,6 +11,8 @@ function Wall(x1, y1, x2, y2, friction) {
   this.normal = this.vector.clone().turnLeft().unit();
   this.unit = this.vector.clone().unit();
   this.bounds = new Rectangle(x1, y1, x2, y2).expand(Wall.COLLISION_TOLERANCE);
+
+  this._rect = new Rectangle(0, 0, 0, 0);
 };
 
 Wall.COLLISION_TOLERANCE = 0.5;
@@ -41,8 +43,10 @@ Wall.prototype.getAbc = function() {
 }
 
 Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
+  // return false;
+
   var bounds1 = this.bounds;
-  var bounds2 = new Rectangle(x1, y1, x2, y2).expand(Wall.COLLISION_TOLERANCE);
+  var bounds2 = this._rect.set(x1, y1, x2, y2).expand(Wall.COLLISION_TOLERANCE);
 
   if (!bounds1.overlaps(bounds2)) return false;
 

@@ -108,6 +108,7 @@ Particle.prototype.gravitate = function(x, y, m) {
 
 Particle.prototype.collide = function(walls) {
   var nearest, intersect;
+  var dx, dy, oldDistance, newDistance;
   var i = walls.length;
 
   while (i--) {
@@ -116,11 +117,11 @@ Particle.prototype.collide = function(walls) {
       this.position.x, this.position.y);
 
     if (intersect) {
-      var dx = intersect.x - this.lastPosition.x;
-      var dy = intersect.y - this.lastPosition.y;
+      dx = intersect.x - this.lastPosition.x;
+      dy = intersect.y - this.lastPosition.y;
       if (nearest) {
-        var oldDistance = nearest.dx * nearest.dx + nearest.dy * nearest.dy;
-        var newDistance = dx * dx + dy * dy;
+        oldDistance = nearest.dx * nearest.dx + nearest.dy * nearest.dy;
+        newDistance = dx * dx + dy * dy;
         if (newDistance < oldDistance) {
           nearest = {
             dx: dx,
