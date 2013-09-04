@@ -71,10 +71,10 @@ Particle.prototype.setBounds = function(rect) {
 };
 
 Particle.prototype.contain = function(time, correction) {
-  if (this.position.x > this.bounds.right) this.position.x = this.bounds.right;
-  else if (this.position.x < this.bounds.left) this.position.x = this.bounds.left;
-  if (this.position.y > this.bounds.bottom) this.position.y = this.bounds.bottom;
-  else if (this.position.y < this.bounds.top) this.position.y = this.bounds.top;
+  if (this.position.x > this.bounds.right) this.position.x = this.lastPosition.x = this.bounds.right;
+  else if (this.position.x < this.bounds.left) this.position.x = this.lastPosition.x = this.bounds.left;
+  if (this.position.y > this.bounds.bottom) this.position.y = this.lastPosition.y = this.bounds.bottom;
+  else if (this.position.y < this.bounds.top) this.position.y = this.lastPosition.y = this.bounds.top;
 };
 
 Particle.prototype.force = function(x, y, mass) {
