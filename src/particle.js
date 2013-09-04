@@ -1,6 +1,7 @@
 function Particle(x, y, m, restitution) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
+  this.lastValidPosition = this.position.clone();
   this.velocity = new Vector(0, 0);
   this.acceleration = new Vector(0, 0);
   this.mass = m || 1.0;
@@ -47,6 +48,9 @@ Particle.prototype.integrate = function(time, correction) {
 
   // Reset acceleration after integration
   this.acceleration.zero();
+
+  // Reset last valid position after integration
+  this.lastValidPosition.copy(this.lastPosition);
 };
 
 Particle.prototype.placeAt = function(x, y) {
@@ -107,8 +111,8 @@ Particle.prototype.collide = function(walls) {
       this.position.x, this.position.y);
 
     if (intersect) {
-      var dx = intersect.x - this.x1;
-      var dy = intersect.y - this.y1;
+      var dx = intersect.x - this.lastPosition.x;
+      var dy = intersect.y - this.lastPosition.y;
       if (nearest) {
         var oldDistance = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
         var newDistance = Math.sqrt(dx * dx + dy * dy);
@@ -136,28 +140,16 @@ Particle.prototype.collide = function(walls) {
   if (nearest) {
     var velocity = this.position.clone().sub(this.lastPosition);
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
+    var totalDx = this.position.x - this.lastPosition.x;
+    var totalDy = this.position.y - this.lastPosition.y;
+    var spentPercent = (nearest.dx / totalDx + nearest.dy / totalDy) * 0.5;
+    var remainingPercent = 1 - spentPercent;
     var reflectedVelocity = nearest.wall.getReflection(velocity, nearest.wall.friction, this.restitution);
-    this.placeAt(bouncePoint.x, bouncePoint.y);
+    var remainingVelocity = reflectedVelocity.clone().multScalar(0);
+
+    this.position.copy(bouncePoint).add(remainingVelocity);
     this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
-
-    return nearest;
-
-    var projection = nearest.wall.getProjection(this.velocity);
-    var totalDx = this.x - this.x1;
-    var totalDy = this.y - this.y1;
-    var totalMotion = Math.sqrt(totalDx * totalDx + totalDy * totalDy);
-    var spentMotion = Math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy);
-    var remainingMotion = 1 - spentMotion / totalMotion;
-
-    this.x = nearest.x;
-    this.y = nearest.y;
-
-    // TODO: no checks here make it possible to accidentally cross over another segment
-    // this.x += projection.x * remainingMotion;
-    // this.y += projection.y * remainingMotion;
-
-    this.x1 = this.x - projection.x;
-    this.y1 = this.y - projection.y;
+    this.lastValidPosition = bouncePoint;
 
     return nearest;
   }

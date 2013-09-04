@@ -19,6 +19,12 @@ Vector.prototype.zero = function() {
   return this;
 };
 
+Vector.prototype.set = function(x, y) {
+  this.x = x;
+  this.y = y;
+  return this;
+};
+
 Vector.prototype.add = function(v) {
   this.x += v.x;
   this.y += v.y;

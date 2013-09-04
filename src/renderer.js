@@ -34,7 +34,7 @@ Renderer.prototype = {
       for (j = 0; j < plen; j++) {
         particle = particles[j];
         pos = particle.position;
-        last = particle.lastPosition;
+        last = particle.lastValidPosition;
 
         //var ty = Math.abs(pos.y - last.y) < 1 ? last.y + particle.mass : pos.y;
         for (var k = 0; k < particle.mass; k++) {
