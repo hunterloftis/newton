@@ -83,7 +83,7 @@
   }
 
   function frame(time, correction) {
-    renderer.render();
+    renderer.render(time, correction);
     shrinkMouse();
     sprayParticles();
     applyForces(time, correction);

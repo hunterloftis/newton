@@ -3,17 +3,18 @@ function Renderer(el) {
 }
 
 Renderer.prototype = {
-  render: function() {
+  render: function(time, correction) {
     var ctx = this.ctx;
-    this.clear(ctx);
+    this.clear(ctx, time);
     this.drawParticles(ctx);
     this.drawWalls(ctx);
     this.drawParticleCount(ctx);
     this.drawFPS(ctx);
   },
-  clear: function(ctx) {
+  clear: function(ctx, time) {
+    var alpha = Math.min(1, time / 64);
     ctx.save();
-    ctx.fillStyle = CLEAR;
+    ctx.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.restore();
   },
