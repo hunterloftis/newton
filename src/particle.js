@@ -30,7 +30,8 @@ Particle.prototype.isSlow = function() {
 Particle.prototype.integrate = function(time, correction) {
 
   // Find velocity
-  this.velocity = this.position.clone()
+  this.velocity
+    .copy(this.position)
     .sub(this.lastPosition)
     .scale(correction);
 
@@ -38,7 +39,7 @@ Particle.prototype.integrate = function(time, correction) {
   this.acceleration.scale(time * time);
 
   // Record last location
-  this.lastPosition = this.position.clone();
+  this.lastPosition.copy(this.position);
 
   // Time-Corrected Verlet integration (TCV)
   this.position
