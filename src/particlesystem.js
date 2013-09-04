@@ -35,3 +35,10 @@ ParticleSystem.prototype.each = function(method, args) {
     particle[method].apply(particle, args);
   }
 };
+
+ParticleSystem.prototype.callback = function(callback) {
+  var i = this.particles.length;
+  while (i--) {
+    callback(this.particles[i]);
+  }
+};

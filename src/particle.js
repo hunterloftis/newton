@@ -6,7 +6,7 @@ function Particle(x, y, m, restitution) {
   this.acceleration = new Vector(0, 0);
   this.mass = m || 1.0;
   this.restitution = restitution || 1;
-  this.drag = 0.9999;
+  this.drag = 0;
 }
 
 Particle.MASS_MIN = 1;
@@ -33,10 +33,13 @@ Particle.prototype.integrate = function(time, correction) {
   this.velocity
     .copy(this.position)
     .sub(this.lastPosition)
-    .scale(correction);
+    .scale(correction)
+    .scale(1 - this.drag);
 
   // Set acceleration based on time squared
-  this.acceleration.scale(time * time);
+  this.acceleration
+    .scale(1 - this.drag)
+    .scale(time * time);
 
   // Record last location
   this.lastPosition.copy(this.position);

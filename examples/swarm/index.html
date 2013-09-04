@@ -8,9 +8,24 @@
 
 <div class='wrap'>
   <canvas id="display" width="1280" height="450"></canvas>
+  <p class='caption'>
+    Create particles by drawing with your mouse.
+  </p>
   <form class='controls'>
     <label>Gravity
-      <input type='range' min='0' max='0.001' step='0.00001' data-bind='GRAVITY'>
+      <input type='range' min='0' max='0.001' step='0.00001' value='0' data-bind='GRAVITY'>
+    </label>
+    <label>Restitution
+      <input type='range' min='0.1' max='1' step='0.01' value='1' data-bind='RESTITUTION'>
+    </label>
+    <label>Friction
+      <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
+    </label>
+    <label>Drag
+      <input type='range' min='0' max='0.5' step='0.01' value='0' data-bind='DRAG'>
+    </label>
+    <label>Mouse Mass
+      <input type='range' min='0' max='6' step='0.1' value='4' data-bind='MOUSE'>
     </label>
   </form>
 </div>
@@ -31,13 +46,14 @@
 <script>
 
   // User-controlled
-  var GRAVITY = 0.00003;
+  var GRAVITY, RESTITUTION, FRICTION, DRAG, MOUSE;
+  var needsUpdate = true;
 
   // Constants
   var WIDTH = 1280;
   var HEIGHT = 450;
   var CLEAR = 'rgba(0, 0, 0, 0.33)';
-  var NEW_BATCHES = 25;
+  var NEW_BATCHES = 10;
   var POLYS = [
     // X
     150, 150, 200, 100,
@@ -69,9 +85,6 @@
   var mouse = {x: 0, y: 0, mass: 0};
   var adding = false;
 
-  // GO!
-  start();
-
 
   // Primary functions
 
@@ -86,6 +99,7 @@
 
   function frame(time, correction) {
     renderer.render(time, correction);
+    updateUserSettings();
     shrinkMouse();
     sprayParticles();
     applyForces(time, correction);
@@ -94,16 +108,31 @@
 
   // Supporting functions
 
+  function updateUserSettings() {
+    if (!needsUpdate) return;
+    system.callback(function(particle) {
+      particle.restitution = RESTITUTION;
+      particle.drag = DRAG;
+    });
+    walls.forEach(function(wall) {
+      wall.friction = FRICTION;
+    });
+    needsUpdate = false;
+  }
+
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
-      system.add(Particle.createRandom(x, y, 50));
+      var newParticle = Particle.createRandom(x, y, 50);
+      newParticle.restitution = RESTITUTION;
+      newParticle.drag = DRAG;
+      system.add(newParticle);
     }
   }
 
   function createWalls() {
     var s = [];
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, 0));
+      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, FRICTION));
     }
     return s;
   }
@@ -126,18 +155,16 @@
 
   function sprayParticles() {
     if (!adding) return;
-    mouse.mass = 4;
+    mouse.mass = MOUSE;
     addParticles(mouse.x, mouse.y, NEW_BATCHES);
   }
 
   // jQuery
   jQuery(document).ready(function(){
     $('#display').mousemove(function(e){
-      mouse = {
-        x: e.pageX - this.offsetLeft,
-        y: e.pageY - this.offsetTop,
-        mass: 4
-      };
+      mouse.x = e.pageX - this.offsetLeft;
+      mouse.y = e.pageY - this.offsetTop;
+      mouse.mass = MOUSE;
     });
     $('#display').mousedown(function(e) {
       adding = true;
@@ -146,12 +173,18 @@
     $(document).mouseup(function(e) {
       adding = false;
     });
+
+    $(document).on('change', 'input[data-bind]', function(e) {
+      updateData(this);
+      needsUpdate = true;
+    });
+
+    // GO!
     $('input[data-bind]').each(function() {
       updateData(this);
     })
-    $(document).on('change', 'input[data-bind]', function(e) {
-      updateData(this);
-    });
+    start();
+
     function updateData(input) {
       var key = $(input).data('bind');
       window[key] = +$(input).val();

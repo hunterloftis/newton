@@ -67,7 +67,7 @@ Renderer.prototype = {
     ctx.restore();
   },
   drawParticleCount: function(ctx) {
-    var text = system.particles.length ? 'Particles: ' + system.particles.length : '(click to add particles)';
+    var text = 'Particles: ' + system.particles.length;
     ctx.save();
     ctx.fillStyle = '#fff';
     ctx.font = '10pt Helvetica';
