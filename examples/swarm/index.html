@@ -94,7 +94,7 @@
   function addParticles(x, y, n) {
     var dot;
     for (var i = 0; i < n; i++) {
-      dot = Particle.createRandom(x, y);
+      dot = Particle.createRandom(x, y, 100);
       dot.setBounds(new Rectangle(0, 0, WIDTH, HEIGHT));
       system.add(dot);
     }

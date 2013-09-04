@@ -4,7 +4,7 @@ function Particle(x, y, m, restitution) {
   this.velocity = new Vector(0, 0);
   this.acceleration = new Vector(0, 0);
   this.mass = m || 1.0;
-  this.restitution = 1;
+  this.restitution = restitution || 1;
   this.drag = 0.9999;
   this.bounds = undefined;
 }
@@ -12,10 +12,10 @@ function Particle(x, y, m, restitution) {
 Particle.MASS_MIN = 1;
 Particle.MASS_MAX = 5;
 
-Particle.createRandom = function(x, y) {
+Particle.createRandom = function(x, y, spread) {
   var mass = Math.random() * (Particle.MASS_MAX - Particle.MASS_MIN) + Particle.MASS_MIN;
-  var x = Math.random() * 20 + x - 10;
-  var y = Math.random() * 20 + y - 10;
+  var x = Math.random() * spread * 2 + x - spread;
+  var y = Math.random() * spread * 2 + y - spread;
   return new Particle(x, y, mass);
 };
 
