@@ -22,7 +22,7 @@
       <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
     </label>
     <label>Drag
-      <input type='range' min='0' max='0.2' step='0.01' value='0' data-bind='DRAG'>
+      <input type='range' min='0' max='0.3' step='0.01' value='0' data-bind='DRAG'>
     </label>
     <label>Mouse Mass
       <input type='range' min='0' max='6' step='0.1' value='4' data-bind='MOUSE'>
@@ -144,13 +144,16 @@
   }
 
   function applyForces(time, correction) {
-    system.each('force', [0, GRAVITY, 1]);
-    system.each('gravitate', [mouse.x, mouse.y, mouse.mass]);
-
-    system.integrate(time, correction);
-
-    system.each('collide', [walls]);
-    system.each('contain', [container]);
+    var i = system.particles.length;
+    var particle;
+    while (i--) {
+      particle = system.particles[i];
+      particle.force(0, GRAVITY, 1);
+      particle.gravitate(mouse.x, mouse.y, mouse.mass);
+      particle.integrate(time, correction);
+      particle.collide(walls);
+      particle.contain(container);
+    }
   }
 
   function sprayParticles() {
