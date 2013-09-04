@@ -63,7 +63,7 @@
   var SCALE = 1.0;
 
   // Globals
-  var gameloop, system, walls, renderer;
+  var gameloop, system, walls, renderer, container;
   var mouse = {x: 0, y: 0, mass: 0};
   var adding = false;
 
@@ -76,6 +76,7 @@
   function start() {
     system = new ParticleSystem();
     walls = createWalls();
+    container = new Rectangle(0, 0, WIDTH, HEIGHT);
     renderer = new Renderer(document.getElementById('display'));
     gameloop = new Gameloop(frame);
     gameloop.start();
@@ -92,11 +93,8 @@
   // Supporting functions
 
   function addParticles(x, y, n) {
-    var dot;
     for (var i = 0; i < n; i++) {
-      dot = Particle.createRandom(x, y, 50);
-      dot.setBounds(new Rectangle(0, 0, WIDTH, HEIGHT));
-      system.add(dot);
+      system.add(Particle.createRandom(x, y, 50));
     }
   }
 
@@ -124,8 +122,8 @@
       // Apply acceleration -> velocity -> position
       particle.integrate(time, correction);  // Apply forces
       // Apply constraints
-      particle.contain(time, correction);  // Keep inside display
       particle.collide(walls);            // Handle collisions with line walls
+      particle.contain(container);        // Keep inside display
     };
   }
 

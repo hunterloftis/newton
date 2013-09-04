@@ -7,7 +7,6 @@ function Particle(x, y, m, restitution) {
   this.mass = m || 1.0;
   this.restitution = restitution || 1;
   this.drag = 0.9999;
-  this.bounds = undefined;
 }
 
 Particle.MASS_MIN = 1;
@@ -70,15 +69,11 @@ Particle.prototype.setVelocity = function(x, y) {
   return this;
 };
 
-Particle.prototype.setBounds = function(rect) {
-  this.bounds = rect ? rect : undefined;
-};
-
-Particle.prototype.contain = function(time, correction) {
-  if (this.position.x > this.bounds.right) this.position.x = this.lastPosition.x = this.bounds.right;
-  else if (this.position.x < this.bounds.left) this.position.x = this.lastPosition.x = this.bounds.left;
-  if (this.position.y > this.bounds.bottom) this.position.y = this.lastPosition.y = this.bounds.bottom;
-  else if (this.position.y < this.bounds.top) this.position.y = this.lastPosition.y = this.bounds.top;
+Particle.prototype.contain = function(bounds) {
+  if (this.position.x > bounds.right) this.position.x = this.lastPosition.x = bounds.right;
+  else if (this.position.x < bounds.left) this.position.x = this.lastPosition.x = bounds.left;
+  if (this.position.y > bounds.bottom) this.position.y = this.lastPosition.y = bounds.bottom;
+  else if (this.position.y < bounds.top) this.position.y = this.lastPosition.y = bounds.top;
 };
 
 Particle.prototype.force = function(x, y, mass) {
