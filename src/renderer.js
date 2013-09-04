@@ -36,7 +36,6 @@ Renderer.prototype = {
         pos = particle.position;
         last = particle.lastValidPosition;
 
-        //var ty = Math.abs(pos.y - last.y) < 1 ? last.y + particle.mass : pos.y;
         for (var k = 0; k < particle.mass; k++) {
           ctx.moveTo(last.x - k, last.y - particle.mass * 0.25);
           ctx.lineTo(pos.x - k, pos.y + particle.mass * 0.25);
