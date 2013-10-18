@@ -88,7 +88,7 @@
   var SCALE = 1.0;
 
   // Globals
-  var gameloop, system, walls, renderer, container, material;
+  var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
   var mouse = {x: 0, y: 0, mass: 0};
   var adding = false;
 
@@ -102,10 +102,13 @@
 
     container = new Rectangle(0, 0, width, height);
     renderer = new Renderer($display[0]);
-    material = new Material({
+    particleMaterial = new Material({
       weight: 1,
       restitution: 1,
       drag: 0
+    });
+    wallMaterial = new Material({
+      friction: 0
     });
     system = new ParticleSystem();
     walls = createWalls();
@@ -135,7 +138,7 @@
 
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
-      var newParticle = Particle.createRandom(x, y, material, 50);
+      var newParticle = Particle.createRandom(x, y, particleMaterial, 50);
       system.add(newParticle);
     }
   }
@@ -143,7 +146,10 @@
   function createWalls() {
     var s = [];
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, 0));
+      s.push(new Wall(
+        POLYS[i] * SCALE, POLYS[i + 1] * SCALE,
+        POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE,
+        wallMaterial));
     }
     return s;
   }

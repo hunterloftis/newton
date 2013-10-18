@@ -158,7 +158,7 @@ Particle.prototype.collide = function(walls) {
   if (nearest) {
     var velocity = this.position.clone().sub(this.lastPosition);
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
-    var reflectedVelocity = nearest.wall.getReflection(velocity, nearest.wall.friction, this.material.restitution);
+    var reflectedVelocity = nearest.wall.getReflection(velocity, this.material.restitution);
 
     this.position.copy(bouncePoint);
     this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);

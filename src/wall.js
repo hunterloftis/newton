@@ -1,11 +1,11 @@
-function Wall(x1, y1, x2, y2, friction) {
+function Wall(x1, y1, x2, y2, material) {
   this.x1 = x1;
   this.y1 = y1;
   this.x2 = x2;
   this.y2 = y2;
   this.anchor = new Vector(x1, y1);
   this.vector = new Vector(x2 - x1, y2 - y1);
-  this.friction = friction || 0;
+  this.material = material || Material.simple;
   this.length = this.vector.getLength();
   this.angle = this.vector.getAngle();
   this.normal = this.vector.clone().turnLeft().unit();
@@ -69,8 +69,9 @@ Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
 
 // friction = range(0, 1)
 // restitution = range(0.1, 1)
-Wall.prototype.getReflection = function(velocity, friction, restitution) {
+Wall.prototype.getReflection = function(velocity, restitution) {
   var dir = this.normal.clone();
+  var friction = this.material.friction;
   var velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution);
   var velT = velocity.clone().sub(velN).multScalar(1 - friction);
   var reflectedVel = velT.sub(velN);
