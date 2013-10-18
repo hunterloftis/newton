@@ -50,11 +50,7 @@
 <script>
 
   // User-controlled
-  var GRAVITY, RESTITUTION, FRICTION, DRAG, MOUSE, GRAVITY_ANGLE;
-  var needsUpdate = true;
-
-  MOUSE = 4;
-  FRICTION = 0;
+  var GRAVITY, GRAVITY_ANGLE, MOUSE;
 
   // Constants
   var POLYS = [
@@ -119,7 +115,6 @@
 
   function frame(time, correction) {
     renderer.render(time, correction);
-    updateUserSettings();
     shrinkMouse();
     sprayParticles();
     applyForces(time, correction);
@@ -127,14 +122,6 @@
 
 
   // Supporting functions
-
-  function updateUserSettings() {
-    if (!needsUpdate) return;
-    walls.forEach(function(wall) {
-      wall.friction = 0; //FRICTION;
-    });
-    needsUpdate = false;
-  }
 
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
@@ -195,25 +182,27 @@
       adding = false;
     });
 
-    $(document).on('change', 'input[data-bind="GRAVITY"]', simpleUpdate);
-    $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', simpleUpdate);
+    $(document).on('change', 'input[data-bind="GRAVITY"]', updateGravity);
+    $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle);
+    $(document).on('change', 'input[data-bind="MOUSE"]', updateMouse);
 
-    function simpleUpdate(e) {
-      var key = $(this).data('bind');
-      window[key] = +$(this).val();
+    function updateGravity(e) {
+      GRAVITY = +$(this).val();
     }
 
-    // GO!
+    function updateGravityAngle(e) {
+      GRAVITY_ANGLE = +$(this).val();
+    }
+
+    function updateMouse(e) {
+      MOUSE = +$(this).val();
+    }
+
     $('input[data-bind]').each(function() {
-      updateData(this);
+      $(this).trigger('change');
     })
 
     start();
-
-    function updateData(input) {
-      var key = $(input).data('bind');
-      window[key] = +$(input).val();
-    }
   });
 
 </script>
