@@ -89,6 +89,21 @@ Particle.prototype.contain = function(bounds) {
   }
 };
 
+// Fixed modulo function
+function mod(a, b) {
+  return ((a % b) + b) % b;
+}
+
+Particle.prototype.wrap = function(bounds) {
+  var velocity = this.position.clone().sub(this.lastPosition);
+  var newX = mod(this.position.x, bounds.width) + bounds.left;
+  var newY = mod(this.position.y, bounds.height) + bounds.top;
+  this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x;
+  this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y;
+  this.position.x = newX;
+  this.position.y = newY;
+};
+
 Particle.prototype.accelerateVector = function(vector) {
   this.acceleration.add(vector);
 };
@@ -108,7 +123,7 @@ Particle.prototype.getMass = function() {
 Particle.prototype.attractSquare = function(x, y, m) {
   var mass = this.getMass();
   var delta = new Vector(x, y).sub(this.position);
-  var r = delta.getLength();
+  var r = Math.max(delta.getLength(), 1);
   var f = (m * mass) / (r * r);
   var ratio = m / (m + mass);
 

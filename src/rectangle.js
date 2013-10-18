@@ -8,6 +8,8 @@ Rectangle.prototype = {
     this.top = Math.min(top, bottom);
     this.right = Math.max(right, left);
     this.bottom = Math.max(bottom, top);
+    this.width = this.right - this.left;
+    this.height = this.bottom - this.top;
     return this;
   },
   contains: function(x, y) {

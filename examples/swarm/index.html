@@ -13,10 +13,10 @@
   </p>
   <form class='controls'>
     <label>Gravity
-      <input type='range' min='0' max='0.001' step='0.00001' value='0' data-bind='GRAVITY'>
+      <input type='range' min='0' max='0.0005' step='0.00001' value='0' data-bind='GRAVITY'>
     </label>
     <label>Gravity Angle
-      <input type='range' min='0' max='1' step='0.01' value='0' data-bind='GRAVITY_ANGLE'>
+      <input type='range' min='0' max='2' step='0.02' value='0' data-bind='GRAVITY_ANGLE'>
     </label>
     <label>Restitution
       <input type='range' min='0.1' max='1' step='0.01' value='1' data-bind='RESTITUTION'>
@@ -28,7 +28,7 @@
       <input type='range' min='0' max='0.3' step='0.01' value='0' data-bind='DRAG'>
     </label>
     <label>Mouse Mass
-      <input type='range' min='0' max='6' step='0.1' value='4' data-bind='MOUSE'>
+      <input type='range' min='0' max='6' step='0.1' value='1' data-bind='MOUSE'>
     </label>
   </form>
 </div>
@@ -78,26 +78,22 @@
     875, 275, 875, 125
   ];
 
-  var SCALE = 1.0;
-
-  // User-controlled
-  var GRAVITY, GRAVITY_ANGLE, MOUSE;
-
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = {x: 0, y: 0, mass: 0};
+  var mouse = { x: 0, y: 0, mass: 0, maxMass: 4 };
+  var gravity = { strength: 0, angle: 0 };
   var adding = false;
 
   // Entry point
   $(document).ready(function() {
-    create();
-    bind();
-    start();
+    createSimulation();
+    bindControls();
+    startSimulation();
   });
 
   // Primary functions
 
-  function create() {
+  function createSimulation() {
     var $display = $('#display');
     var width = $display.width();
     var height = $display.height();
@@ -117,40 +113,49 @@
     gameloop = new Gameloop(frame);
   }
 
-  function bind() {
-    $('#display').mousemove(function(e){
-      mouse.x = e.pageX - this.offsetLeft;
-      mouse.y = e.pageY - this.offsetTop;
-      mouse.mass = MOUSE;
-    });
-    $('#display').mousedown(function(e) {
-      adding = true;
-      return false;
-    });
-    $(document).mouseup(function(e) {
-      adding = false;
-    });
+  function bindControls() {
+    $(document)
+      .mouseup(onMouseUp)
+      .on('change', 'input[data-bind="GRAVITY"]', updateGravity)
+      .on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle)
+      .on('change', 'input[data-bind="MOUSE"]', updateMouse)
+      .on('change', 'input[data-bind="RESTITUTION"]', updateRestitution)
+      .on('change', 'input[data-bind="FRICTION"]', updateFriction)
+      .on('change', 'input[data-bind="DRAG"]', updateDrag);
 
-    $(document).on('change', 'input[data-bind="GRAVITY"]', updateGravity);
-    $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle);
-    $(document).on('change', 'input[data-bind="MOUSE"]', updateMouse);
-    $(document).on('change', 'input[data-bind="RESTITUTION"]', updateRestitution);
-    $(document).on('change', 'input[data-bind="FRICTION"]', updateFriction);
+    $('#display')
+      .mousemove(onMouseMove)
+      .mousedown(onMouseDown);
 
     $('input[data-bind]').each(function() {
       $(this).trigger('change');
     })
 
+    function onMouseMove(e) {
+      mouse.x = e.pageX - this.offsetLeft;
+      mouse.y = e.pageY - this.offsetTop;
+      mouse.mass = mouse.maxMass;
+    }
+
+    function onMouseDown(e) {
+      adding = true;
+      return false;
+    }
+
+    function onMouseUp(e) {
+      adding = false;
+    }
+
     function updateGravity(e) {
-      GRAVITY = +$(this).val();
+      gravity.strength = +$(this).val();
     }
 
     function updateGravityAngle(e) {
-      GRAVITY_ANGLE = +$(this).val();
+      gravity.angle = +$(this).val();
     }
 
     function updateMouse(e) {
-      MOUSE = +$(this).val();
+      mouse.maxMass = +$(this).val();
     }
 
     function updateRestitution(e) {
@@ -160,9 +165,13 @@
     function updateFriction(e) {
       wallMaterial.friction = +$(this).val();
     }
+
+    function updateDrag(e) {
+      particleMaterial.drag = +$(this).val();
+    }
   }
 
-  function start() {
+  function startSimulation() {
     gameloop.start();
   }
 
@@ -186,10 +195,7 @@
   function createWalls() {
     var s = [];
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall(
-        POLYS[i] * SCALE, POLYS[i + 1] * SCALE,
-        POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE,
-        wallMaterial));
+      s.push(new Wall( POLYS[i], POLYS[i + 1], POLYS[i + 2], POLYS[i + 3], wallMaterial));
     }
     return s;
   }
@@ -201,22 +207,23 @@
   }
 
   function applyForces(time, correction) {
-    var gravity = new Vector(0, GRAVITY).rotate(GRAVITY_ANGLE * Math.PI);
+    var g = new Vector(0, gravity.strength).rotate(gravity.angle * Math.PI);
     var i = system.particles.length;
     var particle;
     while (i--) {
       particle = system.particles[i];
-      particle.accelerateVector(gravity);
+      particle.accelerateVector(g);
       particle.attractSquare(mouse.x, mouse.y, mouse.mass);
       particle.integrate(time, correction);
+      particle.wrap(container);
       particle.collide(walls);
-      particle.contain(container);
+      //particle.contain(container);
     }
   }
 
   function sprayParticles() {
     if (!adding) return;
-    mouse.mass = MOUSE;
+    mouse.mass = mouse.maxMass;
     addParticles(mouse.x, mouse.y, 10);
   }
 
