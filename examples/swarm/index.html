@@ -25,7 +25,7 @@
       <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
     </label>
     <label>Drag
-      <input type='range' min='0' max='0.3' step='0.01' value='0.01' data-bind='DRAG'>
+      <input type='range' min='0' max='0.3' step='0.01' value='0.0001' data-bind='DRAG'>
     </label>
     <label>Mouse Mass
       <input type='range' min='0' max='5' step='0.1' value='1' data-bind='MOUSE'>
@@ -80,7 +80,7 @@
 
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 0, maxMass: 4, minDistance: 20 };
+  var mouse = { x: 0, y: 0, mass: 0, minDistance: 20, active: false };
   var gravity = { strength: 0, angle: 0 };
   var adding = false;
 
@@ -118,7 +118,9 @@
       .on('change', 'input[data-bind="DRAG"]', updateDrag);
 
     $('#display')
+      .mouseenter(onMouseEnter)
       .mousemove(onMouseMove)
+      .mouseleave(onMouseLeave)
       .mousedown(onMouseDown);
 
     $('input[data-bind]').each(function() {
@@ -128,7 +130,6 @@
     function onMouseMove(e) {
       mouse.x = e.pageX - this.offsetLeft;
       mouse.y = e.pageY - this.offsetTop;
-      mouse.mass = mouse.maxMass;
     }
 
     function onMouseDown(e) {
@@ -140,6 +141,14 @@
       adding = false;
     }
 
+    function onMouseEnter(e) {
+      mouse.active = true;
+    }
+
+    function onMouseLeave(e) {
+      mouse.active = false;
+    }
+
     function updateGravity(e) {
       gravity.strength = +$(this).val();
     }
@@ -149,7 +158,7 @@
     }
 
     function updateMouse(e) {
-      mouse.maxMass = +$(this).val();
+      mouse.mass = +$(this).val();
     }
 
     function updateRestitution(e) {
@@ -171,7 +180,6 @@
 
   function frame(time, correction) {
     renderer.render(time, correction);
-    shrinkMouse();
     sprayParticles();
     applyForces(time, correction);
   }
@@ -194,12 +202,6 @@
     return s;
   }
 
-  function shrinkMouse() {
-    if (mouse.mass > 0) {
-      mouse.mass -= 0.1;
-    }
-  }
-
   function applyForces(time, correction) {
     var g = new Vector(0, gravity.strength).rotate(gravity.angle * Math.PI);
     var i = system.particles.length;
@@ -207,7 +209,7 @@
     while (i--) {
       particle = system.particles[i];
       particle.accelerateVector(g);
-      particle.attractSquare(mouse.x, mouse.y, mouse.mass, mouse.minDistance);
+      if (mouse.active) particle.attractSquare(mouse.x, mouse.y, mouse.mass, mouse.minDistance);
       particle.integrate(time, correction);
       particle.wrap(container);
       particle.collide(walls);
@@ -217,7 +219,6 @@
 
   function sprayParticles() {
     if (!adding) return;
-    mouse.mass = mouse.maxMass;
     addParticles(mouse.x, mouse.y, 10);
   }
 
