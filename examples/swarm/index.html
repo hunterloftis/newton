@@ -49,9 +49,6 @@
 
 <script>
 
-  // User-controlled
-  var GRAVITY, GRAVITY_ANGLE, MOUSE;
-
   // Constants
   var POLYS = [
 
@@ -83,11 +80,20 @@
 
   var SCALE = 1.0;
 
+  // User-controlled
+  var GRAVITY, GRAVITY_ANGLE, MOUSE;
+
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
   var mouse = {x: 0, y: 0, mass: 0};
   var adding = false;
 
+  // Entry point
+  $(document).ready(function() {
+    create();
+    bind();
+    start();
+  });
 
   // Primary functions
 
@@ -109,6 +115,55 @@
     system = new ParticleSystem();
     walls = createWalls();
     gameloop = new Gameloop(frame);
+  }
+
+  function bind() {
+    $('#display').mousemove(function(e){
+      mouse.x = e.pageX - this.offsetLeft;
+      mouse.y = e.pageY - this.offsetTop;
+      mouse.mass = MOUSE;
+    });
+    $('#display').mousedown(function(e) {
+      adding = true;
+      return false;
+    });
+    $(document).mouseup(function(e) {
+      adding = false;
+    });
+
+    $(document).on('change', 'input[data-bind="GRAVITY"]', updateGravity);
+    $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle);
+    $(document).on('change', 'input[data-bind="MOUSE"]', updateMouse);
+    $(document).on('change', 'input[data-bind="RESTITUTION"]', updateRestitution);
+    $(document).on('change', 'input[data-bind="FRICTION"]', updateFriction);
+
+    $('input[data-bind]').each(function() {
+      $(this).trigger('change');
+    })
+
+    function updateGravity(e) {
+      GRAVITY = +$(this).val();
+    }
+
+    function updateGravityAngle(e) {
+      GRAVITY_ANGLE = +$(this).val();
+    }
+
+    function updateMouse(e) {
+      MOUSE = +$(this).val();
+    }
+
+    function updateRestitution(e) {
+      particleMaterial.restitution = +$(this).val();
+    }
+
+    function updateFriction(e) {
+      wallMaterial.friction = +$(this).val();
+    }
+  }
+
+  function start() {
+    gameloop.start();
   }
 
   function frame(time, correction) {
@@ -164,51 +219,6 @@
     mouse.mass = MOUSE;
     addParticles(mouse.x, mouse.y, 10);
   }
-
-  // jQuery
-  jQuery(document).ready(function(){
-    $('#display').mousemove(function(e){
-      mouse.x = e.pageX - this.offsetLeft;
-      mouse.y = e.pageY - this.offsetTop;
-      mouse.mass = MOUSE;
-    });
-    $('#display').mousedown(function(e) {
-      adding = true;
-      return false;
-    });
-    $(document).mouseup(function(e) {
-      adding = false;
-    });
-
-    $(document).on('change', 'input[data-bind="GRAVITY"]', updateGravity);
-    $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle);
-    $(document).on('change', 'input[data-bind="MOUSE"]', updateMouse);
-    $(document).on('change', 'input[data-bind="RESTITUTION"]', updateRestitution);
-
-    function updateGravity(e) {
-      GRAVITY = +$(this).val();
-    }
-
-    function updateGravityAngle(e) {
-      GRAVITY_ANGLE = +$(this).val();
-    }
-
-    function updateMouse(e) {
-      MOUSE = +$(this).val();
-    }
-
-    function updateRestitution(e) {
-      particleMaterial.restitution = +$(this).val();
-    }
-
-    create();
-
-    $('input[data-bind]').each(function() {
-      $(this).trigger('change');
-    })
-
-    gameloop.start();
-  });
 
 </script>
 
