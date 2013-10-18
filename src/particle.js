@@ -120,10 +120,10 @@ Particle.prototype.getMass = function() {
   return this.size * this.material.weight;
 };
 
-Particle.prototype.attractSquare = function(x, y, m) {
+Particle.prototype.attractSquare = function(x, y, m, minDist) {
   var mass = this.getMass();
   var delta = new Vector(x, y).sub(this.position);
-  var r = Math.max(delta.getLength(), 1);
+  var r = Math.max(delta.getLength(), minDist || 1);
   var f = (m * mass) / (r * r);
   var ratio = m / (m + mass);
 

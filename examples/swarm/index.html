@@ -25,10 +25,10 @@
       <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
     </label>
     <label>Drag
-      <input type='range' min='0' max='0.3' step='0.01' value='0' data-bind='DRAG'>
+      <input type='range' min='0' max='0.3' step='0.01' value='0.01' data-bind='DRAG'>
     </label>
     <label>Mouse Mass
-      <input type='range' min='0' max='6' step='0.1' value='1' data-bind='MOUSE'>
+      <input type='range' min='0' max='5' step='0.1' value='1' data-bind='MOUSE'>
     </label>
   </form>
 </div>
@@ -80,7 +80,7 @@
 
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 0, maxMass: 4 };
+  var mouse = { x: 0, y: 0, mass: 0, maxMass: 4, minDistance: 20 };
   var gravity = { strength: 0, angle: 0 };
   var adding = false;
 
@@ -100,14 +100,8 @@
 
     container = new Rectangle(0, 0, width, height);
     renderer = new Renderer($display[0]);
-    particleMaterial = new Material({
-      weight: 1,
-      restitution: 1,
-      drag: 0
-    });
-    wallMaterial = new Material({
-      friction: 0
-    });
+    particleMaterial = new Material();
+    wallMaterial = new Material();
     system = new ParticleSystem();
     walls = createWalls();
     gameloop = new Gameloop(frame);
@@ -213,7 +207,7 @@
     while (i--) {
       particle = system.particles[i];
       particle.accelerateVector(g);
-      particle.attractSquare(mouse.x, mouse.y, mouse.mass);
+      particle.attractSquare(mouse.x, mouse.y, mouse.mass, mouse.minDistance);
       particle.integrate(time, correction);
       particle.wrap(container);
       particle.collide(walls);
