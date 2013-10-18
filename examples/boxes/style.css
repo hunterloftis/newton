@@ -1,0 +1,53 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #131313;
+  font-family: 'helvetica', 'arial', sans-serif;
+  font-weight: 100;
+  font-size: 13px;
+  color: #666;
+}
+
+a {
+  color: #999;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.wrap {
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: 1280px;
+}
+
+#display {
+  display: block;
+  border: solid 1px #333;
+  background: #000;
+  cursor: crosshair;
+}
+
+.caption {
+  text-align: center;
+}
+
+.controls {
+  padding: 10px;
+}
+
+.controls > label {
+  padding: 10px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+label > input {
+  margin-left: 10px;
+}

@@ -92,16 +92,11 @@
   // Primary functions
 
   function start() {
-    var $display = $('#display');
-    var width = $display.width();
-    var height = $display.height();
-
-    container = new Rectangle(0, 0, width, height);
-    renderer = new Renderer($display[0]);
     system = new ParticleSystem();
     walls = createWalls();
+    container = new Rectangle(0, 0, WIDTH, HEIGHT);
+    renderer = new Renderer(document.getElementById('display'));
     gameloop = new Gameloop(frame);
-
     gameloop.start();
   }
 
