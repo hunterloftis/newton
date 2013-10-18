@@ -1,5 +1,7 @@
 function Renderer(el) {
   this.ctx = el.getContext('2d');
+  this.width = el.width;
+  this.height = el.height;
 }
 
 Renderer.prototype = {
@@ -15,7 +17,7 @@ Renderer.prototype = {
     var alpha = Math.min(1, time / 64);
     ctx.save();
     ctx.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillRect(0, 0, this.width, this.height);
     ctx.restore();
   },
   drawParticles: function(ctx) {
