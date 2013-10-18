@@ -40,6 +40,7 @@
 <script src='../../src/rectangle.js'></script>
 
 <script src='../../src/wall.js'></script>
+<script src='../../src/material.js'></script>
 <script src='../../src/particle.js'></script>
 <script src='../../src/particlesystem.js'></script>
 
@@ -52,9 +53,12 @@
   var GRAVITY, RESTITUTION, FRICTION, DRAG, MOUSE, GRAVITY_ANGLE;
   var needsUpdate = true;
 
+  MOUSE = 4;
+  FRICTION = 0;
+
   // Constants
-  var NEW_BATCHES = 10;
   var POLYS = [
+
     // X
     150, 150, 200, 100,
     200, 100, 250, 150,
@@ -68,20 +72,23 @@
     200, 300, 150, 250,
     150, 250, 200, 200,
     200, 200, 150, 150,
+
     // Triangle
     600, 125, 725, 275,
     725, 275, 475, 275,
     475, 275, 600, 125,
+
     // Box
     875, 125, 1050, 125,
     1050, 125, 1050, 275,
     1050, 275, 875, 275,
     875, 275, 875, 125
   ];
+
   var SCALE = 1.0;
 
   // Globals
-  var gameloop, system, walls, renderer, container;
+  var gameloop, system, walls, renderer, container, material;
   var mouse = {x: 0, y: 0, mass: 0};
   var adding = false;
 
@@ -95,6 +102,11 @@
 
     container = new Rectangle(0, 0, width, height);
     renderer = new Renderer($display[0]);
+    material = new Material({
+      weight: 1,
+      restitution: 1,
+      drag: 0
+    });
     system = new ParticleSystem();
     walls = createWalls();
     gameloop = new Gameloop(frame);
@@ -115,21 +127,15 @@
 
   function updateUserSettings() {
     if (!needsUpdate) return;
-    system.callback(function(particle) {
-      particle.restitution = RESTITUTION;
-      particle.drag = DRAG;
-    });
     walls.forEach(function(wall) {
-      wall.friction = FRICTION;
+      wall.friction = 0; //FRICTION;
     });
     needsUpdate = false;
   }
 
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
-      var newParticle = Particle.createRandom(x, y, 50);
-      newParticle.restitution = RESTITUTION;
-      newParticle.drag = DRAG;
+      var newParticle = Particle.createRandom(x, y, material, 50);
       system.add(newParticle);
     }
   }
@@ -137,7 +143,7 @@
   function createWalls() {
     var s = [];
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, FRICTION));
+      s.push(new Wall(POLYS[i] * SCALE, POLYS[i + 1] * SCALE, POLYS[i + 2] * SCALE, POLYS[i + 3] * SCALE, 0));
     }
     return s;
   }
@@ -165,7 +171,7 @@
   function sprayParticles() {
     if (!adding) return;
     mouse.mass = MOUSE;
-    addParticles(mouse.x, mouse.y, NEW_BATCHES);
+    addParticles(mouse.x, mouse.y, 10);
   }
 
   // jQuery
@@ -183,15 +189,19 @@
       adding = false;
     });
 
-    $(document).on('change', 'input[data-bind]', function(e) {
-      updateData(this);
-      needsUpdate = true;
-    });
+    $(document).on('change', 'input[data-bind="GRAVITY"]', simpleUpdate);
+    $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', simpleUpdate);
+
+    function simpleUpdate(e) {
+      var key = $(this).data('bind');
+      window[key] = +$(this).val();
+    }
 
     // GO!
     $('input[data-bind]').each(function() {
       updateData(this);
     })
+
     start();
 
     function updateData(input) {

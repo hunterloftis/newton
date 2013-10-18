@@ -22,7 +22,7 @@ Renderer.prototype = {
   },
   drawParticles: function(ctx) {
     ctx.save();
-    var i, group, glen, j, particles, particle, plen, pos, last;
+    var i, group, glen, j, particles, particle, plen, pos, last, mass;
 
     glen = system.groups.length;
     for (i = 0; i < glen; i++) {
@@ -38,10 +38,11 @@ Renderer.prototype = {
         particle = particles[j];
         pos = particle.position;
         last = particle.lastValidPosition;
+        mass = particle.getMass();
 
-        for (var k = 0; k < particle.mass; k++) {
-          ctx.moveTo(last.x - k, last.y - particle.mass * 0.25);
-          ctx.lineTo(pos.x - k, pos.y + particle.mass * 0.25);
+        for (var k = 0; k < mass; k++) {
+          ctx.moveTo(last.x - k, last.y - mass * 0.25);
+          ctx.lineTo(pos.x - k, pos.y + mass * 0.25);
         }
       }
       ctx.stroke();

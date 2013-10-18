@@ -1,23 +1,22 @@
-function Particle(x, y, m, restitution) {
+function Particle(x, y, material, size) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
   this.lastValidPosition = this.position.clone();
   this.velocity = new Vector(0, 0);
   this.acceleration = new Vector(0, 0);
-  this.mass = m || 1.0;
-  this.restitution = restitution || 1;
-  this.drag = 0;
+  this.material = material || Material.simple;
+  this.size = size || 1.0;
   this.randomDrag = Math.random() * 0.02;
 }
 
 Particle.MASS_MIN = 1;
 Particle.MASS_MAX = 5;
 
-Particle.createRandom = function(x, y, spread) {
+Particle.createRandom = function(x, y, material, spread) {
   var mass = Math.random() * (Particle.MASS_MAX - Particle.MASS_MIN) + Particle.MASS_MIN;
   var x = Math.random() * spread * 2 + x - spread;
   var y = Math.random() * spread * 2 + y - spread;
-  return new Particle(x, y, mass);
+  return new Particle(x, y, material, mass);
 };
 
 Particle.getMassRange = function() {
@@ -35,11 +34,11 @@ Particle.prototype.integrate = function(time, correction) {
     .copy(this.position)
     .sub(this.lastPosition)
     .scale(correction)
-    .scale(1 - this.drag - this.randomDrag);
+    .scale(1 - this.material.drag - this.randomDrag);
 
   // Set acceleration based on time squared
   this.acceleration
-    .scale(1 - this.drag)
+    .scale(1 - this.material.drag)
     .scale(time * time);
 
   // Record last location
@@ -95,18 +94,23 @@ Particle.prototype.accelerateVector = function(vector) {
 };
 
 Particle.prototype.force = function(x, y, mass) {
-  mass = mass || this.mass;
+  mass = mass || this.getMass();
   this.acceleration.add({
     x: x / mass,
     y: y / mass
   });
 };
 
+Particle.prototype.getMass = function() {
+  return this.size * this.material.weight;
+};
+
 Particle.prototype.attractSquare = function(x, y, m) {
+  var mass = this.getMass();
   var delta = new Vector(x, y).sub(this.position);
   var r = delta.getLength();
-  var f = (m * this.mass) / (r * r);
-  var ratio = m / (m + this.mass);
+  var f = (m * mass) / (r * r);
+  var ratio = m / (m + mass);
 
   this.acceleration.add({
     x: f * (delta.x / r) * ratio,
@@ -154,7 +158,7 @@ Particle.prototype.collide = function(walls) {
   if (nearest) {
     var velocity = this.position.clone().sub(this.lastPosition);
     var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
-    var reflectedVelocity = nearest.wall.getReflection(velocity, nearest.wall.friction, this.restitution);
+    var reflectedVelocity = nearest.wall.getReflection(velocity, nearest.wall.friction, this.material.restitution);
 
     this.position.copy(bouncePoint);
     this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
