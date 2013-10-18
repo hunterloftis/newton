@@ -91,7 +91,7 @@
 
   // Primary functions
 
-  function start() {
+  function create() {
     var $display = $('#display');
     var width = $display.width();
     var height = $display.height();
@@ -109,8 +109,6 @@
     system = new ParticleSystem();
     walls = createWalls();
     gameloop = new Gameloop(frame);
-
-    gameloop.start();
   }
 
   function frame(time, correction) {
@@ -185,6 +183,7 @@
     $(document).on('change', 'input[data-bind="GRAVITY"]', updateGravity);
     $(document).on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle);
     $(document).on('change', 'input[data-bind="MOUSE"]', updateMouse);
+    $(document).on('change', 'input[data-bind="RESTITUTION"]', updateRestitution);
 
     function updateGravity(e) {
       GRAVITY = +$(this).val();
@@ -198,11 +197,17 @@
       MOUSE = +$(this).val();
     }
 
+    function updateRestitution(e) {
+      particleMaterial.restitution = +$(this).val();
+    }
+
+    create();
+
     $('input[data-bind]').each(function() {
       $(this).trigger('change');
     })
 
-    start();
+    gameloop.start();
   });
 
 </script>
