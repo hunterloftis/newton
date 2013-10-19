@@ -78,9 +78,6 @@
     875, 275, 875, 125
   ];
 
-  var MIN_SIZE = 1;
-  var MAX_SIZE = 5;
-
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
   var mouse = { x: 0, y: 0, mass: 0, minDistance: 20, active: false, down: false };
@@ -106,6 +103,9 @@
     system = new ParticleSystem();
     walls = createWalls();
     gameloop = new Gameloop(frame);
+
+    renderer.setColors(['#118888', '#3fc1a6', '#8effec', '#f10c5c'], 1);
+    //renderer.setColors(['#ff0000', '#00ff00', '#0000ff', '#ffffff'], 1);
   }
 
   function bindControls() {
@@ -180,31 +180,9 @@
   }
 
   function frame(time, correction) {
-    renderer.render(time, correction);
+    renderer.render(system, time, correction);
     if (mouse.down) addParticles(mouse.x, mouse.y, 10);
     applyForces(time, correction);
-  }
-
-  function addParticles(x, y, n) {
-    for (var i = 0; i < n; i++) {
-      var newParticle = createRandom(x, y, 50);
-      system.add(newParticle);
-    }
-  }
-
-  function createRandom(x, y, spread) {
-    var mass = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
-    var x = Math.random() * spread * 2 + x - spread;
-    var y = Math.random() * spread * 2 + y - spread;
-    return new Particle(x, y, particleMaterial, mass);
-  }
-
-  function createWalls() {
-    var s = [];
-    for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall( POLYS[i], POLYS[i + 1], POLYS[i + 2], POLYS[i + 3], wallMaterial));
-    }
-    return s;
   }
 
   function applyForces(time, correction) {
@@ -219,6 +197,28 @@
       particle.wrap(container);
       particle.collide(walls);
     }
+  }
+
+  function addParticles(x, y, n) {
+    for (var i = 0; i < n; i++) {
+      var newParticle = createRandom(x, y, 50);
+      system.add(newParticle);
+    }
+  }
+
+  function createRandom(x, y, spread) {
+    var mass = Math.random() * 4 + 1;
+    var x = Math.random() * spread * 2 + x - spread;
+    var y = Math.random() * spread * 2 + y - spread;
+    return new Particle(x, y, particleMaterial, mass);
+  }
+
+  function createWalls() {
+    var s = [];
+    for (var i = 0; i < POLYS.length; i += 4) {
+      s.push(new Wall( POLYS[i], POLYS[i + 1], POLYS[i + 2], POLYS[i + 3], wallMaterial));
+    }
+    return s;
   }
 
 </script>

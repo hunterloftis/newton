@@ -2,13 +2,19 @@ function Renderer(el) {
   this.ctx = el.getContext('2d');
   this.width = el.width;
   this.height = el.height;
+  this.colors = ['#ffffff'];
+  this.colorScale = 1;
 }
 
 Renderer.prototype = {
-  render: function(time, correction) {
+  setColors: function(colors, scale) {
+    this.colors = colors;
+    this.colorScale = scale;
+  },
+  render: function(system, time, correction) {
     var ctx = this.ctx;
     this.clear(ctx, time);
-    this.drawParticles(ctx);
+    this.drawParticles(ctx, system.particles);
     this.drawWalls(ctx);
     this.drawParticleCount(ctx);
     this.drawFPS(ctx);
@@ -20,43 +26,40 @@ Renderer.prototype = {
     ctx.fillRect(0, 0, this.width, this.height);
     ctx.restore();
   },
-  drawParticles: function(ctx) {
-    ctx.save();
-    var i, group, glen, j, particles, particle, plen, pos, last, mass;
+  drawParticles: function(ctx, particles) {
+    var particle, pos, last, mass, colorIndex;
+    var maxColor = this.colors.length - 1;
+    var colors = this.colors;
+    var colorScale = this.colorScale;
 
-    glen = system.groups.length;
-    for (i = 0; i < glen; i++) {
-      group = system.groups[i];
-      particles = group.particles
-      plen = particles.length;
+    ctx.save();
+
+    ctx.lineCap = 'butt';
+
+    for (var j = 0, jlen = particles.length; j < jlen; j++) {
+      particle = particles[j];
+      pos = particle.position;
+      last = particle.lastValidPosition;
+      mass = particle.getMass();
+      colorIndex = ~~((mass - 1) / colorScale);
 
       ctx.beginPath();
-      ctx.strokeStyle = ctx.fillStyle = group.color;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = ~~mass + 1;
+      ctx.strokeStyle = colors[colorIndex] || colors[maxColor];
 
-      for (j = 0; j < plen; j++) {
-        particle = particles[j];
-        pos = particle.position;
-        last = particle.lastValidPosition;
-        mass = particle.getMass();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(pos.x, pos.y + 0.25);
 
-        for (var k = 0; k < mass; k++) {
-          ctx.moveTo(last.x - k, last.y - mass * 0.25);
-          ctx.lineTo(pos.x - k, pos.y + mass * 0.25);
-        }
-      }
       ctx.stroke();
     }
 
+
     ctx.restore();
-    return;
   },
   drawWalls: function(ctx) {
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.lineWidth = 1;
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = 'rgba(100, 200, 255, 1)';
     var wall, i = walls.length;
     while (i--) {
       wall = walls[i];
@@ -64,7 +67,6 @@ Renderer.prototype = {
       ctx.moveTo(wall.x1, wall.y1);
       ctx.lineTo(wall.x2, wall.y2);
       ctx.closePath();
-      ctx.stroke();
       ctx.stroke();
     }
     ctx.restore();
