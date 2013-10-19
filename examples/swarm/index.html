@@ -99,7 +99,7 @@
     wallMaterial = new Material();
     system = new ParticleSystem();
     walls = createWalls();
-    gameloop = new Gameloop(frame);
+    gameloop = new Gameloop(integrate, render);
   }
 
   function bindControls() {
@@ -168,13 +168,16 @@
     gameloop.start();
   }
 
-  function frame(time, correction) {
-    renderer.render(system, time, correction);
+  function integrate(time) {
     if (mouse.down) addParticles(mouse.x, mouse.y, 10);
-    applyForces(time, correction);
+    applyForces(time);
   }
 
-  function applyForces(time, correction) {
+  function render(time) {
+    renderer.render(system, time);
+  }
+
+  function applyForces(time) {
     var g = new Vector(0, gravity.strength).rotate(gravity.angle * Math.PI);
     var i = system.particles.length;
     var particle;
@@ -182,7 +185,7 @@
       particle = system.particles[i];
       particle.accelerateVector(g);
       if (mouse.active) particle.attractSquare(mouse.x, mouse.y, mouse.mass, mouse.minDistance);
-      particle.integrate(time, correction);
+      particle.integrate(time);
       particle.wrap(container);
       particle.collide(walls);
     }

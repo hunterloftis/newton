@@ -9,7 +9,7 @@ Renderer.prototype = {
   setParticleColor: function(color) {
     this.particleColor = color;
   },
-  render: function(system, time, correction) {
+  render: function(system, time) {
     var ctx = this.ctx;
     this.clear(ctx, time);
     this.drawParticles(ctx, system.particles);

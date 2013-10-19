@@ -24,8 +24,9 @@
       };
 
 
-  function Gameloop(integrator) {
+  function Gameloop(integrator, renderer) {
     this.integrator = integrator;
+    this.renderer = renderer;
     this.step = this.getStep();
     this.lastTime = 0;
     this.running = false;
@@ -33,6 +34,8 @@
     this.frames = 0;
     this.countTime = 0;
     this.countInterval = 250;
+    this.accumulator = 0;
+    this.integrationStep = 1000 / 60;
   }
 
   Gameloop.prototype.start = function() {
@@ -54,7 +57,14 @@
       var step = time - self.lastTime;
       if (step > 100) step = 0;         // in case you leave / return
 
-      self.integrator(step);
+      self.accumulator += step;
+
+      while (self.accumulator >= self.integrationStep) {
+        self.integrator(self.integrationStep);
+        self.accumulator -= self.integrationStep;
+      }
+
+      self.renderer(step);
 
       self.frames++;
       if (time >= self.countTime) {
