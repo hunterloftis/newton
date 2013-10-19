@@ -102,6 +102,10 @@ Particle.prototype.getMass = function() {
   return this.size * this.material.weight;
 };
 
+Particle.prototype.getSquaredSpeed = function() {
+  return this.velocity.getSquaredLength();
+};
+
 Particle.prototype.attractSquare = function(x, y, m, minDist) {
   var mass = this.getMass();
   var delta = new Vector(x, y).sub(this.position);

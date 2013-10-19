@@ -30,24 +30,20 @@ Renderer.prototype = {
     ctx.save();
     ctx.lineCap = 'butt';
     ctx.strokeStyle = this.particleColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
 
     for (var j = 0, jlen = particles.length; j < jlen; j++) {
       particle = particles[j];
       pos = particle.position;
       last = particle.lastValidPosition;
-      mass = particle.getMass() * 0.5;
+      mass = particle.getMass();
 
+      ctx.beginPath();
+      ctx.lineWidth = mass;
       ctx.moveTo(last.x, last.y);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.moveTo(pos.x - mass, pos.y - mass);
-      ctx.lineTo(pos.x + mass, pos.y + mass);
-      ctx.moveTo(pos.x + mass, pos.y - mass);
-      ctx.lineTo(pos.x - mass, pos.y + mass);
+      ctx.lineTo(pos.x, pos.y + 0.25);
+      ctx.stroke();
     }
 
-    ctx.stroke();
     ctx.restore();
   },
   drawWalls: function(ctx) {

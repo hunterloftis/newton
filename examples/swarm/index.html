@@ -77,7 +77,7 @@
 
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 5, minDistance: 20, active: false, down: false };
+  var mouse = { x: 0, y: 0, mass: 5, minDistance: 20, active: true, down: false };
   var gravity = { strength: 0, angle: 0 };
 
   // Entry point
@@ -100,8 +100,6 @@
     system = new ParticleSystem();
     walls = createWalls();
     gameloop = new Gameloop(frame);
-
-    renderer.setParticleColor('#f10c5c');
   }
 
   function bindControls() {
@@ -172,7 +170,7 @@
 
   function frame(time, correction) {
     renderer.render(system, time, correction);
-    if (mouse.down) addParticles(mouse.x, mouse.y, 32);
+    if (mouse.down) addParticles(mouse.x, mouse.y, 10);
     applyForces(time, correction);
   }
 
@@ -198,7 +196,7 @@
   }
 
   function createRandom(x, y, spread) {
-    var mass = Math.random() * 5 + 1;
+    var mass = Math.random() * 4 + 1;
     var x = Math.random() * spread * 2 + x - spread;
     var y = Math.random() * spread * 2 + y - spread;
     return new Particle(x, y, particleMaterial, mass);
