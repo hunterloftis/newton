@@ -3,8 +3,6 @@ function mod(a, b) {
   return ((a % b) + b) % b;
 }
 
-var NO_DBZ = 0.0000000001;
-
 function Particle(x, y, material, size) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
@@ -13,7 +11,7 @@ function Particle(x, y, material, size) {
   this.acceleration = new Vector(0, 0);
   this.material = material || Material.simple;
   this.size = size || 1.0;
-  this.randomDrag = Math.random() * 0.1;
+  this.randomDrag = Math.random() * 10 + 0.0000000001;
 }
 
 Particle.prototype.integrate = function(time) {
@@ -23,7 +21,7 @@ Particle.prototype.integrate = function(time) {
     .copy(this.position)
     .sub(this.lastPosition);
 
-  var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + NO_DBZ));
+  var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
 
   this.velocity.scale(1 - drag);
 
