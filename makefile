@@ -1,6 +1,3 @@
 gh-pages:
-	@git commit -m "dist build" || true
-	@git checkout master
-	@git checkout -B gh-pages
+	@git commit -m "publish" || true
 	@git push github gh-pages --force
-	@git checkout master
