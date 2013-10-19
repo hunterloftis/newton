@@ -13,13 +13,13 @@
   </p>
   <form class='controls'>
     <label>Gravity
-      <input type='range' min='0' max='0.0005' step='0.00001' value='0' data-bind='GRAVITY'>
+      <input type='range' min='0' max='0.0005' step='0.00001' value='0.0002' data-bind='GRAVITY'>
     </label>
     <label>Gravity Angle
       <input type='range' min='0' max='2' step='0.02' value='0' data-bind='GRAVITY_ANGLE'>
     </label>
     <label>Restitution
-      <input type='range' min='0.1' max='1' step='0.01' value='1' data-bind='RESTITUTION'>
+      <input type='range' min='0.1' max='1' step='0.01' value='0.75' data-bind='RESTITUTION'>
     </label>
     <label>Friction
       <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
@@ -28,7 +28,7 @@
       <input type='range' min='0' max='0.3' step='0.01' value='0.0001' data-bind='DRAG'>
     </label>
     <label>Mouse Mass
-      <input type='range' min='0' max='5' step='0.1' value='1' data-bind='MOUSE'>
+      <input type='range' min='0' max='5' step='0.1' value='2' data-bind='MOUSE'>
     </label>
   </form>
 </div>
@@ -104,8 +104,7 @@
     walls = createWalls();
     gameloop = new Gameloop(frame);
 
-    renderer.setColors(['#118888', '#3fc1a6', '#8effec', '#f10c5c'], 1);
-    //renderer.setColors(['#ff0000', '#00ff00', '#0000ff', '#ffffff'], 1);
+    renderer.setParticleColor('#f10c5c');
   }
 
   function bindControls() {
