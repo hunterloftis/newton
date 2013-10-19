@@ -3,11 +3,13 @@ function Renderer(el) {
   this.width = el.width;
   this.height = el.height;
   this.particleColor = '#ffffff';
+  this.particleAlpha = 1;
 }
 
 Renderer.prototype = {
-  setParticleColor: function(color) {
+  setParticleColor: function(color, alpha) {
     this.particleColor = color;
+    this.particleAlpha = alpha;
   },
   render: function(system, time) {
     var ctx = this.ctx;
@@ -18,9 +20,8 @@ Renderer.prototype = {
     this.drawFPS(ctx);
   },
   clear: function(ctx, time) {
-    var alpha = Math.min(1, time / 64);
     ctx.save();
-    ctx.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, this.width, this.height);
     ctx.restore();
   },
@@ -39,8 +40,10 @@ Renderer.prototype = {
 
       ctx.beginPath();
       ctx.lineWidth = mass;
+      ctx.globalAlpha = mass / this.particleAlpha + 0.2;
+
       ctx.moveTo(last.x, last.y);
-      ctx.lineTo(pos.x, pos.y + 0.25);
+      ctx.lineTo(pos.x, pos.y + 1);
       ctx.stroke();
     }
 
