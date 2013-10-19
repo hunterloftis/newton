@@ -49,6 +49,12 @@ Vector.prototype.mult = Vector.prototype.multVector = function(v) {
   return this;
 };
 
+Vector.prototype.reverse = function() {
+  this.x = -this.x;
+  this.y = -this.y;
+  return this;
+};
+
 Vector.prototype.div = function(v) {
   this.x /= v.x;
   this.y /= v.y;

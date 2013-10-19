@@ -3,6 +3,8 @@ function mod(a, b) {
   return ((a % b) + b) % b;
 }
 
+var NO_DBZ = 0.0000000001;
+
 function Particle(x, y, material, size) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
@@ -11,7 +13,7 @@ function Particle(x, y, material, size) {
   this.acceleration = new Vector(0, 0);
   this.material = material || Material.simple;
   this.size = size || 1.0;
-  this.randomDrag = Math.random() * 0.02;
+  this.randomDrag = Math.random() * 0.1;
 }
 
 Particle.prototype.integrate = function(time) {
@@ -19,12 +21,15 @@ Particle.prototype.integrate = function(time) {
   // Find velocity
   this.velocity
     .copy(this.position)
-    .sub(this.lastPosition)
-    .scale(1 - this.material.drag - this.randomDrag);
+    .sub(this.lastPosition);
+
+  var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + NO_DBZ));
+
+  this.velocity.scale(1 - drag);
 
   // Set acceleration based on time squared
   this.acceleration
-    .scale(1 - this.material.drag)
+    .scale(1 - drag)
     .scale(time * time);
 
   // Record last location

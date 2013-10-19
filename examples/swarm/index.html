@@ -25,7 +25,7 @@
       <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
     </label>
     <label>Drag
-      <input type='range' min='0' max='0.3' step='0.01' value='0.0001' data-bind='DRAG'>
+      <input type='range' min='0' max='100' step='1' value='0' data-bind='DRAG'>
     </label>
   </form>
 </div>
@@ -162,7 +162,7 @@
     }
 
     function updateDrag(e) {
-      particleMaterial.drag = +$(this).val();
+      particleMaterial.setMaxVelocity(100 - $(this).val());
     }
   }
 

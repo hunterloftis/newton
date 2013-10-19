@@ -40,10 +40,10 @@ Renderer.prototype = {
 
       ctx.beginPath();
       ctx.lineWidth = mass;
-      ctx.globalAlpha = mass / this.particleAlpha + 0.2;
+      ctx.globalAlpha = mass / this.particleAlpha + 0.15;
 
       ctx.moveTo(last.x, last.y);
-      ctx.lineTo(pos.x, pos.y + 1);
+      ctx.lineTo(pos.x, pos.y + 2);
       ctx.stroke();
     }
 

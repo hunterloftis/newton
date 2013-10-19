@@ -4,6 +4,14 @@ function Material(options) {
   this.restitution = options.restitution || 1;
   this.drag = options.drag || 0;
   this.friction = options.friction || 0;
+  this.maxVelocity = options.maxVelocity || 100;
+  this.maxVelocitySquared = this.maxVelocity * this.maxVelocity;
 }
+
+Material.prototype.setMaxVelocity = function(v) {
+  this.maxVelocity = v;
+  this.maxVelocitySquared = v * v;
+  return this;
+};
 
 Material.simple = new Material();
