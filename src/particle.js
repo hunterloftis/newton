@@ -1,3 +1,8 @@
+// Corrected modulo
+function mod(a, b) {
+  return ((a % b) + b) % b;
+}
+
 function Particle(x, y, material, size) {
   this.position = new Vector(x, y);
   this.lastPosition = this.position.clone();
@@ -8,24 +13,6 @@ function Particle(x, y, material, size) {
   this.size = size || 1.0;
   this.randomDrag = Math.random() * 0.02;
 }
-
-Particle.MASS_MIN = 1;
-Particle.MASS_MAX = 5;
-
-Particle.createRandom = function(x, y, material, spread) {
-  var mass = Math.random() * (Particle.MASS_MAX - Particle.MASS_MIN) + Particle.MASS_MIN;
-  var x = Math.random() * spread * 2 + x - spread;
-  var y = Math.random() * spread * 2 + y - spread;
-  return new Particle(x, y, material, mass);
-};
-
-Particle.getMassRange = function() {
-  return Particle.MASS_MAX - Particle.MASS_MIN;
-};
-
-Particle.prototype.isSlow = function() {
-  return this.velocity.getSquaredLength() <= 1;
-};
 
 Particle.prototype.integrate = function(time, correction) {
 
@@ -89,11 +76,6 @@ Particle.prototype.contain = function(bounds) {
   }
 };
 
-// Fixed modulo function
-function mod(a, b) {
-  return ((a % b) + b) % b;
-}
-
 Particle.prototype.wrap = function(bounds) {
   var velocity = this.position.clone().sub(this.lastPosition);
   var newX = mod(this.position.x, bounds.width) + bounds.left;
@@ -128,8 +110,8 @@ Particle.prototype.attractSquare = function(x, y, m, minDist) {
   var ratio = m / (m + mass);
 
   this.acceleration.add({
-    x: f * (delta.x / r) * ratio,
-    y: f * (delta.y / r) * ratio
+    x: -f * (delta.x / r) * ratio,
+    y: -f * (delta.y / r) * ratio
   });
 };
 

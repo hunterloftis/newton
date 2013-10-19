@@ -43,8 +43,6 @@ Wall.prototype.getAbc = function() {
 }
 
 Wall.prototype.findIntersection = function(x1, y1, x2, y2) {
-  // return false;
-
   var bounds1 = this.bounds;
   var bounds2 = this._rect.set(x1, y1, x2, y2).expand(Wall.COLLISION_TOLERANCE);
 

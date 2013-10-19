@@ -78,11 +78,13 @@
     875, 275, 875, 125
   ];
 
+  var MIN_SIZE = 1;
+  var MAX_SIZE = 5;
+
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 0, minDistance: 20, active: false };
+  var mouse = { x: 0, y: 0, mass: 0, minDistance: 20, active: false, down: false };
   var gravity = { strength: 0, angle: 0 };
-  var adding = false;
 
   // Entry point
   $(document).ready(function() {
@@ -91,7 +93,6 @@
     startSimulation();
   });
 
-  // Primary functions
 
   function createSimulation() {
     var $display = $('#display');
@@ -133,12 +134,12 @@
     }
 
     function onMouseDown(e) {
-      adding = true;
+      mouse.down = true;
       return false;
     }
 
     function onMouseUp(e) {
-      adding = false;
+      mouse.down = false;
     }
 
     function onMouseEnter(e) {
@@ -180,18 +181,22 @@
 
   function frame(time, correction) {
     renderer.render(time, correction);
-    sprayParticles();
+    if (mouse.down) addParticles(mouse.x, mouse.y, 10);
     applyForces(time, correction);
   }
 
-
-  // Supporting functions
-
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
-      var newParticle = Particle.createRandom(x, y, particleMaterial, 50);
+      var newParticle = createRandom(x, y, 50);
       system.add(newParticle);
     }
+  }
+
+  function createRandom(x, y, spread) {
+    var mass = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+    var x = Math.random() * spread * 2 + x - spread;
+    var y = Math.random() * spread * 2 + y - spread;
+    return new Particle(x, y, particleMaterial, mass);
   }
 
   function createWalls() {
@@ -213,13 +218,7 @@
       particle.integrate(time, correction);
       particle.wrap(container);
       particle.collide(walls);
-      //particle.contain(container);
     }
-  }
-
-  function sprayParticles() {
-    if (!adding) return;
-    addParticles(mouse.x, mouse.y, 10);
   }
 
 </script>

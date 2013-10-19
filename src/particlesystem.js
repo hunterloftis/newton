@@ -15,7 +15,7 @@ ParticleSystem.prototype.add = function(particle) {
 };
 
 ParticleSystem.prototype.getGroup = function(particle) {
-  var percent = (particle.getMass() - Particle.MASS_MIN) / (Particle.MASS_MAX - Particle.MASS_MIN)
+  var percent = (particle.getMass() - MIN_SIZE) / (MAX_SIZE - MIN_SIZE)
   var index = ~~(percent * this.groups.length);
   return this.groups[index];
 };
