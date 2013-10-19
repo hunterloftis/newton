@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simple Verlet Particles - SDW</title>
+  <title>Newton: Particle Demo</title>
   <link rel='stylesheet' type='text/css' href='style.css' />
 </head>
 <body>
@@ -9,7 +9,7 @@
 <div class='wrap'>
   <canvas id="display" width="1280" height="450"></canvas>
   <p class='caption'>
-    Create particles by drawing with your mouse.
+    Create particles by drawing with your mouse. Newton can maintain high framerates with thousands of objects.
   </p>
   <form class='controls'>
     <label>Gravity
@@ -26,9 +26,6 @@
     </label>
     <label>Drag
       <input type='range' min='0' max='0.3' step='0.01' value='0.0001' data-bind='DRAG'>
-    </label>
-    <label>Mouse Mass
-      <input type='range' min='0' max='5' step='0.1' value='2' data-bind='MOUSE'>
     </label>
   </form>
 </div>
@@ -80,7 +77,7 @@
 
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 0, minDistance: 20, active: false, down: false };
+  var mouse = { x: 0, y: 0, mass: 5, minDistance: 20, active: false, down: false };
   var gravity = { strength: 0, angle: 0 };
 
   // Entry point
@@ -112,7 +109,6 @@
       .mouseup(onMouseUp)
       .on('change', 'input[data-bind="GRAVITY"]', updateGravity)
       .on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle)
-      .on('change', 'input[data-bind="MOUSE"]', updateMouse)
       .on('change', 'input[data-bind="RESTITUTION"]', updateRestitution)
       .on('change', 'input[data-bind="FRICTION"]', updateFriction)
       .on('change', 'input[data-bind="DRAG"]', updateDrag);
@@ -157,10 +153,6 @@
       gravity.angle = +$(this).val();
     }
 
-    function updateMouse(e) {
-      mouse.mass = +$(this).val();
-    }
-
     function updateRestitution(e) {
       particleMaterial.restitution = +$(this).val();
     }
@@ -180,7 +172,7 @@
 
   function frame(time, correction) {
     renderer.render(system, time, correction);
-    if (mouse.down) addParticles(mouse.x, mouse.y, 10);
+    if (mouse.down) addParticles(mouse.x, mouse.y, 32);
     applyForces(time, correction);
   }
 
@@ -206,7 +198,7 @@
   }
 
   function createRandom(x, y, spread) {
-    var mass = Math.random() * 4 + 1;
+    var mass = Math.random() * 5 + 1;
     var x = Math.random() * spread * 2 + x - spread;
     var y = Math.random() * spread * 2 + y - spread;
     return new Particle(x, y, particleMaterial, mass);

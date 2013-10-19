@@ -40,6 +40,7 @@ a:hover {
 
 .controls {
   padding: 10px;
+  text-align: center;
 }
 
 .controls > label {
