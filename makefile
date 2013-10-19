@@ -1,5 +1,6 @@
 gh-pages:
 	@git commit -m "dist build" || true
-	@git push github --delete gh-pages || true
-	@git push github gh-pages
-
+	@git checkout master
+	@git checkout -B gh-pages
+	@git push github gh-pages --force
+	@git checkout master
