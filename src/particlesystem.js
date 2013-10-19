@@ -6,10 +6,10 @@ ParticleSystem.prototype.add = function(particle) {
   this.particles.push(particle);
 };
 
-ParticleSystem.prototype.integrate = function(time, correction) {
+ParticleSystem.prototype.integrate = function(time) {
   var i = this.particles.length;
   while(i--) {
-    this.particles[i].integrate(time, correction);
+    this.particles[i].integrate(time);
   }
 };
 

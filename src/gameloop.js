@@ -9,10 +9,10 @@
   }
 
   if (!window.requestAnimationFrame)
-      window.requestAnimationFrame = function(callback, element) {
+      window.requestAnimationFrame = function(integrator, element) {
           var currTime = new Date().getTime();
           var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-          var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+          var id = window.setTimeout(function() { integrator(currTime + timeToCall); },
             timeToCall);
           lastTime = currTime + timeToCall;
           return id;
@@ -24,12 +24,11 @@
       };
 
 
-  function Gameloop(callback) {
-    this.callback = callback;
+  function Gameloop(integrator) {
+    this.integrator = integrator;
     this.step = this.getStep();
     this.lastTime = 0;
-    this.lastStep = 0;
-    this.started = false;
+    this.running = false;
     this.fps = 0;
     this.frames = 0;
     this.countTime = 0;
@@ -37,32 +36,35 @@
   }
 
   Gameloop.prototype.start = function() {
-    this.started = true;
+    this.running = true;
     this.countTime = Date.now() + 1000;
     requestAnimationFrame(this.step);
   };
 
   Gameloop.prototype.stop = function() {
-    this.started = false;
+    this.running = false;
   };
 
   Gameloop.prototype.getStep = function() {
     var self = this;
     return function generatedStep() {
+      if (!self.running) return;
+
       var time = Date.now();
       var step = time - self.lastTime;
       if (step > 100) step = 0;         // in case you leave / return
-      var correction = (step && self.lastStep) ? step / self.lastStep : 1;
-      self.callback(step, correction);
+
+      self.integrator(step);
+
       self.frames++;
       if (time >= self.countTime) {
         self.fps = (self.frames / (self.countInterval + time - self.countTime) * 1000).toFixed(0);
         self.frames = 0;
         self.countTime = time + self.countInterval;
       }
+
       self.lastTime = time;
-      self.lastStep = step;
-      if (self.started) requestAnimationFrame(self.step);
+      requestAnimationFrame(self.step);
     };
   };
 

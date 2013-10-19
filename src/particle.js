@@ -14,13 +14,12 @@ function Particle(x, y, material, size) {
   this.randomDrag = Math.random() * 0.02;
 }
 
-Particle.prototype.integrate = function(time, correction) {
+Particle.prototype.integrate = function(time) {
 
   // Find velocity
   this.velocity
     .copy(this.position)
     .sub(this.lastPosition)
-    .scale(correction)
     .scale(1 - this.material.drag - this.randomDrag);
 
   // Set acceleration based on time squared
