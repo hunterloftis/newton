@@ -1,6 +1,7 @@
 function ParticleSystem() {
   this.particles = [];
   this.forces = [];
+  this.wrapper = undefined;
 }
 
 ParticleSystem.prototype.add = function(particle) {
@@ -19,7 +20,7 @@ ParticleSystem.prototype.integrate = function(time) {
       this.forces[j].applyTo(particle);
     }
     particle.integrate(time);
-    particle.wrap(container);   // TODO
+    if (this.wrapper) particle.wrap(this.wrapper);
     particle.collide(walls);    // TODO
   }
 };
@@ -41,5 +42,5 @@ ParticleSystem.prototype.callback = function(callback) {
 };
 
 ParticleSystem.prototype.wrapBy = function(rect) {
-
+  this.wrapper = rect;
 };
