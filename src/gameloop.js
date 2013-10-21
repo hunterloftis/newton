@@ -24,7 +24,7 @@
       };
 
 
-  function Gameloop(integrator, renderer) {
+  function Gameloop(integrator, renderer, integrationFps) {
     this.integrator = integrator;
     this.renderer = renderer;
     this.step = this.getStep();
@@ -35,7 +35,7 @@
     this.countTime = 0;
     this.countInterval = 250;
     this.accumulator = 0;
-    this.integrationStep = 1000 / 60;
+    this.integrationStep = 1000 / integrationFps;
   }
 
   Gameloop.prototype.start = function() {

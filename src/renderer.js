@@ -37,10 +37,14 @@ Renderer.prototype = {
       pos = particle.position;
       last = particle.lastValidPosition;
       mass = particle.getMass();
+      var brightness = ~~((mass - 1) / 5 * 128);
 
       ctx.beginPath();
       ctx.lineWidth = mass;
-      ctx.globalAlpha = mass / this.particleAlpha + 0.15;
+
+      ctx.strokeStyle = 'rgba(' + [255, 28 + brightness, 108 + brightness].join(',') + ', 1)';
+
+      //ctx.globalAlpha = mass / this.particleAlpha + 0.15;
 
       ctx.moveTo(last.x, last.y);
       ctx.lineTo(pos.x, pos.y + 2);

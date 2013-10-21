@@ -13,23 +13,22 @@
   </p>
   <form class='controls'>
     <label>Gravity
-      <input type='range' min='0' max='0.0005' step='0.00001' value='0.0002' data-bind='GRAVITY'>
+      <input type='range' min='0' max='0.0005' step='0.00001' value='0.0003' data-bind='GRAVITY'>
     </label>
     <label>Gravity Angle
-      <input type='range' min='0' max='2' step='0.02' value='0' data-bind='GRAVITY_ANGLE'>
+      <input type='range' min='0' max='2' step='0.02' value='0.2' data-bind='GRAVITY_ANGLE'>
     </label>
     <label>Restitution
-      <input type='range' min='0.1' max='1' step='0.01' value='0.75' data-bind='RESTITUTION'>
+      <input type='range' min='0.1' max='1' step='0.01' value='0.7' data-bind='RESTITUTION'>
     </label>
     <label>Friction
-      <input type='range' min='0' max='1' step='0.01' value='0' data-bind='FRICTION'>
+      <input type='range' min='0' max='1' step='0.01' value='0.05' data-bind='FRICTION'>
     </label>
     <label>Drag
       <input type='range' min='0' max='100' step='1' value='0' data-bind='DRAG'>
     </label>
   </form>
 </div>
-<a href="https://github.com/hunterloftis/newton"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub"></a>
 
 <script type="text/javascript" src="../../vendor/jquery-2.0.3.js"></script>
 
@@ -77,7 +76,7 @@
 
   // Globals
   var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 5, minDistance: 20, active: true, down: false };
+  var mouse = { x: 0, y: 0, mass: 4, minDistance: 20, active: true, down: false };
   var gravity = { strength: 0, angle: 0 };
 
   // Entry point
@@ -99,7 +98,7 @@
     wallMaterial = new Material();
     system = new ParticleSystem();
     walls = createWalls();
-    gameloop = new Gameloop(integrate, render);
+    gameloop = new Gameloop(integrate, render, 60);
 
     renderer.setParticleColor('#ff1c6c', 5);
   }
