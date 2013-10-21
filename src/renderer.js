@@ -2,15 +2,9 @@ function Renderer(el) {
   this.ctx = el.getContext('2d');
   this.width = el.width;
   this.height = el.height;
-  this.particleColor = '#ffffff';
-  this.particleAlpha = 1;
 }
 
 Renderer.prototype = {
-  setParticleColor: function(color, alpha) {
-    this.particleColor = color;
-    this.particleAlpha = alpha;
-  },
   render: function(system, time) {
     var ctx = this.ctx;
     this.clear(ctx, time);
@@ -26,26 +20,21 @@ Renderer.prototype = {
     ctx.restore();
   },
   drawParticles: function(ctx, particles) {
-    var particle, pos, last, mass, colorIndex;
+    var particle, pos, last, mass, brightness;
 
     ctx.save();
     ctx.lineCap = 'butt';
-    ctx.strokeStyle = this.particleColor;
 
     for (var j = 0, jlen = particles.length; j < jlen; j++) {
       particle = particles[j];
       pos = particle.position;
       last = particle.lastValidPosition;
       mass = particle.getMass();
-      var brightness = ~~((mass - 1) / 5 * 128);
+      brightness = ~~((mass - 1) / 5 * 128);
 
       ctx.beginPath();
       ctx.lineWidth = mass;
-
       ctx.strokeStyle = 'rgba(' + [255, 28 + brightness, 108 + brightness].join(',') + ', 1)';
-
-      //ctx.globalAlpha = mass / this.particleAlpha + 0.15;
-
       ctx.moveTo(last.x, last.y);
       ctx.lineTo(pos.x, pos.y + 2);
       ctx.stroke();

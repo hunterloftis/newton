@@ -35,7 +35,7 @@
     this.countTime = 0;
     this.countInterval = 250;
     this.accumulator = 0;
-    this.integrationStep = 1000 / integrationFps;
+    this.integrationStep = 1000 / (integrationFps || 60);
   }
 
   Gameloop.prototype.start = function() {
