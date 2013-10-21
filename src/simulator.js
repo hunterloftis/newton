@@ -51,15 +51,8 @@
   };
 
   Simulator.prototype.integrate = function(time) {
-    var i = system.particles.length;
-    var particle;
-    while (i--) {
-      particle = system.particles[i];
-      //particle.accelerateVector(g);
-      if (mouse.active) particle.attractSquare(mouse.x, mouse.y, mouse.mass, mouse.minDistance);
-      particle.integrate(time);
-      particle.wrap(container);
-      particle.collide(walls);
+    for(var j = 0, jlen = this.systems.length; j < jlen; j++) {
+      this.systems[j].integrate(time);
     }
   };
 
@@ -67,7 +60,7 @@
     this.gravity = vec;
   };
 
-  Simulator.prototype.add = function(system) {
+  Simulator.prototype.addSystem = function(system) {
     this.systems.push(system);
   };
 

@@ -38,14 +38,17 @@
 <script src='../../src/wall.js'></script>
 <script src='../../src/material.js'></script>
 <script src='../../src/particle.js'></script>
+<script src='../../src/lineargravity.js'></script>
+<script src='../../src/radialgravity.js'></script>
 <script src='../../src/particlesystem.js'></script>
 
-<script src='../../src/gameloop.js'></script>
+<script src='../../src/simulator.js'></script>
 <script src='../../src/renderer.js'></script>
 
 <script>
 
   // Constants
+
   var POLYS = [
 
     // X
@@ -75,36 +78,48 @@
   ];
 
   // Globals
-  var gameloop, system, walls, renderer, container, particleMaterial, wallMaterial;
-  var mouse = { x: 0, y: 0, mass: 4, minDistance: 20, active: true, down: false };
-  var gravity = { strength: 0, angle: 0 };
+
+  var sim, system, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial;
+  var mouseDown = false;
 
   // Entry point
+
   $(document).ready(function() {
     createSimulation();
     bindControls();
     startSimulation();
   });
 
+  // Setup
 
   function createSimulation() {
     var $display = $('#display');
     var width = $display.width();
     var height = $display.height();
 
-    container = new Rectangle(0, 0, width, height);
-    renderer = new Renderer($display[0]);
     particleMaterial = new Material();
     wallMaterial = new Material();
-    system = new ParticleSystem();
+
+    sim = new Simulator(simulate, render, 60);
+    container = new Rectangle(0, 0, width, height);
     walls = createWalls();
-    gameloop = new Gameloop(integrate, render, 60);
+    system = new ParticleSystem();
+    gravity = new LinearGravity(0, 0, 0); // angle, strength, falloff power
+    radial = new RadialGravity(0, 0, -4, 2);  // x, y, strength, falloff power
+
+    system.addForce(gravity);
+    system.addForce(radial);
+    system.wrapBy(container);
+
+    sim.addSystem(system);
+
+    renderer = new Renderer($display[0]);
   }
 
   function bindControls() {
     $(document)
       .mouseup(onMouseUp)
-      .on('change', 'input[data-bind="GRAVITY"]', updateGravity)
+      .on('change', 'input[data-bind="GRAVITY"]', updateGravityStrength)
       .on('change', 'input[data-bind="GRAVITY_ANGLE"]', updateGravityAngle)
       .on('change', 'input[data-bind="RESTITUTION"]', updateRestitution)
       .on('change', 'input[data-bind="FRICTION"]', updateFriction)
@@ -121,33 +136,32 @@
     })
 
     function onMouseMove(e) {
-      mouse.x = e.pageX - this.offsetLeft;
-      mouse.y = e.pageY - this.offsetTop;
+      radial.setLocation(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
     }
 
     function onMouseDown(e) {
-      mouse.down = true;
+      mouseDown = true;
       return false;
     }
 
     function onMouseUp(e) {
-      mouse.down = false;
+      mouseDown = false;
     }
 
     function onMouseEnter(e) {
-      mouse.active = true;
+      radial.setStrength(4);
     }
 
     function onMouseLeave(e) {
-      mouse.active = false;
+      radial.setStrength(0);
     }
 
-    function updateGravity(e) {
-      gravity.strength = +$(this).val();
+    function updateGravityStrength(e) {
+      gravity.setStrength(+$(this).val());
     }
 
     function updateGravityAngle(e) {
-      gravity.angle = +$(this).val();
+      gravity.setAngle(+$(this).val());
     }
 
     function updateRestitution(e) {
@@ -164,31 +178,20 @@
   }
 
   function startSimulation() {
-    gameloop.start();
+    sim.start();
   }
 
-  function integrate(time) {
-    if (mouse.down) addParticles(mouse.x, mouse.y, 10);
-    applyForces(time);
+  // Each frame
+
+  function simulate(time) {
+    if (mouseDown) addParticles(radial.x, radial.y, 10);
   }
 
   function render(time) {
     renderer.render(system, time);
   }
 
-  function applyForces(time) {
-    var g = new Vector(0, gravity.strength).rotate(gravity.angle * Math.PI);
-    var i = system.particles.length;
-    var particle;
-    while (i--) {
-      particle = system.particles[i];
-      particle.accelerateVector(g);
-      if (mouse.active) particle.attractSquare(mouse.x, mouse.y, mouse.mass, mouse.minDistance);
-      particle.integrate(time);
-      particle.wrap(container);
-      particle.collide(walls);
-    }
-  }
+  // Utilities
 
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {

@@ -66,7 +66,7 @@ Renderer.prototype = {
     ctx.restore();
   },
   drawFPS: function(ctx) {
-    var text = 'FPS: ' + gameloop.fps;
+    var text = 'FPS: ' + sim.fps;
     ctx.save();
     ctx.fillStyle = '#fff';
     ctx.font = '10pt Helvetica';

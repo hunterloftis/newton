@@ -1,15 +1,26 @@
 function ParticleSystem() {
   this.particles = [];
+  this.forces = [];
 }
 
 ParticleSystem.prototype.add = function(particle) {
   this.particles.push(particle);
 };
 
+ParticleSystem.prototype.addForce = function(force) {
+  this.forces.push(force);
+};
+
 ParticleSystem.prototype.integrate = function(time) {
-  var i = this.particles.length;
-  while(i--) {
-    this.particles[i].integrate(time);
+  var particle;
+  for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
+    particle = this.particles[i];
+    for (var j = 0, jlen = this.forces.length; j < jlen; j++) {
+      this.forces[j].applyTo(particle);
+    }
+    particle.integrate(time);
+    particle.wrap(container);   // TODO
+    particle.collide(walls);    // TODO
   }
 };
 
@@ -27,4 +38,8 @@ ParticleSystem.prototype.callback = function(callback) {
   while (i--) {
     callback(this.particles[i]);
   }
+};
+
+ParticleSystem.prototype.wrapBy = function(rect) {
+
 };
