@@ -50,36 +50,6 @@
 
 <script>
 
-  // Constants
-
-  var POLYS = [
-
-    // X
-    150, 150, 200, 100,
-    200, 100, 250, 150,
-    250, 150, 300, 100,
-    300, 100, 350, 150,
-    350, 150, 300, 200,
-    300, 200, 350, 250,
-    350, 250, 300, 300,
-    300, 300, 250, 250,
-    250, 250, 200, 300,
-    200, 300, 150, 250,
-    150, 250, 200, 200,
-    200, 200, 150, 150,
-
-    // Triangle
-    600, 125, 725, 275,
-    725, 275, 475, 275,
-    475, 275, 600, 125,
-
-    // Box
-    875, 125, 1050, 125,
-    1050, 125, 1050, 275,
-    1050, 275, 875, 275,
-    875, 275, 875, 125
-  ];
-
   // Globals
 
   var sim, renderer, container;
@@ -88,15 +58,13 @@
   var gravity, radial;
   var mouseDown = false;
 
-  // Entry point
+  // Simulation
 
   $(document).ready(function() {
     createSimulation();
     bindControls();
     startSimulation();
   });
-
-  // Setup
 
   function createSimulation() {
     var $display = $('#display');
@@ -135,6 +103,79 @@
 
     renderer = new Renderer($display[0]);
   }
+
+  function startSimulation() {
+    sim.start();
+  }
+
+  function simulate(time) {
+    if (mouseDown) addParticles(radial.x, radial.y, time);
+  }
+
+  function render(time) {
+    renderer.render(sim, time);
+  }
+
+
+
+  // Utilities
+
+  function addParticles(x, y, n) {
+    for (var i = 0; i < n; i++) {
+      var newParticle = createRandom(x, y, 50);
+      particles.addParticle(newParticle);
+    }
+  }
+
+  function createRandom(x, y, spread) {
+    var mass = Math.random() * 4 + 1;
+    var x = Math.random() * spread * 2 + x - spread;
+    var y = Math.random() * spread * 2 + y - spread;
+    return new Particle(x, y, particleMaterial, mass);
+  }
+
+  function createWalls() {
+    var polys = [
+
+      // X
+      150, 150, 200, 100,
+      200, 100, 250, 150,
+      250, 150, 300, 100,
+      300, 100, 350, 150,
+      350, 150, 300, 200,
+      300, 200, 350, 250,
+      350, 250, 300, 300,
+      300, 300, 250, 250,
+      250, 250, 200, 300,
+      200, 300, 150, 250,
+      150, 250, 200, 200,
+      200, 200, 150, 150,
+
+      // Triangle
+      600, 125, 725, 275,
+      725, 275, 475, 275,
+      475, 275, 600, 125,
+
+      // Box
+      875, 125, 1050, 125,
+      1050, 125, 1050, 275,
+      1050, 275, 875, 275,
+      875, 275, 875, 125
+    ];
+
+    var w = new Body(wallMaterial);
+    for (var i = 0; i < polys.length; i += 4) {
+      var p1 = new Particle(polys[i], polys[i + 1]);
+      var p2 = new Particle(polys[i + 2], polys[i + 3]);
+      var e = new Edge(p1, p2, wallMaterial);
+      w.addParticle(p1);
+      w.addParticle(p2);
+      w.addEdge(e);       // TODO: figure out a more concise API
+    }
+    return w;
+  }
+
+  // User Interface
 
   function bindControls() {
     $(document)
@@ -200,49 +241,6 @@
     function updateDrag(e) {
       particleMaterial.setMaxVelocity(100 - $(this).val());
     }
-  }
-
-  function startSimulation() {
-    sim.start();
-  }
-
-  // Each frame
-
-  function simulate(time) {
-    if (mouseDown) addParticles(radial.x, radial.y, time);
-  }
-
-  function render(time) {
-    renderer.render(sim, time);
-  }
-
-  // Utilities
-
-  function addParticles(x, y, n) {
-    for (var i = 0; i < n; i++) {
-      var newParticle = createRandom(x, y, 50);
-      particles.addParticle(newParticle);
-    }
-  }
-
-  function createRandom(x, y, spread) {
-    var mass = Math.random() * 4 + 1;
-    var x = Math.random() * spread * 2 + x - spread;
-    var y = Math.random() * spread * 2 + y - spread;
-    return new Particle(x, y, particleMaterial, mass);
-  }
-
-  function createWalls() {
-    var w = new Body(wallMaterial);
-    for (var i = 0; i < POLYS.length; i += 4) {
-      var p1 = new Particle(POLYS[i], POLYS[i + 1]);
-      var p2 = new Particle(POLYS[i + 2], POLYS[i + 3]);
-      var e = new Edge(p1, p2, wallMaterial);
-      w.addParticle(p1);
-      w.addParticle(p2);
-      w.addEdge(e);       // TODO: figure out a more concise API
-    }
-    return w;
   }
 
 </script>
