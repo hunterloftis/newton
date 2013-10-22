@@ -27,6 +27,7 @@
     <label>Drag
       <input type='range' min='0' max='100' step='1' value='0' data-bind='DRAG'>
     </label>
+    <button id='whatever'>Wind</button>
   </form>
 </div>
 
@@ -83,6 +84,8 @@
   var sim, particles, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial, shapeLayer, particleLayer, globalLayer;
   var mouseDown = false;
 
+  var windLayer;
+
   // Entry point
 
   $(document).ready(function() {
@@ -103,7 +106,7 @@
 
     sim = new Simulator(simulate, render, 60);
     walls = createWalls();
-    particles = new Body();
+    particles = new Body(particleMaterial);
     gravity = new LinearGravity(0, 0, 0);           // angle, strength, falloff power
     radial = new RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
     container = new Rectangle(0, 0, width, height);
@@ -111,12 +114,16 @@
     globalLayer = sim.createLayer();
     shapeLayer = sim.createLayer();
     particleLayer = sim.createLayer();
+    windLayer = sim.createLayer();
 
     globalLayer
       .addForce(gravity);
 
+    windLayer
+      .addForce(new LinearGravity(Math.PI * 0.5, 0.001, 0));
+
     particleLayer
-      .watch([particleLayer, globalLayer, shapeLayer])
+      .watch([particleLayer, shapeLayer, globalLayer])
       .addForce(radial)
       .addBody(particles)
       .wrapIn(container);
@@ -135,6 +142,11 @@
       .on('change', 'input[data-bind="RESTITUTION"]', updateRestitution)
       .on('change', 'input[data-bind="FRICTION"]', updateFriction)
       .on('change', 'input[data-bind="DRAG"]', updateDrag);
+
+    $('#whatever').click(function() {
+      particleLayer.watch([particleLayer, shapeLayer, globalLayer, windLayer]);
+      return false;
+    });
 
     $('#display')
       .mouseenter(onMouseEnter)

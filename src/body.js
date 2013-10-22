@@ -1,5 +1,6 @@
-function Body() {
+function Body(material) {
   this.particles = [];
+  this.material = material; // TODO: make this matter
 }
 
 Body.prototype.addParticle = function(particle) {
