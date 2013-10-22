@@ -5,13 +5,18 @@ function Renderer(el) {
 }
 
 Renderer.prototype = {
-  render: function(system, time) {
+  render: function(sim, time) {
     var ctx = this.ctx;
+    var particleCount = 0;
     this.clear(ctx, time);
-    this.drawParticles(ctx, system.particles);
+    for (var i = 0, ilen = sim.layers.length; i < ilen; i++) {
+      for (var j = 0, jlen = sim.layers[i].bodies.length; j < jlen; j++) {
+        particleCount += this.drawParticles(ctx, sim.layers[i].bodies[j].particles);
+      }
+    }
     this.drawWalls(ctx);
-    this.drawParticleCount(ctx);
-    this.drawFPS(ctx);
+    this.drawParticleCount(ctx, particleCount);
+    this.drawFPS(ctx, sim);
   },
   clear: function(ctx, time) {
     ctx.save();
@@ -41,6 +46,8 @@ Renderer.prototype = {
     }
 
     ctx.restore();
+
+    return particles.length;
   },
   drawWalls: function(ctx) {
     ctx.save();
@@ -57,15 +64,15 @@ Renderer.prototype = {
     }
     ctx.restore();
   },
-  drawParticleCount: function(ctx) {
-    var text = 'Particles: ' + system.particles.length;
+  drawParticleCount: function(ctx, count) {
+    var text = 'Particles: ' + count;
     ctx.save();
     ctx.fillStyle = '#fff';
     ctx.font = '10pt Helvetica';
     ctx.fillText(text, 10, 20);
     ctx.restore();
   },
-  drawFPS: function(ctx) {
+  drawFPS: function(ctx, sim) {
     var text = 'FPS: ' + sim.fps;
     ctx.save();
     ctx.fillStyle = '#fff';

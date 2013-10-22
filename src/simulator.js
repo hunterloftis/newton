@@ -36,8 +36,7 @@
     this.countInterval = 250;
     this.accumulator = 0;
     this.integrationStep = 1000 / (integrationFps || 60);
-    this.gravity = new Vector();
-    this.systems = [];
+    this.layers = [];
   }
 
   Simulator.prototype.start = function() {
@@ -51,17 +50,16 @@
   };
 
   Simulator.prototype.integrate = function(time) {
+    return;
     for(var j = 0, jlen = this.systems.length; j < jlen; j++) {
       this.systems[j].integrate(time);
     }
   };
 
-  Simulator.prototype.setGravity = function(vec) {
-    this.gravity = vec;
-  };
-
-  Simulator.prototype.addSystem = function(system) {
-    this.systems.push(system);
+  Simulator.prototype.createLayer = function() {
+    var newLayer = new Layer();
+    this.layers.push(newLayer);
+    return newLayer;
   };
 
   Simulator.prototype.getStep = function() {

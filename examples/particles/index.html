@@ -35,12 +35,13 @@
 <script src='../../src/vector.js'></script>
 <script src='../../src/rectangle.js'></script>
 
-<script src='../../src/wall.js'></script>
+<script src='../../src/layer.js'></script>
+<script src='../../src/body.js'></script>
 <script src='../../src/material.js'></script>
+<script src='../../src/wall.js'></script>
 <script src='../../src/particle.js'></script>
 <script src='../../src/lineargravity.js'></script>
 <script src='../../src/radialgravity.js'></script>
-<script src='../../src/particlesystem.js'></script>
 
 <script src='../../src/simulator.js'></script>
 <script src='../../src/renderer.js'></script>
@@ -79,7 +80,7 @@
 
   // Globals
 
-  var sim, system, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial;
+  var sim, particles, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial, wallLayer, particleLayer, globalLayer;
   var mouseDown = false;
 
   // Entry point
@@ -101,17 +102,27 @@
     wallMaterial = new Material();
 
     sim = new Simulator(simulate, render, 60);
-    container = new Rectangle(0, 0, width, height);
     walls = createWalls();
-    system = new ParticleSystem();
-    gravity = new LinearGravity(0, 0, 0); // angle, strength, falloff power
-    radial = new RadialGravity(0, 0, -4, 2);  // x, y, strength, falloff power
+    particles = new Body();
+    gravity = new LinearGravity(0, 0, 0);           // angle, strength, falloff power
+    radial = new RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
+    container = new Rectangle(0, 0, width, height);
 
-    system.addForce(gravity);
-    system.addForce(radial);
-    system.wrapBy(container);
+    globalLayer = sim.createLayer();
+    wallLayer = sim.createLayer();
+    particleLayer = sim.createLayer();
 
-    sim.addSystem(system);
+    globalLayer
+      .addForce(gravity);
+
+    particleLayer
+      .watch([globalLayer, wallLayer])
+      .addForce(radial)
+      .addBody(particles)
+      .wrapIn(container);
+
+    // wallLayer
+    //   .addBody(walls);
 
     renderer = new Renderer($display[0]);
   }
@@ -188,7 +199,7 @@
   }
 
   function render(time) {
-    renderer.render(system, time);
+    renderer.render(sim, time);
   }
 
   // Utilities
@@ -196,7 +207,7 @@
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
       var newParticle = createRandom(x, y, 50);
-      system.add(newParticle);
+      particles.addParticle(newParticle);
     }
   }
 
