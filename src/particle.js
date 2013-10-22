@@ -11,8 +11,10 @@ function Particle(x, y, material, size) {
   this.acceleration = new Vector(0, 0);
   this.material = material || Material.simple;
   this.size = size || 1.0;
-  this.randomDrag = Math.random() * 10 + 0.0000000001;
+  this.randomDrag = Math.random() * Particle.randomness + 0.0000000001;
 }
+
+Particle.randomness = 25;
 
 Particle.prototype.integrate = function(time) {
 

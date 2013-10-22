@@ -161,7 +161,7 @@
     }
 
     function updateGravityAngle(e) {
-      gravity.setAngle(+$(this).val());
+      gravity.setAngle(+$(this).val() * Math.PI);
     }
 
     function updateRestitution(e) {
