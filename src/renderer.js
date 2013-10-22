@@ -8,13 +8,14 @@ Renderer.prototype = {
   render: function(sim, time) {
     var ctx = this.ctx;
     var particleCount = 0;
+    var edgeCount = 0;
     this.clear(ctx, time);
     for (var i = 0, ilen = sim.layers.length; i < ilen; i++) {
       for (var j = 0, jlen = sim.layers[i].bodies.length; j < jlen; j++) {
         particleCount += this.drawParticles(ctx, sim.layers[i].bodies[j].particles);
+        edgeCount += this.drawEdges(ctx, sim.layers[i].bodies[j].edges);
       }
     }
-    this.drawWalls(ctx);
     this.drawParticleCount(ctx, particleCount);
     this.drawFPS(ctx, sim);
   },
@@ -49,20 +50,22 @@ Renderer.prototype = {
 
     return particles.length;
   },
-  drawWalls: function(ctx) {
+  drawEdges: function(ctx, edges) {
     ctx.save();
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.lineWidth = 1;
-    var wall, i = walls.length;
+    var edge, i = edges.length;
     while (i--) {
-      wall = walls[i];
+      edge = edges[i];
       ctx.beginPath();
-      ctx.moveTo(wall.x1, wall.y1);
-      ctx.lineTo(wall.x2, wall.y2);
+      ctx.moveTo(edge.x1, edge.y1);
+      ctx.lineTo(edge.x2, edge.y2);
       ctx.closePath();
       ctx.stroke();
     }
     ctx.restore();
+
+    return edges.length;
   },
   drawParticleCount: function(ctx, count) {
     var text = 'Particles: ' + count;

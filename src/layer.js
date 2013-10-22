@@ -27,7 +27,7 @@ Layer.prototype.addBody = function(body) {
 
 // TODO: cache or precompute all these lookups and collations
 Layer.prototype.integrate = function(time) {
-  var i, ilen, j, jlen, forces, particles, particle;
+  var i, ilen, j, jlen, forces, particles, particle, edges;
 
   // find all watched forces & local forces
   // find all watched particles & edges
@@ -43,8 +43,10 @@ Layer.prototype.integrate = function(time) {
   }
 
   particles = [];
+  edges = [];
   for (i = 0, ilen = this.bodies.length; i < ilen; i++) {
     particles = particles.concat(this.bodies[i].particles);
+    edges = edges.concat(this.bodies[i].edges);
   }
 
   for (i = 0, ilen = particles.length; i < ilen; i++) {
@@ -54,6 +56,7 @@ Layer.prototype.integrate = function(time) {
     }
     particle.integrate(time);
     if (this.wrapper) particle.wrap(this.wrapper);
-    particle.collide(walls);    // TODO
+
+    particle.collide(edges);  // TODO: asymmetrical collision resolution
   }
 };

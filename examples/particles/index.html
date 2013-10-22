@@ -13,7 +13,7 @@
   </p>
   <form class='controls'>
     <label>Gravity
-      <input type='range' min='0' max='0.0005' step='0.00001' value='0.0003' data-bind='GRAVITY'>
+      <input type='range' min='0' max='0.0009' step='0.00001' value='0.0005' data-bind='GRAVITY'>
     </label>
     <label>Gravity Angle
       <input type='range' min='0' max='2' step='0.02' value='0.2' data-bind='GRAVITY_ANGLE'>
@@ -81,10 +81,11 @@
 
   // Globals
 
-  var sim, particles, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial, shapeLayer, particleLayer, globalLayer;
+  var sim, renderer, container;
+  var shapeLayer, particleLayer, globalLayer, windLayer;
+  var particles, walls, particleMaterial, wallMaterial;
+  var gravity, radial;
   var mouseDown = false;
-
-  var windLayer;
 
   // Entry point
 
@@ -231,11 +232,16 @@
   }
 
   function createWalls() {
-    var s = [];
+    var w = new Body(wallMaterial);
     for (var i = 0; i < POLYS.length; i += 4) {
-      s.push(new Wall( POLYS[i], POLYS[i + 1], POLYS[i + 2], POLYS[i + 3], wallMaterial));
+      var p1 = new Particle(POLYS[i], POLYS[i + 1]);
+      var p2 = new Particle(POLYS[i + 2], POLYS[i + 3]);
+      //var e = new Edge(p1, p2, wallMaterial);
+      w.addParticle(p1);
+      w.addParticle(p2);
+      //w.addEdge(e);       // TODO: figure out a more concise API
     }
-    return s;
+    return w;
   }
 
 </script>
