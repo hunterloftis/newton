@@ -80,7 +80,7 @@
 
   // Globals
 
-  var sim, particles, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial, wallLayer, particleLayer, globalLayer;
+  var sim, particles, walls, renderer, container, particleMaterial, wallMaterial, gravity, radial, shapeLayer, particleLayer, globalLayer;
   var mouseDown = false;
 
   // Entry point
@@ -109,19 +109,19 @@
     container = new Rectangle(0, 0, width, height);
 
     globalLayer = sim.createLayer();
-    wallLayer = sim.createLayer();
+    shapeLayer = sim.createLayer();
     particleLayer = sim.createLayer();
 
     globalLayer
       .addForce(gravity);
 
     particleLayer
-      .watch([particleLayer, globalLayer, wallLayer])
+      .watch([particleLayer, globalLayer, shapeLayer])
       .addForce(radial)
       .addBody(particles)
       .wrapIn(container);
 
-    // wallLayer
+    // shapeLayer
     //   .addBody(walls);
 
     renderer = new Renderer($display[0]);

@@ -27,6 +27,8 @@ Layer.prototype.addBody = function(body) {
 
 // TODO: cache or precompute all these lookups and collations
 Layer.prototype.integrate = function(time) {
+  var i, ilen, j, jlen, forces, particles, particle;
+
   // find all watched forces & local forces
   // find all watched particles & edges
   // loop through all particles and:
@@ -35,20 +37,19 @@ Layer.prototype.integrate = function(time) {
   // - wrap it
   // - find and resolve edge collisions (TODO)
 
-  var forces = [];
-  for (var i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
+  forces = [];
+  for (i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
     forces = forces.concat(this.watchedLayers[i].forces);
   }
 
-  var particles = [];
-  for (var i = 0, ilen = this.bodies.length; i < ilen; i++) {
+  particles = [];
+  for (i = 0, ilen = this.bodies.length; i < ilen; i++) {
     particles = particles.concat(this.bodies[i].particles);
   }
 
-  var particle;
-  for (var i = 0, ilen = particles.length; i < ilen; i++) {
+  for (i = 0, ilen = particles.length; i < ilen; i++) {
     particle = particles[i];
-    for (var j = 0, jlen = forces.length; j < jlen; j++) {
+    for (j = 0, jlen = forces.length; j < jlen; j++) {
       forces[j].applyTo(particle);
     }
     particle.integrate(time);
