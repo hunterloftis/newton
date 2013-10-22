@@ -1,4 +1,4 @@
-# What is Newton.js?
+# What is Newton?
 
 Newton is a JavaScript physics engine that pairs a simple API
 with performance and flexibility.
