@@ -6,7 +6,7 @@ function Layer() {
 }
 
 Layer.prototype.watch = function(layers) {
-  this.watchedLayers = layers;
+  this.watchedLayers = layers || [];
   return this;
 };
 
@@ -38,15 +38,20 @@ Layer.prototype.integrate = function(time) {
   // - find and resolve edge collisions (TODO)
 
   forces = [];
-  for (i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
-    forces = forces.concat(this.watchedLayers[i].forces);
-  }
-
   particles = [];
   edges = [];
+
+  // TODO: figure out how to manage all these different overlapping groups
+
   for (i = 0, ilen = this.bodies.length; i < ilen; i++) {
     particles = particles.concat(this.bodies[i].particles);
-    edges = edges.concat(this.bodies[i].edges);
+  }
+
+  for (i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
+    forces = forces.concat(this.watchedLayers[i].forces);
+    for (var j = 0, jlen = this.watchedLayers[i].bodies.length; j < jlen; j++) {
+      edges = edges.concat(this.watchedLayers[i].bodies[j].edges);
+    }
   }
 
   for (i = 0, ilen = particles.length; i < ilen; i++) {

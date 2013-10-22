@@ -64,6 +64,8 @@ Edge.prototype.findIntersection = function(x1, y1, x2, y2) {
 
   if (!bounds1.overlaps(bounds2)) return false;
 
+//  debugger;
+
   var l1 = this.getAbc();
   var l2 = Edge.getAbc(x1, y1, x2, y2);
   var det = l1.a * l2.b - l2.a * l1.b;

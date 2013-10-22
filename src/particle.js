@@ -123,13 +123,17 @@ Particle.prototype.attractSquare = function(x, y, m, minDist) {
   });
 };
 
-Particle.prototype.collide = function(walls) {
+Particle.prototype.collide = function(edges) {
   var nearest, intersect;
   var dx, dy, oldDistance, newDistance;
-  var i = walls.length;
+  var partOfEdge;
+  var i = edges.length;
 
   while (i--) {
-    intersect = walls[i].findIntersection(
+
+    // TODO: this is wonky
+    partOfEdge = this === edges[i].p1 || this === edges[i].p2;
+    intersect = !partOfEdge && edges[i].findIntersection(
       this.lastPosition.x, this.lastPosition.y,
       this.position.x, this.position.y);
 
@@ -145,7 +149,7 @@ Particle.prototype.collide = function(walls) {
             dy: dy,
             x: intersect.x,
             y: intersect.y,
-            wall: walls[i]
+            wall: edges[i]
           };
         }
       }
@@ -155,7 +159,7 @@ Particle.prototype.collide = function(walls) {
           dy: dy,
           x: intersect.x,
           y: intersect.y,
-          wall: walls[i]
+          wall: edges[i]
         };
       }
     }
