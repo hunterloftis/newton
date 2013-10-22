@@ -16,7 +16,7 @@ Renderer.prototype = {
         edgeCount += this.drawEdges(ctx, sim.layers[i].bodies[j].edges);
       }
     }
-    this.drawParticleCount(ctx, particleCount);
+    this.drawCounts(ctx, particleCount, edgeCount);
     this.drawFPS(ctx, sim);
   },
   clear: function(ctx, time) {
@@ -67,12 +67,12 @@ Renderer.prototype = {
 
     return edges.length;
   },
-  drawParticleCount: function(ctx, count) {
-    var text = 'Particles: ' + count;
+  drawCounts: function(ctx, particleCount, edgeCount) {
     ctx.save();
     ctx.fillStyle = '#fff';
     ctx.font = '10pt Helvetica';
-    ctx.fillText(text, 10, 20);
+    ctx.fillText('Particles: ' + particleCount, 10, 20);
+    ctx.fillText('Edges: ' + edgeCount, 10, 40);
     ctx.restore();
   },
   drawFPS: function(ctx, sim) {
@@ -80,7 +80,7 @@ Renderer.prototype = {
     ctx.save();
     ctx.fillStyle = '#fff';
     ctx.font = '10pt Helvetica';
-    ctx.fillText(text, 10, 40);
+    ctx.fillText(text, 10, 60);
     ctx.restore();
   }
 };
