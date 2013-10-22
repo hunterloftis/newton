@@ -116,7 +116,7 @@
       .addForce(gravity);
 
     particleLayer
-      .watch([globalLayer, wallLayer])
+      .watch([particleLayer, globalLayer, wallLayer])
       .addForce(radial)
       .addBody(particles)
       .wrapIn(container);
@@ -195,7 +195,7 @@
   // Each frame
 
   function simulate(time) {
-    if (mouseDown) addParticles(radial.x, radial.y, 10);
+    if (mouseDown) addParticles(radial.x, radial.y, time);
   }
 
   function render(time) {

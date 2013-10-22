@@ -50,9 +50,8 @@
   };
 
   Simulator.prototype.integrate = function(time) {
-    return;
-    for(var j = 0, jlen = this.systems.length; j < jlen; j++) {
-      this.systems[j].integrate(time);
+    for (var i = 0, ilen = this.layers.length; i < ilen; i++) {
+      this.layers[i].integrate(time);
     }
   };
 
