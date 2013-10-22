@@ -2,6 +2,10 @@ function Rectangle(left, top, right, bottom) {
   this.set.apply(this, arguments);
 };
 
+Rectangle.fromVectors = function(v1, v2) {
+  return new Rectangle(v1.x, v1.y, v2.x, v2.y);
+};
+
 Rectangle.prototype = {
   set: function(left, top, right, bottom) {
     this.left = Math.min(left, right);

@@ -41,6 +41,7 @@
 <script src='../../src/material.js'></script>
 <script src='../../src/wall.js'></script>
 <script src='../../src/particle.js'></script>
+<script src='../../src/edge.js'></script>
 <script src='../../src/lineargravity.js'></script>
 <script src='../../src/radialgravity.js'></script>
 
@@ -129,8 +130,8 @@
       .addBody(particles)
       .wrapIn(container);
 
-    // shapeLayer
-    //   .addBody(walls);
+    shapeLayer
+      .addBody(walls);
 
     renderer = new Renderer($display[0]);
   }
@@ -236,10 +237,10 @@
     for (var i = 0; i < POLYS.length; i += 4) {
       var p1 = new Particle(POLYS[i], POLYS[i + 1]);
       var p2 = new Particle(POLYS[i + 2], POLYS[i + 3]);
-      //var e = new Edge(p1, p2, wallMaterial);
+      var e = new Edge(p1, p2, wallMaterial);
       w.addParticle(p1);
       w.addParticle(p2);
-      //w.addEdge(e);       // TODO: figure out a more concise API
+      w.addEdge(e);       // TODO: figure out a more concise API
     }
     return w;
   }

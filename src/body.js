@@ -8,6 +8,10 @@ Body.prototype.addParticle = function(particle) {
   this.particles.push(particle);
 };
 
+Body.prototype.addEdge = function(edge) {
+  this.edges.push(edge);
+};
+
 Body.prototype.each = function(method, args) {
   var i = this.particles.length;
   var particle;

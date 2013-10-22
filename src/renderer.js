@@ -56,7 +56,7 @@ Renderer.prototype = {
     ctx.lineWidth = 1;
     var edge, i = edges.length;
     while (i--) {
-      edge = edges[i];
+      edge = edges[i].getCoords();
       ctx.beginPath();
       ctx.moveTo(edge.x1, edge.y1);
       ctx.lineTo(edge.x2, edge.y2);
