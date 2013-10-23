@@ -25,6 +25,7 @@
 
 
   function Simulator(simulator, renderer, integrationFps) {
+    if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
     this.simulator = simulator;
     this.renderer = renderer;
     this.step = this.getStep();

@@ -5,7 +5,7 @@
     this.ctx = el.getContext('2d');
     this.width = el.width;
     this.height = el.height;
-    this.render = this.render.bind(this); // TODO: shim for Function.bind
+    this.callback = this.callback.bind(this); // TODO: shim for Function.bind
   }
 
   Renderer.prototype = {
