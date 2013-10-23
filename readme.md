@@ -185,6 +185,8 @@ Particles in Layers that respond to (A). Useful for gravity, wind.
 
 ```js
 var gravity = new LinearGravity(force, direction);
+
+layer.addForce(gravity);
 ```
 
 - force: strength of the gravity
