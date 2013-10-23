@@ -72,8 +72,8 @@ function renderFn(time, simulator) {}
 
 #### Newton.Renderer
 
-You can render the scene however you like by providing a render function in the form
-`function renderFn(frameTimeInMs, simulation)`. However, it's often convenient to
+You can render the scene however you like by providing a render function
+that takes the arguments *(frameTimeInMs, simulator)*. However, it's often convenient to
 have a default renderer for quick development. Newton provides one based on Canvas:
 
 ```js
