@@ -8,7 +8,7 @@ var sim = Newton.Simulator(simulate, renderer.callback, 60);
 var particles = Newton.Body();
 var accumulator = 0;
 
-var particleLayer = sim.createLayer();
+var particleLayer = sim.Layer();
 
 particleLayer
   .addBody(particles)
@@ -112,9 +112,9 @@ for applying shared forces like gravity, wind, and explosions.
 Created via `Simulator.createLayer`.
 
 ```js
-var envLayer = sim.createLayer();
-var fixedLayer = sim.createLayer();
-var playerLayer = sim.createLayer();
+var envLayer = sim.Layer();
+var fixedLayer = sim.Layer();
+var playerLayer = sim.Layer();
 
 envLayer                // shared forces like gravity
   .addForce(gravity);

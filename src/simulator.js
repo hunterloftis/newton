@@ -56,8 +56,8 @@
     }
   };
 
-  Simulator.prototype.createLayer = function() {
-    var newLayer = new Newton.Layer();
+  Simulator.prototype.Layer = function() {
+    var newLayer = Newton.Layer();
     this.layers.push(newLayer);
     return newLayer;
   };

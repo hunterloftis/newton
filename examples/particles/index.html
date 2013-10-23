@@ -81,10 +81,10 @@
     radial = new Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
     container = new Newton.Rectangle(0, 0, width, height);
 
-    globalLayer = sim.createLayer();
-    shapeLayer = sim.createLayer();
-    particleLayer = sim.createLayer();
-    windLayer = sim.createLayer();
+    globalLayer = sim.Layer();
+    shapeLayer = sim.Layer();
+    particleLayer = sim.Layer();
+    windLayer = sim.Layer();
 
     globalLayer
       .addForce(gravity);
