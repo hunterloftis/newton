@@ -9,7 +9,6 @@ $ bower install newton
 ```
 
 ```js
-
 var renderer = new Newton.Renderer(document.getElementById('viewport'));
 var sim = new Newton.Simulator(simulate, renderer, 60);
 var particles = new Newton.Body();
@@ -28,7 +27,6 @@ function simulate(time) {
     particles.addParticle(new Newton.Particle(Math.random() * 640, 0));
   }
 }
-
 ```
 
 See this [simple demo](http://www.google.com) in action.
