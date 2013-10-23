@@ -18,9 +18,7 @@ particleLayer
 sim.start();
 
 function simulate(time) {
-  while (time--) {
-    particles.addParticle(new Particle(Math.random() * 640, 0));
-  }
+  while (time--) particles.addParticle(new Particle(Math.random() * 640, 0));
 }
 
 function render(time) {
