@@ -68,7 +68,7 @@ in node.js!
 
 ### Bite-sized and dependency-free
 
-Newton is standalone and framework-and-library agnostic. It can be installed as one simple dependency or
+Newton is framework-and-library agnostic. It can be installed as one simple dependency or
 you can pick-and-choose from its three components: Math, Physics, and Primitives.
 - Math: fundamental Vector and Rectangle definitions
 - Physics: adds Particles, Edges, Constraints, Forces, and the Verlet Integrator
