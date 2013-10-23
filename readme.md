@@ -60,7 +60,7 @@ A game-ready HTML5 physics engine should be:
 
 Read all the [nerdy details](http://www.google.com) about how Newton accomplishes these goals.
 
-## Quick Start
+## API Reference
 
 ### The loop
 
