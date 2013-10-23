@@ -72,6 +72,15 @@ function renderFn(time, simulator) {}
 
 #### Newton.Renderer
 
+You can render the scene however you like by providing a render function in the form
+`function renderFn(frameTimeInMs, simulation)`. However, it's often convenient to
+have a default renderer for quick development. Newton provides one based on Canvas:
+
+```js
+var renderer = new Newton.Renderer(document.getElementById('viewport'));
+var sim = new Newton.Simulator(null, renderer);
+```
+
 ### Layers and bodies
 
 #### Newton.Layer
