@@ -143,7 +143,7 @@ body
 
 #### Newton.Material
 
-Materials determine the reactions of colliding objects.
+Materials determine how colliding objects react.
 
 ```js
 var material = new Newton.Material({
