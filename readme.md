@@ -1,8 +1,6 @@
-# What is Newton?
+# Newton
 
-Newton is an easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
-
-[Quick Start](http://www.google.com)
+An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
 ```
 $ bower install newton
@@ -29,9 +27,13 @@ function simulate(time) {
 }
 ```
 
-See this [simple demo](http://www.google.com) in action.
+See this [simple demo](http://www.google.com) in action or check out [more demos](http://www.google.com).
 
-## State of the art
+## Installation
+
+## Quick Start
+
+## Philosophy
 
 Until Newton, the best physics libraries available for JavaScript were
 [Box2d](https://github.com/kripken/box2d.js/) and
@@ -43,6 +45,10 @@ Still,
 [Verlet-JS](https://github.com/subprotocol/verlet-js), and
 [PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
 have failed to match the clunkier but more effective C-based simulators.
+
+Read all the [nerdy details](http://www.google.com).
+
+## Demos
 
 ## Nerdy details
 
@@ -76,4 +82,5 @@ including
 [Chipmunk](https://groups.google.com/forum/#!topic/v8-users/e9HNSVoovEU) and
 [Box2d](https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript).
 
+## License
 
