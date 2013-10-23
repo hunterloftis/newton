@@ -93,7 +93,7 @@
       .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
 
     particleLayer
-      .watch([particleLayer, shapeLayer, globalLayer])
+      .respondTo([particleLayer, shapeLayer, globalLayer])
       .addForce(radial)
       .addBody(particles)
       .wrapIn(container);
@@ -180,7 +180,7 @@
       .on('change', 'input[data-bind="DRAG"]', updateDrag);
 
     $('#whatever').click(function() {
-      particleLayer.watch([particleLayer, shapeLayer, globalLayer, windLayer]);
+      particleLayer.respondTo([particleLayer, shapeLayer, globalLayer, windLayer]);
       return false;
     });
 

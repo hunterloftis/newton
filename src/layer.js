@@ -7,7 +7,7 @@
     this.wrapper = undefined;
   }
 
-  Layer.prototype.watch = function(layers) {
+  Layer.prototype.respondTo = function(layers) {
     this.watchedLayers = layers || [];
     return this;
   };
