@@ -23,7 +23,7 @@ Under the hood, Newton.js uses the simple and stable
 [verlet method](http://www.gamedev.net/page/resources/_/technical/math-and-physics/a-verlet-based-approach-for-2d-game-physics-r2714)
 to integrate Newton's equations of motion.
 
-### Decoupled render and simulation steps
+### Decoupled simulation
 
 JavaScript physics engines must deal with a variety of framerates, simulation complexities,
 browsers, and hardware. To deliver consistent simulations in different scenarios, Newton uses a
@@ -35,5 +35,8 @@ fixed interval via a time accumulator. This keeps Newton smooth, fast, and stutt
 ### Arbitrary renderer
 
 Newton comes with a simple built-in canvas renderer for development and experimentation but allows
-you to render any way you like - including Canvas, WebGL, SVG, and CSS.
+you to render any way you like - including Canvas, WebGL, SVG, and CSS. Newton can even run simulations
+in node.js!
+
+
 
