@@ -53,7 +53,7 @@ Read all the [nerdy details](http://www.google.com).
 At its core, Newton is a loop that periodically calls two callbacks: `simulate` and `render`.
 `simulate` is called in regular time steps and should be used to add simulation logic, like
 behaviors responding to user input. `render` is called as quickly as possible based on
-RequestAnimationFrame.
+RequestAnimationFrame and should be used to draw the scene in its current state.
 
 #### Newton.Simulator
 
