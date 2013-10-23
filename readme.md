@@ -164,6 +164,12 @@ var particle = new Newton.Particle(0, 0, 1, material);  // overrides Body value
 
 ### Forces
 
+Forces and impulses (force * time) can be applied via methods, but can also be represented
+as objects in the scene. For example, instead of manually applying gravity as a force
+each frame, it's convenient to attach a LinearGravity instance to a Layer in the Simulation.
+
+#### Impulses
+
 #### LinearGravity
 
 #### RadialGravity
