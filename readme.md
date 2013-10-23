@@ -1,6 +1,7 @@
 # What is Newton?
 
 Newton is an easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
+[Quick Start](http://www.google.com)
 
 ```js
 
@@ -28,10 +29,7 @@ function render(time) {
 }
 ```
 
-See this
-[simple demo](http://www.google.com)
-in action or check out the
-[Quick Start](http://www.google.com).
+See this [simple demo](http://www.google.com) in action.
 
 ## The state of the art
 
