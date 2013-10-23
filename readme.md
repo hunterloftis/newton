@@ -55,7 +55,8 @@ to integrate Newton's equations of motion.
 
 ### Decoupled simulation
 
-JavaScript physics engines must deal with a variety of framerates, simulation complexities,
+JavaScript physics engines must deal with a wide variety of unstable framerates,
+simulation complexities,
 browsers, and hardware. To deliver consistent simulations in different scenarios, Newton uses a
 [render-independent fixed-time simulation step](http://gafferongames.com/game-physics/fix-your-timestep/).
 
