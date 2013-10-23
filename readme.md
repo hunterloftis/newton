@@ -122,6 +122,8 @@ playerLayer             // responds to forces and collisions on all layers
 
 ```
 
+By default, Layers watch themselves, eg: `layer.watch([layer])`.
+
 #### Newton.Body
 
 Bodies group related Particles, Edges, and Constraints together into logical entities.
