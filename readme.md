@@ -152,6 +152,9 @@ var material = new Newton.Material({
   friction: 0.2,
   maxVelocity: 50
 });
+
+var body = new Newton.Body(material);   // default for contained Particles and Edges
+var particle = new Newton.Particle(0, 0, 1, material);  // overrides Body value
 ```
 
 - weight: multiplier for a Particle's mass; optional, default = 1
