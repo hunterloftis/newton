@@ -18,7 +18,7 @@ sim.start();
 
 function simulate(time) {
   while (time--) {
-    particles.addParticle(new Newton.Particle(Math.random() * 640, 0));
+    particles.addParticle(new Newton.Particle(Math.random() * 640, 0, Math.random() * 5 + 1));
   }
 }
 ```
