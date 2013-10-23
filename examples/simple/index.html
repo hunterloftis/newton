@@ -27,14 +27,6 @@
 <script src='../../src/renderer.js'></script>
 
 <script>
-  window.onresize = function(e) {
-    var canvas = document.getElementById('display');
-    canvas.width = window.innerWidth - 200;
-    canvas.height = window.innerHeight - 200;
-  };
-
-  window.onresize();
- 
   var renderer = Newton.Renderer(document.getElementById('display'));
   var sim = Newton.Simulator(simulate, renderer.callback, 60);
   var particles = Newton.Body();
