@@ -127,7 +127,10 @@ playerLayer             // responds to forces and collisions on all layers
 
 ## Examples
 
-## Nerdy details
+## The nerdy details
+
+Physics major? Game engine buff? Like to argue about Euler vs Verlet vs RK4?
+This is for you.
 
 ### Verlet integration
 
