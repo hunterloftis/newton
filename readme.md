@@ -28,7 +28,10 @@ function render(time) {
 }
 ```
 
-See this [simple demo](http://www.google.com) in action.
+See this
+[simple demo](http://www.google.com)
+in action or check out the
+[Quick Start](http://www.google.com).
 
 ## The state of the art
 
