@@ -48,7 +48,7 @@ A game-ready HTML5 physics engine should be:
 
 - Written in and optimized for idiomatic JavaScript
 - Easily orchestrated through a simple API
-- Featureful enough for non-trivial games and simulations
+- Sufficiently featureful for non-trivial games and simulations
 - Designed with garbage collection in mind
 - Decoupled from rendering
 - Consistent across browsers and hardware
