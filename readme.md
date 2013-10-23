@@ -57,6 +57,10 @@ RequestAnimationFrame and should be used to draw the scene in its current state.
 
 #### Newton.Simulator
 
+```js
+var sim = new Newton.Simulator(simulateFn, renderFn, simulateFps);
+```
+
 #### Newton.Renderer
 
 ### Layers and bodies
