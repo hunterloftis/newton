@@ -141,6 +141,14 @@ body
   .addEdge(edge);
 ```
 
+#### Newton.Particle
+
+#### Newton.Edge
+
+#### Newton.DistanceConstraint
+
+#### Newton.AngleConstraint
+
 #### Newton.Material
 
 Materials determine how colliding objects react.
