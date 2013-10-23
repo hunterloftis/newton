@@ -3,6 +3,7 @@
   function Renderer(el) {
     if (!(this instanceof Renderer)) return new Renderer(el);
     var self = this;
+    this.el = el;
     this.ctx = el.getContext('2d');
     this.width = el.width;
     this.height = el.height;
@@ -27,7 +28,7 @@
     clear: function(ctx, time) {
       ctx.save();
       ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.fillRect(0, 0, this.el.width, this.el.height);
       ctx.restore();
     },
     drawParticles: function(ctx, particles) {
@@ -94,3 +95,11 @@
   window.Newton.Renderer = Renderer;
 
 })();
+
+window.onresize = function(e) {
+  var canvas = document.getElementById('display');
+  canvas.width = window.innerWidth - 200;
+  canvas.height = window.innerHeight - 200;
+};
+
+window.onresize();
