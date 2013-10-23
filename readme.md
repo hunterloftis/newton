@@ -31,6 +31,21 @@ See this [simple demo](http://www.google.com) in action or check out [more examp
 $ bower install newton
 ```
 
+## Philosophy
+
+Until Newton, the best physics libraries available for JavaScript were
+[Box2d](https://github.com/kripken/box2d.js/) and
+[Chipmunk](https://github.com/josephg/Chipmunk-js) -
+both of which are automated ports of very capable and popular C++ projects.
+Unfortunately, these ports combine the clarity and conciseness of C++ with the speed of JavaScript.
+Still,
+[CoffeePhysics](https://github.com/soulwire/Coffee-Physics),
+[Verlet-JS](https://github.com/subprotocol/verlet-js), and
+[PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
+have failed to match the clunkier but more effective C-based simulators.
+
+Read all the [nerdy details](http://www.google.com).
+
 ## Quick Start
 
 ### The loop
@@ -56,21 +71,6 @@ $ bower install newton
 #### Newton.Vector
 
 #### Newton.Rectangle
-
-## Philosophy
-
-Until Newton, the best physics libraries available for JavaScript were
-[Box2d](https://github.com/kripken/box2d.js/) and
-[Chipmunk](https://github.com/josephg/Chipmunk-js) -
-both of which are automated ports of very capable and popular C++ projects.
-Unfortunately, these ports combine the clarity and conciseness of C++ with the speed of JavaScript.
-Still,
-[CoffeePhysics](https://github.com/soulwire/Coffee-Physics),
-[Verlet-JS](https://github.com/subprotocol/verlet-js), and
-[PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
-have failed to match the clunkier but more effective C-based simulators.
-
-Read all the [nerdy details](http://www.google.com).
 
 ## Demos
 
