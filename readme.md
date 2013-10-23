@@ -2,10 +2,6 @@
 
 An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
-```
-$ bower install newton
-```
-
 ```js
 var renderer = new Newton.Renderer(document.getElementById('viewport'));
 var sim = new Newton.Simulator(simulate, renderer, 60);
@@ -30,6 +26,10 @@ function simulate(time) {
 See this [simple demo](http://www.google.com) in action or check out [more demos](http://www.google.com).
 
 ## Installation
+
+```
+$ bower install newton
+```
 
 ## Quick Start
 
