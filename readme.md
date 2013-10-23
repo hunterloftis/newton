@@ -47,7 +47,7 @@ Still,
 [CoffeePhysics](https://github.com/soulwire/Coffee-Physics),
 [Verlet-JS](https://github.com/subprotocol/verlet-js), and
 [PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
-have failed to match the clunkier but more effective C-based libraries.
+have failed to match the clunkier but more effective C-based simulators.
 
 ## Nerdy details
 
