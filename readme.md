@@ -91,6 +91,8 @@ for applying shared forces like gravity, wind, and explosions.
 
 #### Newton.Layer
 
+Created via `Simulator.createLayer()`.
+
 ```js
 var envLayer = sim.createLayer();
 var fixedLayer = sim.createLayer();
