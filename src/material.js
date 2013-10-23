@@ -1,6 +1,7 @@
 ;(function() {
 
   function Material(options) {
+    if (!(this instanceof Material)) return new Material(options);
     options = options || {};
     this.weight = options.weight || 1;
     this.restitution = options.restitution || 1;

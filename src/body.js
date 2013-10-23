@@ -1,6 +1,7 @@
 ;(function() {
 
   function Body(material) {
+    if (!(this instanceof Body)) return new Body(material);
     this.particles = [];
     this.edges = [];
     this.material = material; // TODO: make this matter

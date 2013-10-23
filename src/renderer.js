@@ -1,6 +1,7 @@
 ;(function() {
 
   function Renderer(el) {
+    if (!(this instanceof Renderer)) return new Renderer(el);
     var self = this;
     this.ctx = el.getContext('2d');
     this.width = el.width;

@@ -1,6 +1,7 @@
 ;(function() {
 
   function Layer() {
+    if (!(this instanceof Layer)) return new Layer();
     this.bodies = [];
     this.forces = [];
     this.watchedLayers = [this];

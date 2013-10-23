@@ -3,24 +3,24 @@
 An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
 ```js
-var renderer = new Newton.Renderer(document.getElementById('display'));
-var sim = new Newton.Simulator(simulate, renderer.callback, 60);
-var particles = new Newton.Body();
+var renderer = Newton.Renderer(document.getElementById('display'));
+var sim = Newton.Simulator(simulate, renderer.callback, 60);
+var particles = Newton.Body();
 var accumulator = 0;
 
 var particleLayer = sim.createLayer();
 
 particleLayer
   .addBody(particles)
-  .addForce(new Newton.LinearGravity(0, 0.001, 0))
-  .wrapIn(new Newton.Rectangle(0, 0, 1280, 450));
+  .addForce(Newton.LinearGravity(0, 0.001, 0))
+  .wrapIn(Newton.Rectangle(0, 0, 1280, 450));
 
 sim.start();
 
 function simulate(time) {
   accumulator += time;
   while (accumulator > 250) {
-    particles.addParticle(new Newton.Particle(Math.random() * 1280, 10, Math.random() * 5 + 1));
+    particles.addParticle(Newton.Particle(Math.random() * 1280, 10, Math.random() * 5 + 1));
     accumulator -= 250;
   }
 }
@@ -76,7 +76,7 @@ RequestAnimationFrame and should be used to draw the scene in its current state.
 #### Newton.Simulator
 
 ```js
-var sim = new Newton.Simulator(simulateFn, renderFn, simulationFps);
+var sim = Newton.Simulator(simulateFn, renderFn, simulationFps);
 sim.start();
 sim.stop();
 
@@ -95,8 +95,8 @@ that takes the arguments *(frameTimeInMs, simulator)*. However, it's often conve
 have a default renderer for quick development. Newton provides one based on Canvas:
 
 ```js
-var renderer = new Newton.Renderer(document.getElementById('viewport'));
-var sim = new Newton.Simulator(null, renderer.callback);
+var renderer = Newton.Renderer(document.getElementById('viewport'));
+var sim = Newton.Simulator(null, renderer.callback);
 ```
 
 ### Layers and bodies
@@ -138,7 +138,7 @@ The player's character in a game, a vehicle, and a bridge could all be represent
 instances of Body.
 
 ```js
-var body = new Newton.Body();
+var body = Newton.Body();
 
 body
   .addParticle(particle)
@@ -158,15 +158,15 @@ body
 Materials determine how colliding objects react.
 
 ```js
-var material = new Newton.Material({
+var material = Newton.Material({
   weight: 2,
   restitution: 0.5,
   friction: 0.2,
   maxVelocity: 50
 });
 
-var body = new Newton.Body(material);   // default for contained Particles and Edges
-var particle = new Newton.Particle(0, 0, 1, material);  // overrides Body value
+var body = Newton.Body(material);   // default for contained Particles and Edges
+var particle = Newton.Particle(0, 0, 1, material);  // overrides Body value
 ```
 
 - weight: multiplier for a Particle's mass (0 .. N); optional, default = 1

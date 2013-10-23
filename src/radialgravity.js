@@ -1,6 +1,7 @@
 ;(function() {
 
   function RadialGravity(x, y, strength, falloff) {
+    if (!(this instanceof RadialGravity)) return new RadialGravity(x, y, strength, falloff);
     this.x = x;
     this.y = y;
     this.strength = strength;

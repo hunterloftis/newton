@@ -1,6 +1,7 @@
 ;(function() {
 
   function LinearGravity(angle, strength, falloff) {
+    if (!(this instanceof LinearGravity)) return new LinearGravity(angle, strength, falloff);
     this.angle = angle;
     this.strength = strength;
     this.vector = new Newton.Vector(0, strength).rotate(angle);

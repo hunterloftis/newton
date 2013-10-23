@@ -6,6 +6,7 @@
   }
 
   function Particle(x, y, size, material) {
+    if (!(this instanceof Particle)) return new Particle(x, y, size, material);
     this.position = new Newton.Vector(x, y);
     this.lastPosition = this.position.clone();
     this.lastValidPosition = this.position.clone();
