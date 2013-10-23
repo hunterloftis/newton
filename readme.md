@@ -172,11 +172,11 @@ var particle = Newton.Particle(0, 0, 1, material);  // overrides Body value
 
 ### Constraints
 
-Sometimes you need to constrain an object's range of motion.
-You may want two bodies to stay a certain distance apart, or to maintain a particular angle of separation.
+Sometimes you need to constrain a Particle's range of motion.
+You may want two Particles to stay a certain distance apart, or to maintain a particular angle of separation.
 With Constraints, you can compose Particles and Edges into more complex structures like boxes, ropes, and wheels.
 
-Constraints can also be applied between Bodies to connect two bodies together.
+Constraints can also be applied between Bodies.
 For example, you may want to hang one body (a lamp) from another body (a ceiling) with a DistanceConstraint.
 
 #### Newton.DistanceConstraint
