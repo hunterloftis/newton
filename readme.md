@@ -149,10 +149,6 @@ body
 
 #### Newton.Edge
 
-#### Newton.DistanceConstraint
-
-#### Newton.AngleConstraint
-
 #### Newton.Material
 
 Materials determine how colliding objects react.
@@ -173,6 +169,19 @@ var particle = Newton.Particle(0, 0, 1, material);  // overrides Body value
 - restitution: bounciness of a Particle (0 .. 1); optional, default = 1
 - friction: roughness of an Edge; optional (0 .. 1), default = 0
 - maxVelocity: determines drag and terminal velocity (0 .. 1000); optional, default = 100
+
+### Constraints
+
+Sometimes you need to constrain an object's range of motion.
+You may want two bodies to stay a certain distance apart, or to maintain a particular angle of separation.
+With Constraints, you can compose Particles and Edges into more complex structures like boxes, ropes, and wheels.
+
+Constraints can also be applied between Bodies to connect two bodies together.
+For example, you may want to hang one body (a lamp) from another body (a ceiling) with a DistanceConstraint.
+
+#### Newton.DistanceConstraint
+
+#### Newton.AngleConstraint
 
 ### Forces
 
