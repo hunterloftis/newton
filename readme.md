@@ -10,8 +10,8 @@ var renderer = new Renderer(document.getElementById('viewport'));
 var particleLayer = sim.createLayer();
 
 particleLayer
-  .addForce(new LinearGravity(Math.PI * 0.5, 0.01, 0))
   .addBody(particles)
+  .addForce(new LinearGravity(Math.PI * 0.5, 0.01, 0))
   .wrapIn(new Rectangle(0, 0, 640, 480));
 
 sim.start();
