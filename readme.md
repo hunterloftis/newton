@@ -109,7 +109,7 @@ entities into logical objects. Newton uses Layers and Bodies.
 Layers control which Bodies collide with each other. Layers also provide a mechanism
 for applying shared forces like gravity, wind, and explosions.
 
-Created via `Simulator.createLayer`.
+Created via `Simulator.Layer`.
 
 ```js
 var envLayer = sim.Layer();
