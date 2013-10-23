@@ -4,6 +4,10 @@ Newton is an easy-to-use, feature-rich physics engine that's designed from the g
 
 [Quick Start](http://www.google.com)
 
+```
+$ bower install newton
+```
+
 ```js
 
 var sim = new Newton.Simulator(simulate, render, 60);
@@ -69,14 +73,12 @@ Newton comes with a simple built-in canvas renderer for development and experime
 you to render any way you like - including Canvas, WebGL, SVG, and CSS. Newton can even run simulations
 in node.js!
 
-### Bite-sized and dependency-free
+### Garbage collector-friendly
 
-Newton is framework-and-library agnostic. It can be installed as one simple dependency or
-you can pick-and-choose from its three components: Math, Physics, and Primitives.
-- Math: fundamental Vector and Rectangle definitions
-- Physics: adds Particles, Edges, Constraints, Forces, and the Verlet Integrator
-- Primitives: building blocks like Polygons, Springs, Ropes, etc
-
-
+Newton's 2D Vector class uses in-place writes by default to avoid flooding the garbage
+collector with extraneous objects. This is an issue with most JS physics engines,
+including
+[Chipmunk](https://groups.google.com/forum/#!topic/v8-users/e9HNSVoovEU) and
+[Box2d](https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript).
 
 
