@@ -58,8 +58,17 @@ RequestAnimationFrame and should be used to draw the scene in its current state.
 #### Newton.Simulator
 
 ```js
-var sim = new Newton.Simulator(simulateFn, renderFn, simulateFps);
+var sim = new Newton.Simulator(simulateFn, renderFn, simulationFps);
+sim.start();
+sim.stop();
+
+function simulateFn(time, simulator) {}
+function renderFn(time, simulator) {}
 ```
+
+- simulateFn: optional callback for simulation logic
+- renderFn: optional callback for drawing the scene
+- simulationFps: optional number of frames per second for the fixed time step. defaults to 60.
 
 #### Newton.Renderer
 
