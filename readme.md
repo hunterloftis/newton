@@ -6,6 +6,7 @@ Newton is an easy-to-use, feature-rich physics engine that's designed from the g
 var sim = new Simulator(simulate, render, 60);
 var particles = new Body();
 var renderer = new Renderer(document.getElementById('viewport'));
+
 var particleLayer = sim.createLayer();
 
 particleLayer
