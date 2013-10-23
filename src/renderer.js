@@ -4,7 +4,7 @@
     if (!(this instanceof Renderer)) return new Renderer(el);
     var self = this;
     this.el = el;
-    this.ctx = el.getContext('2d');
+    this.ctx = this.el.getContext('2d');
     this.width = el.width;
     this.height = el.height;
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
@@ -95,11 +95,3 @@
   window.Newton.Renderer = Renderer;
 
 })();
-
-window.onresize = function(e) {
-  var canvas = document.getElementById('display');
-  canvas.width = window.innerWidth - 200;
-  canvas.height = window.innerHeight - 200;
-};
-
-window.onresize();

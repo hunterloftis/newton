@@ -7,7 +7,7 @@
 <body>
 
 <div class='wrap'>
-  <center><canvas id="display"></canvas></center>
+  <canvas id="display" style="display: block; margin-left: auto; margin-right: auto;"></canvas>
 </div>
 
 <script type="text/javascript" src="../../vendor/jquery-2.0.3.js"></script>
@@ -27,6 +27,14 @@
 <script src='../../src/renderer.js'></script>
 
 <script>
+  window.onresize = function(e) {
+    var canvas = document.getElementById('display');
+    canvas.width = window.innerWidth - 200;
+    canvas.height = window.innerHeight - 200;
+  };
+
+  window.onresize();
+ 
   var renderer = Newton.Renderer(document.getElementById('display'));
   var sim = Newton.Simulator(simulate, renderer.callback, 60);
   var particles = Newton.Body();
@@ -48,7 +56,6 @@
       accumulator -= 250;
     }
   }
-
 </script>
 
 </body>
