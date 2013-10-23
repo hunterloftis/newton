@@ -76,7 +76,7 @@ in node.js!
 ### Garbage collector-friendly
 
 Newton's 2D Vector class uses mutable operations by default to avoid flooding the garbage
-collector with extraneous objects. This is an issue with most JS physics engines,
+collector with extraneous objects. Garbage-collector abuse is an issue with most JS physics engines,
 including
 [Chipmunk](https://groups.google.com/forum/#!topic/v8-users/e9HNSVoovEU) and
 [Box2d](https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript).
