@@ -94,9 +94,8 @@ var sim = new Newton.Simulator(null, renderer);
 
 ### Layers and bodies
 
-A physics engine needs some sort of organization that allows you to group logically
-related entities and to tie external actors to simulated objects. Newton uses Layers
-and Bodies.
+A physics engine needs some sort of organization that allows you to group physical
+entities into logical objects. Newton uses Layers and Bodies.
 
 #### Newton.Layer
 
