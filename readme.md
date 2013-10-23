@@ -62,7 +62,7 @@ A game-ready HTML5 physics engine should be:
 - Consistent across browsers and hardware
 - Fluid, fast, stable, and predictable
 
-Read all the [nerdy details](http://www.google.com) about how Newton accomplishes these goals.
+Read all the [nerdy details](#the-nerdy-details) about how Newton accomplishes these goals.
 
 ## API Reference
 
