@@ -181,7 +181,9 @@ Forces and impulses (force * time) can be applied via methods, but can also be r
 as objects in the scene. For example, instead of manually applying gravity as a force
 each frame, it's convenient to attach a LinearGravity instance to a Layer in the Simulation.
 
-#### Impulses
+#### applyImpulse
+
+`applyImpulse(force, direction, time)`
 
 Impulses allow programmatic, time-based changes to the velocities of Bodies and Particles.
 They're the 'verb' form of forces.
