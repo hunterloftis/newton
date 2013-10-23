@@ -39,7 +39,6 @@
 <script src='../../src/layer.js'></script>
 <script src='../../src/body.js'></script>
 <script src='../../src/material.js'></script>
-<script src='../../src/wall.js'></script>
 <script src='../../src/particle.js'></script>
 <script src='../../src/edge.js'></script>
 <script src='../../src/lineargravity.js'></script>
@@ -71,15 +70,16 @@
     var width = $display.width();
     var height = $display.height();
 
-    particleMaterial = new Material();
-    wallMaterial = new Material();
+    particleMaterial = new Newton.Material();
+    wallMaterial = new Newton.Material();
 
-    sim = new Simulator(simulate, render, 60);
+    renderer = new Newton.Renderer($display[0]);
+    sim = new Newton.Simulator(simulate, renderer.render, 60);
     walls = createWalls();
-    particles = new Body(particleMaterial);
-    gravity = new LinearGravity(0, 0, 0);           // angle, strength, falloff power
-    radial = new RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
-    container = new Rectangle(0, 0, width, height);
+    particles = new Newton.Body(particleMaterial);
+    gravity = new Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
+    radial = new Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
+    container = new Newton.Rectangle(0, 0, width, height);
 
     globalLayer = sim.createLayer();
     shapeLayer = sim.createLayer();
@@ -90,7 +90,7 @@
       .addForce(gravity);
 
     windLayer
-      .addForce(new LinearGravity(Math.PI * 0.5, 0.001, 0));
+      .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
 
     particleLayer
       .watch([particleLayer, shapeLayer, globalLayer])
@@ -100,8 +100,6 @@
 
     shapeLayer
       .addBody(walls);
-
-    renderer = new Renderer($display[0]);
   }
 
   function startSimulation() {
@@ -111,11 +109,6 @@
   function simulate(time) {
     if (mouseDown) addParticles(radial.x, radial.y, time);
   }
-
-  function render(time) {
-    renderer.render(sim, time);
-  }
-
 
 
   // Utilities
@@ -131,7 +124,7 @@
     var mass = Math.random() * 4 + 1;
     var x = Math.random() * spread * 2 + x - spread;
     var y = Math.random() * spread * 2 + y - spread;
-    return new Particle(x, y, particleMaterial, mass);
+    return new Newton.Particle(x, y, mass, particleMaterial);
   }
 
   function createWalls() {
@@ -163,11 +156,11 @@
       875, 275, 875, 125
     ];
 
-    var w = new Body(wallMaterial);
+    var w = new Newton.Body(wallMaterial);
     for (var i = 0; i < polys.length; i += 4) {
-      var p1 = new Particle(polys[i], polys[i + 1]);
-      var p2 = new Particle(polys[i + 2], polys[i + 3]);
-      var e = new Edge(p1, p2, wallMaterial);
+      var p1 = new Newton.Particle(polys[i], polys[i + 1]);
+      var p2 = new Newton.Particle(polys[i + 2], polys[i + 3]);
+      var e = new Newton.Edge(p1, p2, wallMaterial);
       w.addParticle(p1);
       w.addParticle(p2);
       w.addEdge(e);       // TODO: figure out a more concise API

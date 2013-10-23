@@ -7,7 +7,7 @@
 
     this.compute();
 
-    this._rect = new Rectangle(0, 0, 0, 0);
+    this._rect = new Newton.Rectangle(0, 0, 0, 0);
   };
 
   Edge.COLLISION_TOLERANCE = 0.5;
@@ -28,7 +28,7 @@
     this.angle = this.vector.getAngle();
     this.normal = this.vector.clone().turnLeft().unit();
     this.unit = this.vector.clone().unit();
-    this.bounds = Rectangle
+    this.bounds = Newton.Rectangle
       .fromVectors(this.p1.position, this.p2.position)
       .expand(Edge.COLLISION_TOLERANCE);
   };
