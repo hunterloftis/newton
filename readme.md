@@ -77,9 +77,9 @@ function simulateFn(time, simulator) {}
 function renderFn(time, simulator) {}
 ```
 
-- simulateFn: optional callback for simulation logic
-- renderFn: optional callback for drawing the scene
-- simulationFps: optional number of frames per second for the fixed time step. defaults to 60.
+- simulateFn: callback for simulation logic; optional
+- renderFn: callback for drawing the scene; optional
+- simulationFps: number of frames per second for the fixed time step; optional, defaults to 60
 
 #### Newton.Renderer
 
