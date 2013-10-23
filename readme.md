@@ -141,13 +141,13 @@ body
   .addEdge(edge);
 ```
 
-#### Newton.Particle
+##### Newton.Particle
 
-#### Newton.Edge
+##### Newton.Edge
 
-#### Newton.DistanceConstraint
+##### Newton.DistanceConstraint
 
-#### Newton.AngleConstraint
+##### Newton.AngleConstraint
 
 #### Newton.Material
 
