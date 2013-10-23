@@ -2,6 +2,33 @@
 
 Newton is an easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
+```js
+var sim = new Simulator(simulate, render, 60);
+var particles = new Body();
+var gravity = new LinearGravity(Math.PI * 0.5, 0.01, 0);
+var container = new Rectangle(0, 0, 640, 480);
+var renderer = new Renderer(document.getElementById('viewport'));
+
+var particleLayer = sim.createLayer();
+
+particleLayer
+  .addForce(gravity)
+  .addBody(particles)
+  .wrapIn(container);
+
+sim.start();
+
+function simulate(time) {
+  particles.addParticle(new Particle(Math.random() * 640, 0));
+}
+
+function render(time) {
+  renderer.render(sim, time);
+}
+```
+
+See this [simple demo](http://www.google.com) in action.
+
 ## The state of the art
 
 Until Newton, the best physics libraries available for JavaScript were
@@ -9,7 +36,7 @@ Until Newton, the best physics libraries available for JavaScript were
 [Chipmunk](https://github.com/josephg/Chipmunk-js) -
 both of which are automated ports of very capable and popular C++ projects.
 Unfortunately, these ports combine the clarity and conciseness of C++ with the speed of JavaScript.
-Still, 
+Still,
 [CoffeePhysics](https://github.com/soulwire/Coffee-Physics),
 [Verlet-JS](https://github.com/subprotocol/verlet-js), and
 [PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
