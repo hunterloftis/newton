@@ -189,7 +189,7 @@ Impulses allow programmatic, time-based changes to the velocities of Bodies and 
 They're the 'verb' form of forces.
 
 ```js
-particle.applyImpulse(0.025, 0, 100);       // force, direction, time
+particle.applyImpulse(0.025, 0, 100);       // apply an impulse to a single Particle
 body.applyImpulse(0.1, Math.PI * 0.5, 16);  // applies to all Particles in this Body
 ```
 
