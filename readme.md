@@ -2,26 +2,25 @@
 
 Newton is an easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
-## JS Physics needs a refresh
+## The state of the art
 
-The best physics libraries available for JavaScript are still
+Until Newton, the best physics libraries available for JavaScript were still
 [Box2d](https://github.com/kripken/box2d.js/) and
 [Chipmunk](https://github.com/josephg/Chipmunk-js) -
-both of which are automated ports from very capable and popular C++ projects.
-Unfortunately, the JS ports combine the clarity and conciseness of C++ with the speed of JavaScript.
-Other libraries like
+both of which are automated ports of very capable and popular C++ projects.
+Unfortunately, these ports combine the clarity and conciseness of C++ with the speed of JavaScript.
 [CoffeePhysics](https://github.com/soulwire/Coffee-Physics),
 [Verlet-JS](https://github.com/subprotocol/verlet-js), and
 [PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
-are too limited or slow for non-trivial games and simulations, so they see almost no production use.
+have failed to match the clunkier but more effective C-based libraries.
 
 ## Nerdy details
 
 ### Verlet integration
 
-Under the hood, Newton uses the simple and stable
+Under the hood, Newton.js uses the simple and stable
 [verlet method](http://www.gamedev.net/page/resources/_/technical/math-and-physics/a-verlet-based-approach-for-2d-game-physics-r2714)
-to integrate the equations of motion.
+to integrate Newton's equations of motion.
 
 ### Decoupled render and simulation steps
 
