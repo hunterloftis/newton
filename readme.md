@@ -26,7 +26,9 @@ function simulate(time) {
 }
 ```
 
-See this [simple demo](http://www.google.com) in action or check out [more examples](http://www.google.com).
+See this
+[simple demo](http://hunterloftis.github.io/newton/examples/simple) in action or check out
+[more examples](#examples).
 
 ## Installation
 
