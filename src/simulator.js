@@ -92,6 +92,7 @@
     };
   };
 
-  window.Simulator = Simulator;
+  window.Newton = window.Newton || {};
+  window.Newton.Simulator = Simulator;
 
 })();

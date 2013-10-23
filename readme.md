@@ -12,7 +12,7 @@ var particleLayer = sim.createLayer();
 particleLayer
   .addBody(particles)
   .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.01, 0))
-  .wrapIn(new Newton.Rectangle(0, 0, 640, 480));
+  .wrapIn(new Newton.Rectangle(0, 0, 1280, 450));
 
 sim.start();
 

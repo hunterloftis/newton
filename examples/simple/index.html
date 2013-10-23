@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Newton.js: Simple Example</title>
+  <link rel='stylesheet' type='text/css' href='../shared/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <canvas id="display" width="1280" height="450"></canvas>
+</div>
+
+<script type="text/javascript" src="../../vendor/jquery-2.0.3.js"></script>
+
+<script src='../../src/vector.js'></script>
+<script src='../../src/rectangle.js'></script>
+
+<script src='../../src/layer.js'></script>
+<script src='../../src/body.js'></script>
+<script src='../../src/material.js'></script>
+<script src='../../src/wall.js'></script>
+<script src='../../src/particle.js'></script>
+<script src='../../src/edge.js'></script>
+<script src='../../src/lineargravity.js'></script>
+<script src='../../src/radialgravity.js'></script>
+
+<script src='../../src/simulator.js'></script>
+<script src='../../src/renderer.js'></script>
+
+<script>
+
+  var renderer = new Newton.Renderer(document.getElementById('viewport'));
+  var sim = new Newton.Simulator(simulate, renderer, 60);
+  var particles = new Newton.Body();
+
+  var particleLayer = sim.createLayer();
+
+  particleLayer
+    .addBody(particles)
+    .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.01, 0))
+    .wrapIn(new Newton.Rectangle(0, 0, 1280, 450));
+
+  sim.start();
+
+  function simulate(time) {
+    while (time--) {
+      particles.addParticle(new Newton.Particle(Math.random() * 640, 0, Math.random() * 5 + 1));
+    }
+  }
+
+</script>
+
+</body>
