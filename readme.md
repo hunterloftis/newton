@@ -129,7 +129,9 @@ playerLayer             // responds to forces and collisions on all layers
 
 ## The nerdy details
 
-Physics major? Browser performance wizard? Like to argue about Euler vs Verlet vs RK4?
+Physics major?
+Browser performance wizard?
+Like to argue about Euler vs. Verlet vs. RK4?
 This is for you.
 
 ### Verlet integration
