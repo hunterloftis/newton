@@ -219,6 +219,7 @@ layer.addForce(gravity);
 ## The nerdy details
 
 Physics major?
+Game programmer?
 Browser performance wizard?
 Like to argue about Euler vs. Verlet vs. RK4?
 This is for you.
