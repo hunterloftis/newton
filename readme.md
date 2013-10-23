@@ -66,5 +66,14 @@ Newton comes with a simple built-in canvas renderer for development and experime
 you to render any way you like - including Canvas, WebGL, SVG, and CSS. Newton can even run simulations
 in node.js!
 
+### No dependencies; components
+
+Newton is standalone and framework-and-library agnostic. It can be installed as one simple dependency or
+you can pick-and-choose from its three components: Math, Physics, and Primitives.
+- Math: fundamental Vector and Rectangle definitions
+- Physics: adds Particles, Edges, Constraints, Forces, and the Verlet Integrator
+- Primitives: building blocks like Polygons, Springs, Ropes, etc
+
+
 
 
