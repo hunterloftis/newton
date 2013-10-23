@@ -225,6 +225,10 @@ layer.addForce(gravity);
 
 ## Examples
 
+- [Simple](http://hunterloftis.github.io/newton/examples/simple)
+- [Particles](http://hunterloftis.github.io/newton/examples/particles)
+- ~~[Boxes](http://hunterloftis.github.io/newton/examples/boxes)~~ (Broken)
+
 ## The nerdy details
 
 Physics major?
