@@ -3,6 +3,7 @@
 Newton is an easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
 ```js
+
 var sim = new Simulator(simulate, render, 60);
 var particles = new Body();
 var renderer = new Renderer(document.getElementById('viewport'));
@@ -17,7 +18,9 @@ particleLayer
 sim.start();
 
 function simulate(time) {
-  particles.addParticle(new Particle(Math.random() * 640, 0));
+  while (time--) {
+    particles.addParticle(new Particle(Math.random() * 640, 0));
+  }
 }
 
 function render(time) {
