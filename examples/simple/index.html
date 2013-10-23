@@ -29,7 +29,7 @@
 <script>
 
   var renderer = new Newton.Renderer(document.getElementById('display'));
-  var sim = new Newton.Simulator(simulate, renderer.render, 60);
+  var sim = new Newton.Simulator(simulate, renderer.callback, 60);
   var particles = new Newton.Body();
   var accumulator = 0;
 

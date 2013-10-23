@@ -9,7 +9,7 @@
   }
 
   Renderer.prototype = {
-    render: function(time, sim) {
+    callback: function(time, sim) {
       var ctx = this.ctx;
       var particleCount = 0;
       var edgeCount = 0;

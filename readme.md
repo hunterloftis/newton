@@ -4,7 +4,7 @@ An easy-to-use, feature-rich physics engine that's designed from the ground up f
 
 ```js
 var renderer = new Newton.Renderer(document.getElementById('display'));
-var sim = new Newton.Simulator(simulate, renderer.render, 60);
+var sim = new Newton.Simulator(simulate, renderer.callback, 60);
 var particles = new Newton.Body();
 var accumulator = 0;
 
@@ -96,7 +96,7 @@ have a default renderer for quick development. Newton provides one based on Canv
 
 ```js
 var renderer = new Newton.Renderer(document.getElementById('viewport'));
-var sim = new Newton.Simulator(null, renderer);
+var sim = new Newton.Simulator(null, renderer.callback);
 ```
 
 ### Layers and bodies
