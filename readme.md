@@ -83,6 +83,12 @@ var sim = new Newton.Simulator(null, renderer);
 
 ### Layers and bodies
 
+Bodies group related Particles, Edges, and Constraints together into a logical entity.
+The player's character in a game, a vehicle, and a bridge could all be represented as
+Body instances.
+Layers control which Bodies collide with each other. They also provide a mechanism
+for sharing or splitting forces like gravity, wind, or explosions.
+
 #### Newton.Layer
 
 #### Newton.Body
