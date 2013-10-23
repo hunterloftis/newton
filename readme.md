@@ -10,9 +10,9 @@ $ bower install newton
 
 ```js
 
-var sim = new Newton.Simulator(simulate, render, 60);
-var particles = new Newton.Body();
 var renderer = new Newton.Renderer(document.getElementById('viewport'));
+var sim = new Newton.Simulator(simulate, renderer, 60);
+var particles = new Newton.Body();
 
 var particleLayer = sim.createLayer();
 
@@ -29,14 +29,11 @@ function simulate(time) {
   }
 }
 
-function render(time) {
-  renderer.render(sim, time);
-}
 ```
 
 See this [simple demo](http://www.google.com) in action.
 
-## The state of the art
+## State of the art
 
 Until Newton, the best physics libraries available for JavaScript were
 [Box2d](https://github.com/kripken/box2d.js/) and
