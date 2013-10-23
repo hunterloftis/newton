@@ -66,7 +66,7 @@ Newton comes with a simple built-in canvas renderer for development and experime
 you to render any way you like - including Canvas, WebGL, SVG, and CSS. Newton can even run simulations
 in node.js!
 
-### No dependencies; components
+### Bite-sized and dependency-free
 
 Newton is standalone and framework-and-library agnostic. It can be installed as one simple dependency or
 you can pick-and-choose from its three components: Math, Physics, and Primitives.
