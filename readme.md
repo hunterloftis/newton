@@ -38,11 +38,10 @@ Until Newton, the best physics libraries available for JavaScript were
 [Chipmunk](https://github.com/josephg/Chipmunk-js) -
 both of which are JS ports of very capable and popular C++ projects.
 Unfortunately, these ports combine the clarity and conciseness of C++ with the speed of JavaScript.
-Still,
 [CoffeePhysics](https://github.com/soulwire/Coffee-Physics),
 [Verlet-JS](https://github.com/subprotocol/verlet-js), and
 [PhysicsJS](https://github.com/wellcaffeinated/PhysicsJS)
-have failed to supplant these clunky libraries.
+haven't supplanted these C-based libraries for various reasons.
 
 A game-ready HTML5 physics engine should be:
 
