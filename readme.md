@@ -4,21 +4,23 @@ Newton is an easy-to-use, feature-rich physics engine that's designed from the g
 
 ```js
 
-var sim = new Simulator(simulate, render, 60);
-var particles = new Body();
-var renderer = new Renderer(document.getElementById('viewport'));
+var sim = new Newton.Simulator(simulate, render, 60);
+var particles = new Newton.Body();
+var renderer = new Newton.Renderer(document.getElementById('viewport'));
 
 var particleLayer = sim.createLayer();
 
 particleLayer
   .addBody(particles)
-  .addForce(new LinearGravity(Math.PI * 0.5, 0.01, 0))
-  .wrapIn(new Rectangle(0, 0, 640, 480));
+  .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.01, 0))
+  .wrapIn(new Newton.Rectangle(0, 0, 640, 480));
 
 sim.start();
 
 function simulate(time) {
-  while (time--) particles.addParticle(new Particle(Math.random() * 640, 0));
+  while (time--) {
+    particles.addParticle(new Newton.Particle(Math.random() * 640, 0));
+  }
 }
 
 function render(time) {
