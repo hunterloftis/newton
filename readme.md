@@ -170,7 +170,7 @@ each frame, it's convenient to attach a LinearGravity instance to a Layer in the
 
 #### Impulses
 
-Impulses allow programmatic, time-based changes to the velocity of Bodies and Particles.
+Impulses allow programmatic, time-based changes to the velocities of Bodies and Particles.
 They're the 'verb' form of forces.
 
 ```js
@@ -179,6 +179,16 @@ body.applyImpulse(0.1, Math.PI * 0.5, 16);  // applies to all Particles in this 
 ```
 
 #### LinearGravity
+
+Adding a LinearGravity instance to a Layer (A) creates a force that's exerted on all
+Particles in Layers that respond to (A). Useful for gravity, wind.
+
+```js
+var gravity = new LinearGravity(force, direction);
+```
+
+- force: strength of the gravity
+- direction: angle in radians
 
 #### RadialGravity
 
