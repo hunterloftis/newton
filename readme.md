@@ -157,10 +157,10 @@ var body = new Newton.Body(material);   // default for contained Particles and E
 var particle = new Newton.Particle(0, 0, 1, material);  // overrides Body value
 ```
 
-- weight: multiplier for a Particle's mass; optional, default = 1
-- restitution: bounciness of a Particle; optional, default = 1
-- friction: roughness of an Edge; optional, default = 0
-- maxVelocity: determines drag and terminal velocity; optional, default = 100
+- weight: multiplier for a Particle's mass (0 .. N); optional, default = 1
+- restitution: bounciness of a Particle (0 .. 1); optional, default = 1
+- friction: roughness of an Edge; optional (0 .. 1), default = 0
+- maxVelocity: determines drag and terminal velocity (0 .. 1000); optional, default = 100
 
 ### Forces
 
