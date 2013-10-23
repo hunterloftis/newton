@@ -3,22 +3,25 @@
 An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
 ```js
-var renderer = new Newton.Renderer(document.getElementById('viewport'));
-var sim = new Newton.Simulator(simulate, renderer, 60);
+var renderer = new Newton.Renderer(document.getElementById('display'));
+var sim = new Newton.Simulator(simulate, renderer.render, 60);
 var particles = new Newton.Body();
+var accumulator = 0;
 
 var particleLayer = sim.createLayer();
 
 particleLayer
   .addBody(particles)
-  .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.01, 0))
+  .addForce(new Newton.LinearGravity(0, 0.001, 0))
   .wrapIn(new Newton.Rectangle(0, 0, 1280, 450));
 
 sim.start();
 
 function simulate(time) {
-  while (time--) {
-    particles.addParticle(new Newton.Particle(Math.random() * 640, 0, Math.random() * 5 + 1));
+  accumulator += time;
+  while (accumulator > 250) {
+    particles.addParticle(new Newton.Particle(Math.random() * 1280, 10, Math.random() * 5 + 1));
+    accumulator -= 250;
   }
 }
 ```

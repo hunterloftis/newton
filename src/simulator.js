@@ -56,7 +56,7 @@
   };
 
   Simulator.prototype.createLayer = function() {
-    var newLayer = new Layer();
+    var newLayer = new Newton.Layer();
     this.layers.push(newLayer);
     return newLayer;
   };
@@ -73,12 +73,12 @@
       self.accumulator += step;
 
       while (self.accumulator >= self.integrationStep) {
-        self.simulator(self.integrationStep);
+        self.simulator(self.integrationStep, self);
         self.integrate(self.integrationStep);
         self.accumulator -= self.integrationStep;
       }
 
-      self.renderer(step);
+      self.renderer(step, self);
 
       self.frames++;
       if (time >= self.countTime) {

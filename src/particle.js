@@ -5,13 +5,13 @@
     return ((a % b) + b) % b;
   }
 
-  function Particle(x, y, material, size) {
-    this.position = new Vector(x, y);
+  function Particle(x, y, size, material) {
+    this.position = new Newton.Vector(x, y);
     this.lastPosition = this.position.clone();
     this.lastValidPosition = this.position.clone();
-    this.velocity = new Vector(0, 0);
-    this.acceleration = new Vector(0, 0);
-    this.material = material || Material.simple;
+    this.velocity = new Newton.Vector(0, 0);
+    this.acceleration = new Newton.Vector(0, 0);
+    this.material = material || Newton.Material.simple;
     this.size = size || 1.0;
     this.randomDrag = Math.random() * Particle.randomness + 0.0000000001;
   }
@@ -114,7 +114,7 @@
 
   Particle.prototype.attractSquare = function(x, y, m, minDist) {
     var mass = this.getMass();
-    var delta = new Vector(x, y).sub(this.position);
+    var delta = new Newton.Vector(x, y).sub(this.position);
     var r = Math.max(delta.getLength(), minDist || 1);
     var f = (m * mass) / (r * r);
     var ratio = m / (m + mass);

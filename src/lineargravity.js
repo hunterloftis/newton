@@ -3,7 +3,7 @@
   function LinearGravity(angle, strength, falloff) {
     this.angle = angle;
     this.strength = strength;
-    this.vector = new Vector(0, strength).rotate(angle);
+    this.vector = new Newton.Vector(0, strength).rotate(angle);
   }
 
   LinearGravity.prototype.setAngle = function(angle) {

@@ -1,13 +1,15 @@
 ;(function() {
 
   function Renderer(el) {
+    var self = this;
     this.ctx = el.getContext('2d');
     this.width = el.width;
     this.height = el.height;
+    this.render = this.render.bind(this); // TODO: shim for Function.bind
   }
 
   Renderer.prototype = {
-    render: function(sim, time) {
+    render: function(time, sim) {
       var ctx = this.ctx;
       var particleCount = 0;
       var edgeCount = 0;

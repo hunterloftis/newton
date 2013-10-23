@@ -6,7 +6,7 @@
   }
 
   Vector.prototype.clone = function() {
-    return new Vector(this.x, this.y);
+    return new Newton.Vector(this.x, this.y);
   };
 
   Vector.prototype.copy = function(v) {

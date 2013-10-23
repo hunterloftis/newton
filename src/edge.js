@@ -43,7 +43,7 @@
   };
 
   Edge.prototype.getRepelled = function(x, y) {
-    return new Vector(x, y).add(this.normal);
+    return new Newton.Vector(x, y).add(this.normal);
   };
 
   Edge.prototype.getProjection = function(vector) {
