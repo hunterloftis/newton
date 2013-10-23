@@ -34,8 +34,8 @@ $ bower install newton
 ## Philosophy
 
 I started Newton after struggling to find a physics engine
-that was powerful enough to complete my physics-based project
-without feeling like I was programming in C++.
+with a normal, simple JavaScript API that was also
+powerful enough to complete my non-trivial physics-based project.
 
 Until Newton, the best physics libraries available for JavaScript were
 [Box2d](https://github.com/kripken/box2d.js/) and
