@@ -133,6 +133,32 @@ Bodies group related Particles, Edges, and Constraints together into logical ent
 The player's character in a game, a vehicle, and a bridge could all be represented as
 instances of Body.
 
+```js
+var body = new Newton.Body();
+
+body
+  .addParticle(particle)
+  .addEdge(edge);
+```
+
+#### Newton.Material
+
+Materials determine the reactions of colliding objects.
+
+```js
+var material = new Newton.Material({
+  weight: 2,
+  restitution: 0.5,
+  friction: 0.2,
+  maxVelocity: 50
+});
+```
+
+- weight: multiplier for a Particle's mass; optional, default = 1
+- restitution: bounciness of a Particle; optional, default = 1
+- friction: roughness of an Edge; optional, default = 0
+- maxVelocity: determines drag and terminal velocity; optional, default = 100
+
 ### Forces
 
 #### LinearGravity
