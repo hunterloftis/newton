@@ -113,16 +113,16 @@ envLayer                // shared forces like gravity
   .addForce(gravity);
 
 fixedLayer              // responds to no forces, no collisions
-  .watch([])
+  .respondTo([])
   .addBody(terrain);
 
 playerLayer             // responds to forces and collisions on all layers
   .addBody(player)
-  .watch([playerLayer, fixedLayer, envLayer]);
+  .respondTo([playerLayer, fixedLayer, envLayer]);
 
 ```
 
-By default, Layers watch themselves, eg: `layer.watch([layer])`.
+By default, Layers respond to themselves, eg: `layer.respondTo([layer])`.
 
 #### Newton.Body
 
