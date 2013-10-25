@@ -36,15 +36,16 @@
     },
     drawForces: function(ctx, forces) {
       ctx.save();
-      ctx.lineWidth = 10;
-      ctx.strokeStyle = 'rgba(255, 255, 0, 0.15)';
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
 
       for (var i = 0, ilen = forces.length; i < ilen; i++) {
         var force = forces[i];
         if (force instanceof Newton.RadialGravity) {
           ctx.beginPath();
           ctx.arc(force.x, force.y, force.strength * force.strength * 0.5, 0, 2 * Math.PI, false);
-          ctx.stroke();
+          ctx.fill();
         }
       }
 
