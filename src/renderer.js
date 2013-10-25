@@ -14,13 +14,17 @@
       var ctx = this.ctx;
       var particleCount = 0;
       var edgeCount = 0;
+
       this.clear(ctx, time);
+
       for (var i = 0, ilen = sim.layers.length; i < ilen; i++) {
         for (var j = 0, jlen = sim.layers[i].bodies.length; j < jlen; j++) {
           particleCount += this.drawParticles(ctx, sim.layers[i].bodies[j].particles);
           edgeCount += this.drawEdges(ctx, sim.layers[i].bodies[j].edges);
         }
+        this.drawForces(ctx, sim.layers[i].forces);
       }
+
       this.drawCounts(ctx, particleCount, edgeCount);
       this.drawFPS(ctx, sim);
     },
@@ -28,6 +32,22 @@
       ctx.save();
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, this.width, this.height);
+      ctx.restore();
+    },
+    drawForces: function(ctx, forces) {
+      ctx.save();
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(255, 255, 0, 0.15)';
+
+      for (var i = 0, ilen = forces.length; i < ilen; i++) {
+        var force = forces[i];
+        if (force instanceof Newton.RadialGravity) {
+          ctx.beginPath();
+          ctx.arc(force.x, force.y, force.strength * force.strength * 0.5, 0, 2 * Math.PI, false);
+          ctx.stroke();
+        }
+      }
+
       ctx.restore();
     },
     drawParticles: function(ctx, particles) {
