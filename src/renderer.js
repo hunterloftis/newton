@@ -37,8 +37,8 @@
     drawForces: function(ctx, forces) {
       ctx.save();
       ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
 
       for (var i = 0, ilen = forces.length; i < ilen; i++) {
         var force = forces[i];
