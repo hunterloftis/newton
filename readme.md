@@ -213,7 +213,7 @@ Constraints can be applied between Particles of the same Body
 or between Particles on different Bodies.
 For example, you may want to build a fabric flag as a single Body
 using a mesh of Particles with Distance constraints,
-but you might also use a Distance constraint to hang that flag from a different Body.
+but you might also use a Distance constraint to connect the flag to a different Body.
 
 #### Newton.DistanceConstraint
 
