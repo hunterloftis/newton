@@ -3,7 +3,8 @@
   function Renderer(el) {
     if (!(this instanceof Renderer)) return new Renderer(el);
     var self = this;
-    this.ctx = el.getContext('2d');
+    this.el = el;
+    this.ctx = this.el.getContext('2d');
     this.width = el.width;
     this.height = el.height;
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
@@ -31,7 +32,7 @@
     clear: function(ctx, time) {
       ctx.save();
       ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.fillRect(0, 0, this.el.width, this.el.height);
       ctx.restore();
     },
     drawForces: function(ctx, forces) {
