@@ -92,7 +92,7 @@ function renderFn(time, simulator) {}
 
 - simulateFn: callback for simulation logic; optional
 - renderFn: callback for drawing the scene; optional
-- simulationFps: number of frames per second for the fixed time step; optional, defaults to 60
+- simulationFps: Number of frames per second for the fixed time step; optional, defaults to 60
 
 #### Newton.Renderer
 
@@ -153,16 +153,16 @@ body
 
 #### Newton.Particle
 
-All physics in newton are fundamentally based on Particles.
+All physics in newton are based on simple Particles.
 
 ```js
 var particle = Newton.Particle(x, y, size, material);
 ```
 
-- x: number
-- y: number
-- size: number; optional, default = 1, typical range = 1 - 10
-- material: number; optional, default = bodymaterial || Material.simple
+- x: Number
+- y: Number
+- size: Number; optional, default = 1, typical range = 1 - 10
+- material: Number; optional, default = bodymaterial || Material.simple
 
 #### Newton.Edge
 
@@ -170,7 +170,7 @@ An Edge is a one-way wall.
 Each end of an Edge is attached to a Particle.
 
 The direction of the Edge controls which side is passable and which side is blocked.
-Closed shapes are defined in a clockwise order.
+If you define a shape clockwise, the edge will point outwards.
 For example, an Edge from (0, 0) to (100, 0) will act as a floor,
 while an Edge from (100, 0) to (0, 0) will act as a ceiling.
 
@@ -184,7 +184,7 @@ var edge = Newton.Edge(fromParticle, toParticle, material);
 
 #### Newton.Material
 
-Materials determine how colliding objects react.
+Materials determine how objects move (mass, drag) and how colliding objects react.
 
 ```js
 var material = Newton.Material({
@@ -214,7 +214,19 @@ For example, you may want to hang one body (a lamp) from another body (a ceiling
 
 #### Newton.DistanceConstraint
 
+```js
+var constraint = Newton.DistanceConstraint(particle1, particle2, distance, stiffness, strength);
+```
+
+- particle1: [Particle](#newtonparticle)
+- particle2: [Particle](#newtonparticle)
+- distance: Number, the target distance between the two Particles
+- stiffness: Number, lower is more springy higher is more stiff; optional, default = 1, reasonable = 0.1 - 2
+- strength: Number, the tensile strength before breaking; optional, default = 0 (unbreakable), reasonable = 0 - 100
+
 #### Newton.AngleConstraint
+
+### Newton.PinConstraint
 
 ### Forces
 
