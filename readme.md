@@ -225,7 +225,7 @@ var constraint = Newton.DistanceConstraint(particle1, particle2, distance, stiff
 - particle2: [Particle](#newtonparticle)
 - distance: Number, the target distance between the two Particles
 - stiffness: Number, lower is more springy higher is more stiff; optional, default = 1, reasonable = 0.1 - 2
-- strength: Number, the tensile strength before breaking; optional, default = 0 (unbreakable), reasonable = 0 - 100
+- strength: Number, breaking tensile strength; optional, default = 0 (unbreakable), reasonable = 0 - 100
 
 #### Newton.AngleConstraint
 
