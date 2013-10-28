@@ -72,6 +72,21 @@ Newton on twitter: [@hunterloftis](http://twitter.com/hunterloftis)
 
 ## API Reference
 
+- [Simulator](#newtonsimulator)
+- [Renderer](#newtonrenderer)
+- [Layer](#newtonlayer)
+- [Body](#newtonbody)
+- [Particle](#newtonparticle)
+- [Edge](#newtonedge)
+- [Material](#newtonmaterial)
+- [DistanceConstraint](#newtondistanceconstraint)
+- [AngleConstraint](#newtonangleconstraint)
+- [PinConstraint](#newtonpinconstraint)
+- [LinearGravity](#newtonlineargravity)
+- [RadialGravity](#newtonradialgravity)
+- [Vector](#newtonvector)
+- [Rectangle](#newtonrectangle)
+
 ### The loop
 
 At its core, Newton is a loop that periodically calls two callbacks: `simulate` and `render`.
