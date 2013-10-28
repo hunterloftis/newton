@@ -225,7 +225,8 @@ but you might also use a Distance constraint to connect the flag to a different 
 
 A DistanceConstraint keeps two particles at a specified distance from one another.
 The constraint behaves like a spring but can also be hard, like a metal girder, with a high stiffness.
-For example, ropes, bridges, and fabric can all be made with DistanceConstraints.
+Ropes, bridges, and fabric can all be made with DistanceConstraints.
+DistanceConstraints can optionally be set to break under sufficient pulling force.
 
 ```js
 var constraint = Newton.DistanceConstraint(particle1, particle2, distance, stiffness, strength);
