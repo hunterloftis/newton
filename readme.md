@@ -68,6 +68,8 @@ A game-ready HTML5 physics engine should be:
 
 Read all the [nerdy details](#the-nerdy-details) about how Newton accomplishes these goals.
 
+Newton on twitter: [@hunterloftis](http://twitter.com/hunterloftis)
+
 ## API Reference
 
 ### The loop
