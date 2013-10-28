@@ -153,7 +153,34 @@ body
 
 #### Newton.Particle
 
+All physics in newton are fundamentally based on Particles.
+
+```js
+var particle = Newton.Particle(x, y, size, material);
+```
+
+- x: number
+- y: number
+- size: number; optional, default = 1, typical range = 1 - 10
+- material: number; optional, default = bodymaterial || Material.simple
+
 #### Newton.Edge
+
+An Edge is a one-way wall.
+Each end of an Edge is attached to a Particle.
+
+The direction of the Edge controls which side is passable and which side is blocked.
+Closed shapes are defined in a clockwise order.
+For example, an Edge from (0, 0) to (100, 0) will act as a floor,
+while an Edge from (100, 0) to (0, 0) will act as a ceiling.
+
+```js
+var edge = Newton.Edge(fromParticle, toParticle, material);
+```
+
+- fromParticle: [Newton.Particle](#newtonparticle)
+- toParticle: [Newton.Particle](#newtonparticle)
+- material: [Newton.Material](#newtonmaterial); optional, default = Body material || Material.simple
 
 #### Newton.Material
 
