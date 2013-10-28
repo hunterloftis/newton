@@ -209,8 +209,11 @@ Sometimes you need to constrain a Particle's range of motion.
 You may want two Particles to stay a certain distance apart, or to maintain a particular angle of separation.
 With Constraints, you can compose Particles and Edges into more complex structures like boxes, ropes, and wheels.
 
-Constraints can also be applied between Bodies.
-For example, you may want to hang one body (a lamp) from another body (a ceiling) with a DistanceConstraint.
+Constraints can be applied between Particles of the same Body
+or between Particles on different Bodies.
+For example, you may want to build a fabric flag as a single Body
+using a mesh of Particles with Distance constraints,
+but you might also use a Distance constraint to hang that flag from a different Body.
 
 #### Newton.DistanceConstraint
 
