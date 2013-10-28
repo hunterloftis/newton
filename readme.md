@@ -68,7 +68,7 @@ A game-ready HTML5 physics engine should be:
 
 Read all the [nerdy details](#the-nerdy-details) about how Newton accomplishes these goals.
 
-Newton on twitter: [@hunterloftis](http://twitter.com/hunterloftis)
+Follow newton developments on twitter: [@hunterloftis](http://twitter.com/hunterloftis)
 
 ## API Reference
 
@@ -222,6 +222,10 @@ using a mesh of Particles with Distance constraints,
 but you might also use a Distance constraint to connect the flag to a different Body.
 
 #### Newton.DistanceConstraint
+
+A DistanceConstraint keeps two particles at the same distance from one another.
+The constraint behaves like a spring but can also be hard, like a metal girder, with a high stiffness.
+For example, ropes, bridges, and fabric can all be made with DistanceConstraints.
 
 ```js
 var constraint = Newton.DistanceConstraint(particle1, particle2, distance, stiffness, strength);
