@@ -61,7 +61,6 @@
     var particles = this.cachedParticles;
     var forces = this.cachedForces;
 
-    debugger;
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
       for (var j = 0, jlen = forces.length; j < jlen; j++) {

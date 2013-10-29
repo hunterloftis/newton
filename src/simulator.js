@@ -35,7 +35,8 @@
       this.layers[i].collect(time);
       this.layers[i].integrate(time);
     }
-    for (j = 0; j < jlen; jlen++) {
+
+    for (j = 0; j < jlen; j++) {
       for (i = 0; i < ilen; i++) this.layers[i].constrain(time);
       for (i = 0; i < ilen; i++) this.layers[i].collide(time);
     }
