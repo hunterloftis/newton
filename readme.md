@@ -36,6 +36,8 @@ See this
 
 ## Installation
 
+(waiting for Bower to manually update its newton package)
+
 ```
 $ bower install newton
 ```
@@ -96,9 +98,9 @@ function simulateFn(time, simulator) {}
 function renderFn(time, simulator) {}
 ```
 
-- simulateFn: callback for simulation logic; optional
-- renderFn: callback for drawing the scene; optional
-- simulationFps: Number of frames per second for the fixed time step; optional, defaults to 60
+- simulateFn: Function, callback for simulation logic; optional
+- renderFn: Function, callback for drawing the scene; optional
+- simulationFps: Number, frames per second for the fixed time step; optional, defaults to 60
 
 #### Newton.Renderer
 
@@ -204,10 +206,10 @@ var body = Newton.Body(material);   // default for contained Particles and Edges
 var particle = Newton.Particle(0, 0, 1, material);  // overrides Body value
 ```
 
-- weight: multiplier for a Particle's mass (0 .. N); optional, default = 1
-- restitution: bounciness of a Particle (0 .. 1); optional, default = 1
-- friction: roughness of an Edge; optional (0 .. 1), default = 0
-- maxVelocity: determines drag and terminal velocity (0 .. 1000); optional, default = 100
+- weight: Number, multiplier for a Particle's mass (0 .. N); optional, default = 1
+- restitution: Number, bounciness of a Particle (0 .. 1); optional, default = 1
+- friction: Number, roughness of an Edge; optional (0 .. 1), default = 0
+- maxVelocity: Number, determines drag and terminal velocity (0 .. 1000); optional, default = 100
 
 ### Constraints
 
@@ -217,11 +219,11 @@ With Constraints, you can compose Particles and Edges into more complex structur
 
 Constraints can be applied between Particles of the same Body
 or between Particles on different Bodies.
-For example, you may want to build a fabric flag as a single Body
+For example, you may want to build a fabric Body
 using a mesh of Particles with Distance constraints,
-but you might also use a Distance constraint to connect the flag to a different Body.
+but you might also use a Distance constraint to connect the fabric to a different Body.
 
-#### Newton.DistanceConstraint
+#### Particle.DistanceConstraint
 
 A DistanceConstraint keeps two particles at a specified distance from one another.
 The constraint behaves like a spring but can also be hard, like a metal girder, with a high stiffness.
@@ -230,18 +232,44 @@ Ropes, bridges, and fabric can all be made with DistanceConstraints.
 DistanceConstraints can optionally be set to break under sufficient pulling force.
 
 ```js
-var constraint = Newton.DistanceConstraint(particle1, particle2, distance, stiffness, strength);
+var constraint = particle.DistanceConstraint(toParticle, distance, stiffness, strength);
 ```
 
-- particle1: [Particle](#newtonparticle)
-- particle2: [Particle](#newtonparticle)
+- toParticle: [Particle](#newtonparticle)
 - distance: Number, the target distance between the two Particles
 - stiffness: Number, lower is more springy higher is more stiff; optional, default = 1, reasonable = 0.1 - 2
 - strength: Number, breaking tensile strength; optional, default = 0 (unbreakable), reasonable = 0 - 100
 
-#### Newton.AngleConstraint
+#### Particle.AngleConstraint
 
-### Newton.PinConstraint
+An AngleConstraint keeps two particles (anchors) at a specified angle from each other with respect to a third particle.
+AngleConstraints can be used in conjunction with DistanceConstraints to construct objects like
+boxes, ragdolls, polygons, and wheels.
+
+```js
+var constraint = particle.AngleConstraint(anchor1, anchor2, angle, stiffness, strength);
+```
+
+- anchor1: [Particle](#newtonparticle)
+- anchor2: [Particle](#newtonparticle)
+- angle: Number, radians of the angle between anchor1 and anchor2
+- stiffness: Number, lower is more springy higher is more stuff; optional, default = 1, reasonable = 0.1 - 2
+- strength: Number, breaking rotational strength; optional, default = 0 (unbreakable), reasonable = 0 - 100
+
+#### Newton.PinConstraint
+
+A PinConstraint keeps a particle fixed in place regardless of outside forces.
+
+Optionally, a breaking strength can be supplied to destroy the constraint.
+Otherwise, the PinConstraint is unbreakable.
+
+```js
+var constraint = particle.PinConstraint(x, y, strength);
+```
+
+- x: Number
+- y: Number
+- strength: Number, breaking strength; optional, default = 0 (unbreakable), reasonable = 0 - 100
 
 ### Forces
 
@@ -263,8 +291,8 @@ body.applyImpulse(0.1, Math.PI * 0.5, 16);  // applies to all Particles in this 
 
 #### LinearGravity
 
-Adding a LinearGravity instance to a Layer (A) creates a force that's exerted on all
-Particles in Layers that respond to (A). Useful for gravity, wind.
+Adding a LinearGravity instance to a Layer creates a force that's exerted on all
+Particles in that Layer (and in Layers that [respondTo](#newtonlayer) that layer).
 
 ```js
 var gravity = new LinearGravity(force, direction);
@@ -273,9 +301,13 @@ layer.addForce(gravity);
 ```
 
 - force: strength of the gravity
-- direction: angle in radians
+- direction: angle in radians (0 = down)
 
 #### RadialGravity
+
+#### LinearForce
+
+#### RadialForce
 
 ### Math primitives
 

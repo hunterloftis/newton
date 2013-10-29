@@ -44,8 +44,6 @@
     particles = [];
     edges = [];
 
-    // TODO: figure out how to manage all these different overlapping groups
-
     for (i = 0, ilen = this.bodies.length; i < ilen; i++) {
       particles = particles.concat(this.bodies[i].particles);
     }
