@@ -6,6 +6,12 @@
     this.forces = [];
     this.watchedLayers = [this];
     this.wrapper = undefined;
+
+    // TODO: add flags when things change to invalidate these caches
+    // instead of invalidating them at the beginning of every frame
+    this.cachedParticles = [];
+    this.cachedForces =
+    this.cachedEdges = [];
   }
 
   Layer.prototype.respondTo = function(layers) {
@@ -28,42 +34,58 @@
     return this;
   };
 
-  // TODO: cache or precompute all these lookups and collations
-  Layer.prototype.integrate = function(time) {
-    var i, ilen, j, jlen, forces, particles, particle, edges;
+  // TODO: measure the performance impact of these collations
+  Layer.prototype.collect = function(time) {
+    var particles = this.cachedParticles;
+    var forces = this.cachedForces;
+    var edges = this.cachedEdges;
+    var bodies = this.bodies;
+    var watched = this.watchedLayers;
+    var i, ilen, j, jlen;
 
-    // find all watched forces & local forces
-    // find all watched particles & edges
-    // loop through all particles and:
-    // - apply forces to it
-    // - integrate it
-    // - wrap it
-    // - find and resolve edge collisions (TODO)
+    particles.length = forces.length = edges.length = 0;
 
-    forces = [];
-    particles = [];
-    edges = [];
-
-    for (i = 0, ilen = this.bodies.length; i < ilen; i++) {
-      particles = particles.concat(this.bodies[i].particles);
+    for (i = 0, ilen = bodies.length; i < ilen; i++) {
+      particles = particles.concat(bodies[i].particles);
     }
 
     for (i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
-      forces = forces.concat(this.watchedLayers[i].forces);
-      for (var j = 0, jlen = this.watchedLayers[i].bodies.length; j < jlen; j++) {
-        edges = edges.concat(this.watchedLayers[i].bodies[j].edges);
+      forces = forces.concat(watched[i].forces);
+      for (i = 0, jlen = watched[i].bodies.length; j < jlen; j++) {
+        edges = edges.concat(watched[i].bodies[j].edges);
       }
     }
+  };
 
-    for (i = 0, ilen = particles.length; i < ilen; i++) {
+  Layer.prototype.integrate = function(time) {
+    var particles = this.cachedParticles;
+    var forces = this.cachedForces;
+
+    debugger;
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
-      for (j = 0, jlen = forces.length; j < jlen; j++) {
+      for (var j = 0, jlen = forces.length; j < jlen; j++) {
         forces[j].applyTo(particle);
       }
       particle.integrate(time);
-      if (this.wrapper) particle.wrap(this.wrapper);
+    }
+  };
 
-      particle.collide(edges);  // TODO: asymmetrical collision resolution
+  Layer.prototype.constrain = function(time) {
+    var particles = this.cachedParticles;
+
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
+      if (this.wrapper) particles[i].wrap(this.wrapper);
+    }
+  };
+
+  // TODO: right now this will check for particle -> edge collisions but not edge -> particle collisions
+  Layer.prototype.collide = function(time) {
+    var particles = this.cachedParticles;
+    var edges = this.cachedEdges;
+
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
+      particle.collide(edges);
     }
   };
 

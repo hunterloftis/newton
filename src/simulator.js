@@ -1,6 +1,6 @@
 ;(function() {
 
-  function Simulator(simulator, renderer, integrationFps) {
+  function Simulator(simulator, renderer, integrationFps, iterations) {
     if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
     this.simulator = simulator;
     this.renderer = renderer;
@@ -14,6 +14,7 @@
     this.accumulator = 0;
     this.integrationStep = 1000 / (integrationFps || 60);
     this.layers = [];
+    this.iterations = iterations || 3;
   }
 
   Simulator.prototype.start = function() {
@@ -27,8 +28,16 @@
   };
 
   Simulator.prototype.integrate = function(time) {
-    for (var i = 0, ilen = this.layers.length; i < ilen; i++) {
+    var i, ilen = this.layers.length;
+    var j, jlen = this.iterations;
+
+    for (i = 0; i < ilen; i++) {
+      this.layers[i].collect(time);
       this.layers[i].integrate(time);
+    }
+    for (j = 0; j < jlen; jlen++) {
+      for (i = 0; i < ilen; i++) this.layers[i].constrain(time);
+      for (i = 0; i < ilen; i++) this.layers[i].collide(time);
     }
   };
 
