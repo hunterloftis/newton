@@ -32,13 +32,13 @@
     var j, jlen = this.iterations;
 
     for (i = 0; i < ilen; i++) {
-      this.layers[i].collect(time);
-      this.layers[i].integrate(time);
+      this.layers[i].collect(time);     // First, figure out which physical objects we're manipulating for each layer
+      this.layers[i].integrate(time);   // Then integrate the layer's particles over time
     }
 
-    for (j = 0; j < jlen; j++) {
-      for (i = 0; i < ilen; i++) this.layers[i].constrain(time);
-      for (i = 0; i < ilen; i++) this.layers[i].collide(time);
+    for (j = 0; j < jlen; j++) {                                  // More iterations simulates with greater accuracy at the cost of time
+      for (i = 0; i < ilen; i++) this.layers[i].constrain(time);  // Apply each particle's constraints
+      for (i = 0; i < ilen; i++) this.layers[i].collide(time);    // Resolve collisions
     }
   };
 

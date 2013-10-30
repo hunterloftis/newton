@@ -53,7 +53,7 @@
 
     for (i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
       forces.push.apply(forces, watched[i].forces);                   // TODO: ditto
-      for (i = 0, jlen = watched[i].bodies.length; j < jlen; j++) {
+      for (j = 0, jlen = watched[i].bodies.length; j < jlen; j++) {
         edges.push.apply(edges, watched[i].bodies[j].edges);          // TODO: ditto
       }
     }
