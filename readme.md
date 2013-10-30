@@ -34,6 +34,8 @@ See this
 [simple demo](http://hunterloftis.github.io/newton/examples/simple) in action or check out
 [more examples](#examples).
 
+## Status
+
 Newton was posted on Hacker News and has since been trending on Github.
 This is great, but Newton is still in very early development and the docs are outpacing the implementation.
 Please be patient as we get everything feature-complete. We're using Newton in projects too so there's a lot of momentum here!
