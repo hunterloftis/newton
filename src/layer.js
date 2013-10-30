@@ -10,7 +10,7 @@
     // TODO: add flags when things change to invalidate these caches
     // instead of invalidating them at the beginning of every frame
     this.cachedParticles = [];
-    this.cachedForces =
+    this.cachedForces = [];
     this.cachedEdges = [];
   }
 
@@ -43,16 +43,18 @@
     var watched = this.watchedLayers;
     var i, ilen, j, jlen;
 
-    particles.length = forces.length = edges.length = 0;
+    particles.length = 0;
+    forces.length = 0;
+    edges.length = 0;
 
     for (i = 0, ilen = bodies.length; i < ilen; i++) {
-      particles = particles.concat(bodies[i].particles);
+      particles.push.apply(particles, bodies[i].particles); // TODO: figure out if this is faster or slower than using concat and incurring GC penalties
     }
 
     for (i = 0, ilen = this.watchedLayers.length; i < ilen; i++) {
-      forces = forces.concat(watched[i].forces);
+      forces.push.apply(forces, watched[i].forces);                   // TODO: ditto
       for (i = 0, jlen = watched[i].bodies.length; j < jlen; j++) {
-        edges = edges.concat(watched[i].bodies[j].edges);
+        edges.push.apply(edges, watched[i].bodies[j].edges);          // TODO: ditto
       }
     }
   };
