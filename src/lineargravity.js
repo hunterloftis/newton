@@ -1,5 +1,7 @@
 ;(function() {
 
+  'use strict'
+
   function LinearGravity(angle, strength, falloff) {
     if (!(this instanceof LinearGravity)) return new LinearGravity(angle, strength, falloff);
     this.angle = angle;

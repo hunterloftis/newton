@@ -1,5 +1,7 @@
 ;(function() {
 
+  'use strict'
+
   function Simulator(simulator, renderer, integrationFps, iterations) {
     if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
     this.simulator = simulator;

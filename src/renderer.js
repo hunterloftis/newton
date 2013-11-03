@@ -1,5 +1,7 @@
 ;(function() {
 
+  'use strict'
+
   function Renderer(el) {
     if (!(this instanceof Renderer)) return new Renderer(el);
     var self = this;

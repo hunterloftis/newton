@@ -1,5 +1,7 @@
 ;(function() {
 
+  'use strict'
+
   function Edge(p1, p2, material) {
     if (!(this instanceof Edge)) return new Edge(p1, p2, material);
     this.p1 = p1;

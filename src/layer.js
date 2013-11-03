@@ -1,5 +1,7 @@
 ;(function() {
 
+  'use strict'
+
   function Layer() {
     if (!(this instanceof Layer)) return new Layer();
     this.bodies = [];
@@ -62,6 +64,7 @@
   Layer.prototype.integrate = function(time) {
     var particles = this.cachedParticles;
     var forces = this.cachedForces;
+    var particle;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
@@ -86,7 +89,7 @@
     var edges = this.cachedEdges;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
-      particle.collide(edges);
+      particles[i].collide(edges);
     }
   };
 

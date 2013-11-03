@@ -1,5 +1,7 @@
 ;(function() {
 
+  'use strict'
+
   function Rectangle(left, top, right, bottom) {
     if (!(this instanceof Rectangle)) return new Rectangle(left, top, right, bottom);
     this.set.apply(this, arguments);
