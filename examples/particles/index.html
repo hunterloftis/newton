@@ -7,7 +7,7 @@
 <body>
 
 <div class='wrap'>
-  <canvas id="display" width="1280" height="450"></canvas>
+  <div id="display"></div>
   <p class='caption'>
     Create particles by drawing with your mouse. Newton can maintain high framerates with hundreds of objects.
   </p>
@@ -32,6 +32,7 @@
 </div>
 
 <script type="text/javascript" src="../../vendor/jquery-2.0.3.js"></script>
+<script type="text/javascript" src="../../vendor/pixi-1.0.3.js"></script>
 
 <script src='../../src/frame.js'></script>
 <script src='../../src/vector.js'></script>
@@ -47,6 +48,7 @@
 
 <script src='../../src/simulator.js'></script>
 <script src='../../src/renderer.js'></script>
+<script src='../../src/pixirenderer.js'></script>
 
 <script>
 
@@ -68,13 +70,13 @@
 
   function createSimulation() {
     var $display = $('#display');
-    var width = $display.width();
-    var height = $display.height();
+    var width = 1280;
+    var height = 480;
 
     particleMaterial = new Newton.Material();
     wallMaterial = new Newton.Material();
 
-    renderer = new Newton.Renderer($display[0]);
+    renderer = new Newton.PixiRenderer($display[0], width, height);
     sim = new Newton.Simulator(simulate, renderer.callback, 60);
     walls = createWalls();
     particles = new Newton.Body(particleMaterial);
