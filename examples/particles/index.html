@@ -75,7 +75,7 @@
     wallMaterial = new Newton.Material();
 
     renderer = new Newton.Renderer($display[0]);
-    sim = new Newton.Simulator(simulate, renderer.callback, 60);
+    sim = new Newton.Simulator(simulate, renderer.callback, 60, 1);
     walls = createWalls();
     particles = new Newton.Body(particleMaterial);
     gravity = new Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
@@ -108,7 +108,7 @@
   }
 
   function simulate(time) {
-    if (mouseDown) addParticles(radial.x, radial.y, time);
+    if (mouseDown) addParticles(radial.x, radial.y, 1);
   }
 
 
