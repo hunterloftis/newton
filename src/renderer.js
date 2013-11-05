@@ -68,7 +68,12 @@
 
         ctx.beginPath();
         ctx.lineWidth = mass;
-        ctx.strokeStyle = 'rgba(' + [255, 28 + brightness, 108 + brightness].join(',') + ', 1)';
+        if (particle.colliding) {
+          ctx.strokeStyle = 'rgba(255, 255, 100, 1)';
+        }
+        else {
+          ctx.strokeStyle = 'rgba(' + [255, 28 + brightness, 108 + brightness].join(',') + ', 1)';
+        }
         ctx.moveTo(last.x, last.y);
         ctx.lineTo(pos.x, pos.y + 2);
         ctx.stroke();

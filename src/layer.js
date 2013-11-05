@@ -76,6 +76,7 @@
   };
 
   Layer.prototype.constrain = function(time) {
+    return;
     var particles = this.cachedParticles;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {

@@ -1,3 +1,5 @@
+var intersections = 0;
+
 ;(function() {
 
   'use strict'
@@ -17,6 +19,8 @@
     this.material = material || Newton.Material.simple;
     this.size = size || 1.0;
     this.randomDrag = Math.random() * Particle.randomness + 0.0000000001;
+
+    this.colliding = false;
   }
 
   Particle.randomness = 25;
@@ -50,6 +54,8 @@
 
     // Reset last valid position after integration
     this.lastValidPosition.copy(this.lastPosition);
+
+    this.colliding = false;
   };
 
   Particle.prototype.placeAt = function(x, y) {
@@ -143,6 +149,8 @@
         this.position.x, this.position.y);
 
       if (intersect) {
+        //debugger
+
         dx = intersect.x - this.lastPosition.x;
         dy = intersect.y - this.lastPosition.y;
         if (nearest) {
@@ -170,6 +178,7 @@
       }
     }
     if (nearest) {
+
       var velocity = this.position.clone().sub(this.lastPosition);
       var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
       var reflectedVelocity = nearest.wall.getReflection(velocity, this.material.restitution);
@@ -177,6 +186,8 @@
       this.position.copy(bouncePoint);
       this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
       this.lastValidPosition = bouncePoint;
+
+      this.colliding = true;
 
       return nearest;
     }

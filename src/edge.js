@@ -64,12 +64,12 @@
   }
 
   Edge.prototype.findIntersection = function(x1, y1, x2, y2) {
+    // TODO: determine whether or not it's moving into or out of this one-way edge!
+
     var bounds1 = this.bounds;
     var bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
 
     if (!bounds1.overlaps(bounds2)) return false;
-
-  //  debugger;
 
     var l1 = this.getAbc();
     var l2 = Edge.getAbc(x1, y1, x2, y2);

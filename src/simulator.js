@@ -42,6 +42,7 @@
       for (i = 0; i < ilen; i++) this.layers[i].constrain(time);  // Apply each particle's constraints
       for (i = 0; i < ilen; i++) this.layers[i].collide(time);    // Resolve collisions
     }
+
   };
 
   Simulator.prototype.Layer = function() {

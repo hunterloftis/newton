@@ -116,6 +116,7 @@
 
   function addParticles(x, y, n) {
     for (var i = 0; i < n; i++) {
+      //if (particles.particles.length) return;
       var newParticle = createRandom(x, y, 50);
       particles.addParticle(newParticle);
     }
