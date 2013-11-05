@@ -1,0 +1,29 @@
+{
+  "name": "newton",
+  "devDependencies": {
+    "jquery": "2.0.3"
+  },
+  "main": "newton.js",
+  "version": "0.0.0",
+  "authors": [
+    "Hunter Loftis <hunter@hunterloftis.com>"
+  ],
+  "description": "An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.",
+  "keywords": [
+    "physics",
+    "simulation",
+    "game",
+    "animation",
+    "box2d",
+    "verlet",
+    "integrator"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
