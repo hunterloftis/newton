@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   function Body(material) {
     if (!(this instanceof Body)) return new Body(material);
     this.particles = [];

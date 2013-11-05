@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   function Layer() {
     if (!(this instanceof Layer)) return new Layer();
     this.bodies = [];

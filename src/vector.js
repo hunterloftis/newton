@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   function Vector(x, y) {
     if (!(this instanceof Vector)) return new Vector(x, y);
     this.x = x;

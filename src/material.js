@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   function Material(options) {
     if (!(this instanceof Material)) return new Material(options);
     options = options || {};

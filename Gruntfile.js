@@ -17,7 +17,8 @@ module.exports = function(grunt) {
             beautify: {
               width: 80,
               beautify: true
-            }
+            },
+            mangle: false
           }
         }
       }

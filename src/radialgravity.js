@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   function RadialGravity(x, y, strength, falloff) {
     if (!(this instanceof RadialGravity)) return new RadialGravity(x, y, strength, falloff);
     this.x = x;

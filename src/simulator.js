@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   function Simulator(simulator, renderer, integrationFps) {
     if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
     this.simulator = simulator;
@@ -19,7 +21,7 @@
   Simulator.prototype.start = function() {
     this.running = true;
     this.countTime = Date.now() + 1000;
-    requestAnimationFrame(this.step);
+    Newton.frame(this.step);
   };
 
   Simulator.prototype.stop = function() {
@@ -65,7 +67,7 @@
       }
 
       self.lastTime = time;
-      requestAnimationFrame(self.step);
+      Newton.frame(self.step);
     };
   };
 

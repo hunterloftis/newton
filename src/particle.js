@@ -1,5 +1,7 @@
 ;(function(Newton) {
 
+  'use strict';
+
   // Corrected modulo
   function mod(a, b) {
     return ((a % b) + b) % b;
