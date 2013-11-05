@@ -217,7 +217,7 @@
             fill: "#ffffff",
             font: "10pt Helvetica"
         }), this.stage.addChild(this.infoText), this.graphics = new PIXI.Graphics(), this.stage.addChild(this.graphics), 
-        this.callback = this.callback.bind(this), void 0) : new PixiRenderer(el);
+        this.callback = this.callback.bind(this), void 0) : new PixiRenderer(el, width, height);
     }
     PixiRenderer.prototype = {
         callback: function(time, sim) {

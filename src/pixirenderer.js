@@ -7,8 +7,8 @@
   }
 
   function PixiRenderer(el, width, height) {
-    if (!(this instanceof PixiRenderer)) return new PixiRenderer(el);
-    var self = this;
+    if (!(this instanceof PixiRenderer)) return new PixiRenderer(el, width, height);
+
     this.stage = new PIXI.Stage(0x000000, true);
     this.stage.setInteractive(true);
 
@@ -88,4 +88,3 @@
   Newton.PixiRenderer = PixiRenderer;
 
 })(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
-

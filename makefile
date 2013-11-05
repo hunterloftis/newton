@@ -1,8 +1,11 @@
 setup:
 	bower install
 
+dev:
+	grunt dev
+
 build:
-	grunt
+	grunt uglify
 
 gh-pages:
 	@git commit -m "publish" || true
