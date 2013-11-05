@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Layer() {
     if (!(this instanceof Layer)) return new Layer();
@@ -67,7 +67,6 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Layer = Layer;
+  Newton.Layer = Layer;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

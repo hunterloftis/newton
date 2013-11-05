@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   var lastTime = 0;
   var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -27,4 +27,4 @@
     };
   }
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

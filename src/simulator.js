@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Simulator(simulator, renderer, integrationFps) {
     if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
@@ -69,7 +69,6 @@
     };
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Simulator = Simulator;
+  Newton.Simulator = Simulator;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

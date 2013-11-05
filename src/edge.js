@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Edge(p1, p2, material) {
     if (!(this instanceof Edge)) return new Edge(p1, p2, material);
@@ -97,7 +97,6 @@
     return reflectedVel;
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Edge = Edge;
+  Newton.Edge = Edge;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

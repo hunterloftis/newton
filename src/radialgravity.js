@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function RadialGravity(x, y, strength, falloff) {
     if (!(this instanceof RadialGravity)) return new RadialGravity(x, y, strength, falloff);
@@ -21,7 +21,6 @@
     particle.attractSquare(this.x, this.y, this.strength, 20);
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.RadialGravity = RadialGravity;
+  Newton.RadialGravity = RadialGravity;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

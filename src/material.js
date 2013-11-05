@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Material(options) {
     if (!(this instanceof Material)) return new Material(options);
@@ -18,7 +18,6 @@
 
   Material.simple = new Material();
 
-  window.Newton = window.Newton || {};
-  window.Newton.Material = Material;
+  Newton.Material = Material;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

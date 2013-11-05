@@ -10,6 +10,7 @@
     "grunt-contrib-uglify": "0.2.x",
     "grunt": "0.4.x"
   },
+  "main": "newton.js",
   "author": "Hunter Loftis <hunter@hunterloftis.com>",
   "license": "MIT",
   "readmeFilename": "readme.md",

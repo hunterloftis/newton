@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Renderer(el) {
     if (!(this instanceof Renderer)) return new Renderer(el);
@@ -111,7 +111,7 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Renderer = Renderer;
+  Newton.Renderer = Renderer;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
+

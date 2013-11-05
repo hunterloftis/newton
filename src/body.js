@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Body(material) {
     if (!(this instanceof Body)) return new Body(material);
@@ -31,7 +31,6 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Body = Body;
+  Newton.Body = Body;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

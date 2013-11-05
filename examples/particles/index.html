@@ -37,6 +37,8 @@
 
 <script>
 
+  console.log('Newton:', Newton);
+
   // Globals
 
   var sim, renderer, container;
@@ -58,16 +60,16 @@
     var width = 1280;
     var height = 480;
 
-    particleMaterial = new Newton.Material();
-    wallMaterial = new Newton.Material();
+    particleMaterial = Newton.Material();
+    wallMaterial = Newton.Material();
 
-    renderer = new Newton.PixiRenderer($display[0], width, height);
-    sim = new Newton.Simulator(simulate, renderer.callback, 60);
+    renderer = Newton.PixiRenderer($display[0], width, height);
+    sim = Newton.Simulator(simulate, renderer.callback, 60);
     walls = createWalls();
-    particles = new Newton.Body(particleMaterial);
-    gravity = new Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
-    radial = new Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
-    container = new Newton.Rectangle(0, 0, width, height);
+    particles = Newton.Body(particleMaterial);
+    gravity = Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
+    radial = Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
+    container = Newton.Rectangle(0, 0, width, height);
 
     globalLayer = sim.Layer();
     shapeLayer = sim.Layer();
@@ -78,7 +80,7 @@
       .addForce(gravity);
 
     windLayer
-      .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
+      .addForce(Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
 
     particleLayer
       .respondTo([particleLayer, shapeLayer, globalLayer])
@@ -112,7 +114,7 @@
     var mass = Math.random() * 4 + 1;
     var x = Math.random() * spread * 2 + x - spread;
     var y = Math.random() * spread * 2 + y - spread;
-    return new Newton.Particle(x, y, mass, particleMaterial);
+    return Newton.Particle(x, y, mass, particleMaterial);
   }
 
   function createWalls() {
@@ -144,11 +146,11 @@
       875, 275, 875, 125
     ];
 
-    var w = new Newton.Body(wallMaterial);
+    var w = Newton.Body(wallMaterial);
     for (var i = 0; i < polys.length; i += 4) {
-      var p1 = new Newton.Particle(polys[i], polys[i + 1]);
-      var p2 = new Newton.Particle(polys[i + 2], polys[i + 3]);
-      var e = new Newton.Edge(p1, p2, wallMaterial);
+      var p1 = Newton.Particle(polys[i], polys[i + 1]);
+      var p2 = Newton.Particle(polys[i + 2], polys[i + 3]);
+      var e = Newton.Edge(p1, p2, wallMaterial);
       w.addParticle(p1);
       w.addParticle(p2);
       w.addEdge(e);       // TODO: figure out a more concise API

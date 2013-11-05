@@ -1,64 +1,64 @@
-!function() {
-    function a(b) {
-        return this instanceof a ? (this.particles = [], this.edges = [], this.material = b, 
-        void 0) : new a(b);
+!function(a) {
+    function b(a) {
+        return this instanceof b ? (this.particles = [], this.edges = [], this.material = a, 
+        void 0) : new b(a);
     }
-    a.prototype.addParticle = function(a) {
+    b.prototype.addParticle = function(a) {
         this.particles.push(a);
-    }, a.prototype.addEdge = function(a) {
+    }, b.prototype.addEdge = function(a) {
         this.edges.push(a);
-    }, a.prototype.each = function(a, b) {
+    }, b.prototype.each = function(a, b) {
         for (var c, d = this.particles.length; d--; ) c = this.particles[d], c[a].apply(c, b);
-    }, a.prototype.callback = function(a) {
+    }, b.prototype.callback = function(a) {
         for (var b = this.particles.length; b--; ) a(this.particles[b]);
-    }, window.Newton = window.Newton || {}, window.Newton.Body = a;
-}(), function() {
-    function a(b, c, d) {
-        return this instanceof a ? (this.p1 = b, this.p2 = c, this.material = d || Material.simple, 
-        this.compute(), this._rect = new Newton.Rectangle(0, 0, 0, 0), void 0) : new a(b, c, d);
+    }, a.Body = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(c, d, e) {
+        return this instanceof b ? (this.p1 = c, this.p2 = d, this.material = e || Material.simple, 
+        this.compute(), this._rect = new a.Rectangle(0, 0, 0, 0), void 0) : new b(c, d, e);
     }
-    a.COLLISION_TOLERANCE = .5, a.getAbc = function(a, b, c, d) {
+    b.COLLISION_TOLERANCE = .5, b.getAbc = function(a, b, c, d) {
         var e = d - b, f = a - c, g = e * a + f * b;
         return {
             a: e,
             b: f,
             c: g
         };
-    }, a.prototype.compute = function() {
+    }, b.prototype.compute = function() {
         this.anchor = this.p1.position.clone(), this.vector = this.p2.position.clone().sub(this.p1.position), 
         this.length = this.vector.getLength(), this.angle = this.vector.getAngle(), this.normal = this.vector.clone().turnLeft().unit(), 
-        this.unit = this.vector.clone().unit(), this.bounds = Newton.Rectangle.fromVectors(this.p1.position, this.p2.position).expand(a.COLLISION_TOLERANCE);
-    }, a.prototype.getCoords = function() {
+        this.unit = this.vector.clone().unit(), this.bounds = a.Rectangle.fromVectors(this.p1.position, this.p2.position).expand(b.COLLISION_TOLERANCE);
+    }, b.prototype.getCoords = function() {
         return {
             x1: this.p1.position.x,
             y1: this.p1.position.y,
             x2: this.p2.position.x,
             y2: this.p2.position.y
         };
-    }, a.prototype.getRepelled = function(a, b) {
-        return new Newton.Vector(a, b).add(this.normal);
-    }, a.prototype.getProjection = function(a) {
+    }, b.prototype.getRepelled = function(b, c) {
+        return new a.Vector(b, c).add(this.normal);
+    }, b.prototype.getProjection = function(a) {
         var b = this.vector.getDot(a);
         return this.unit.clone().scale(b);
-    }, a.prototype.getAngleDelta = function(a) {
+    }, b.prototype.getAngleDelta = function(a) {
         return this.angle - a.getAngle();
-    }, a.prototype.getAbc = function() {
-        return a.getAbc(this.p1.position.x, this.p1.position.y, this.p2.position.x, this.p2.position.y);
-    }, a.prototype.findIntersection = function(b, c, d, e) {
-        var f = this.bounds, g = this._rect.set(b, c, d, e).expand(a.COLLISION_TOLERANCE);
+    }, b.prototype.getAbc = function() {
+        return b.getAbc(this.p1.position.x, this.p1.position.y, this.p2.position.x, this.p2.position.y);
+    }, b.prototype.findIntersection = function(a, c, d, e) {
+        var f = this.bounds, g = this._rect.set(a, c, d, e).expand(b.COLLISION_TOLERANCE);
         if (!f.overlaps(g)) return !1;
-        var h = this.getAbc(), i = a.getAbc(b, c, d, e), j = h.a * i.b - i.a * h.b;
+        var h = this.getAbc(), i = b.getAbc(a, c, d, e), j = h.a * i.b - i.a * h.b;
         if (0 === j) return !1;
         var k = (i.b * h.c - h.b * i.c) / j, l = (h.a * i.c - i.a * h.c) / j;
         return f.contains(k, l) && g.contains(k, l) ? {
             x: k,
             y: l
         } : !1;
-    }, a.prototype.getReflection = function(a, b) {
+    }, b.prototype.getReflection = function(a, b) {
         var c = this.normal.clone(), d = this.material.friction, e = c.multScalar(a.getDot(c)).multScalar(b), f = a.clone().sub(e).multScalar(1 - d), g = f.sub(e);
         return g;
-    }, window.Newton = window.Newton || {}, window.Newton.Edge = a;
-}(), function() {
+    }, a.Edge = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function() {
     var a = 0, b = [ "ms", "moz", "webkit", "o" ], c = !!window.opera || navigator.userAgent.indexOf(" OPR/") >= 0;
     Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") > 0, !!window.chrome && !c;
     for (var d = 0; d < b.length && !window.requestAnimationFrame; ++d) window.requestAnimationFrame = window[b[d] + "RequestAnimationFrame"], 
@@ -71,20 +71,20 @@
     }, window.cancelAnimationFrame = function(a) {
         clearTimeout(a);
     });
-}(), function() {
-    function a() {
-        return this instanceof a ? (this.bodies = [], this.forces = [], this.watchedLayers = [ this ], 
-        this.wrapper = void 0, void 0) : new a();
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b() {
+        return this instanceof b ? (this.bodies = [], this.forces = [], this.watchedLayers = [ this ], 
+        this.wrapper = void 0, void 0) : new b();
     }
-    a.prototype.respondTo = function(a) {
+    b.prototype.respondTo = function(a) {
         return this.watchedLayers = a || [], this;
-    }, a.prototype.addForce = function(a) {
+    }, b.prototype.addForce = function(a) {
         return this.forces.push(a), this;
-    }, a.prototype.wrapIn = function(a) {
+    }, b.prototype.wrapIn = function(a) {
         return this.wrapper = a, this;
-    }, a.prototype.addBody = function(a) {
+    }, b.prototype.addBody = function(a) {
         return this.bodies.push(a), this;
-    }, a.prototype.integrate = function(a) {
+    }, b.prototype.integrate = function(a) {
         var b, c, d, e, f, g, h, i;
         for (f = [], g = [], i = [], b = 0, c = this.bodies.length; c > b; b++) g = g.concat(this.bodies[b].particles);
         for (b = 0, c = this.watchedLayers.length; c > b; b++) {
@@ -95,76 +95,76 @@
             for (h = g[b], d = 0, e = f.length; e > d; d++) f[d].applyTo(h);
             h.integrate(a), this.wrapper && h.wrap(this.wrapper), h.collide(i);
         }
-    }, window.Newton = window.Newton || {}, window.Newton.Layer = a;
-}(), function() {
-    function a(b, c, d) {
-        return this instanceof a ? (this.angle = b, this.strength = c, this.vector = new Newton.Vector(0, c).rotate(b), 
-        void 0) : new a(b, c, d);
+    }, a.Layer = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(c, d, e) {
+        return this instanceof b ? (this.angle = c, this.strength = d, this.vector = new a.Vector(0, d).rotate(c), 
+        void 0) : new b(c, d, e);
     }
-    a.prototype.setAngle = function(a) {
+    b.prototype.setAngle = function(a) {
         this.angle = a, this.vector.set(0, this.strength).rotate(this.angle);
-    }, a.prototype.setStrength = function(a) {
+    }, b.prototype.setStrength = function(a) {
         this.strength = a, this.vector.set(0, this.strength).rotate(this.angle);
-    }, a.prototype.applyTo = function(a) {
+    }, b.prototype.applyTo = function(a) {
         a.accelerateVector(this.vector);
-    }, window.Newton = window.Newton || {}, window.Newton.LinearGravity = a;
-}(), function() {
-    function a(b) {
-        return this instanceof a ? (b = b || {}, this.weight = b.weight || 1, this.restitution = b.restitution || 1, 
-        this.friction = b.friction || 0, this.maxVelocity = b.maxVelocity || 100, this.maxVelocitySquared = this.maxVelocity * this.maxVelocity, 
-        void 0) : new a(b);
+    }, a.LinearGravity = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a) {
+        return this instanceof b ? (a = a || {}, this.weight = a.weight || 1, this.restitution = a.restitution || 1, 
+        this.friction = a.friction || 0, this.maxVelocity = a.maxVelocity || 100, this.maxVelocitySquared = this.maxVelocity * this.maxVelocity, 
+        void 0) : new b(a);
     }
-    a.prototype.setMaxVelocity = function(a) {
+    b.prototype.setMaxVelocity = function(a) {
         return this.maxVelocity = a, this.maxVelocitySquared = a * a, this;
-    }, a.simple = new a(), window.Newton = window.Newton || {}, window.Newton.Material = a;
-}(), function() {
-    function a(a, b) {
+    }, b.simple = new b(), a.Material = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a, b) {
         return (a % b + b) % b;
     }
-    function b(a, c, d, e) {
-        return this instanceof b ? (this.position = new Newton.Vector(a, c), this.lastPosition = this.position.clone(), 
-        this.lastValidPosition = this.position.clone(), this.velocity = new Newton.Vector(0, 0), 
-        this.acceleration = new Newton.Vector(0, 0), this.material = e || Newton.Material.simple, 
-        this.size = d || 1, this.randomDrag = Math.random() * b.randomness + 1e-10, void 0) : new b(a, c, d, e);
+    function c(b, d, e, f) {
+        return this instanceof c ? (this.position = new a.Vector(b, d), this.lastPosition = this.position.clone(), 
+        this.lastValidPosition = this.position.clone(), this.velocity = new a.Vector(0, 0), 
+        this.acceleration = new a.Vector(0, 0), this.material = f || a.Material.simple, 
+        this.size = e || 1, this.randomDrag = Math.random() * c.randomness + 1e-10, void 0) : new c(b, d, e, f);
     }
-    b.randomness = 25, b.prototype.integrate = function(a) {
+    c.randomness = 25, c.prototype.integrate = function(a) {
         this.velocity.copy(this.position).sub(this.lastPosition);
         var b = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
         this.velocity.scale(1 - b), this.acceleration.scale(1 - b).scale(a * a), this.lastPosition.copy(this.position), 
         this.position.add(this.velocity).add(this.acceleration), this.acceleration.zero(), 
         this.lastValidPosition.copy(this.lastPosition);
-    }, b.prototype.placeAt = function(a, b) {
+    }, c.prototype.placeAt = function(a, b) {
         return this.position.set(a, b), this.lastPosition.copy(this.position), this.lastValidPosition.copy(this.lastPosition), 
         this;
-    }, b.prototype.moveBy = function(a, b) {
+    }, c.prototype.moveBy = function(a, b) {
         return this.lastPosition = this.position.clone(), this.position.add(a, b), this;
-    }, b.prototype.setVelocity = function(a, b) {
+    }, c.prototype.setVelocity = function(a, b) {
         return this.lastPosition.copy(this.position).subXY(a, b), this;
-    }, b.prototype.contain = function(a) {
+    }, c.prototype.contain = function(a) {
         this.position.x > a.right ? this.position.x = this.lastPosition.x = this.lastValidPosition.x = a.right : this.position.x < a.left && (this.position.x = this.lastPosition.x = this.lastValidPosition.x = a.left), 
         this.position.y > a.bottom ? this.position.y = this.lastPosition.y = this.lastValidPosition.y = a.bottom : this.position.y < a.top && (this.position.y = this.lastPosition.y = this.lastValidPosition.y = a.top);
-    }, b.prototype.wrap = function(b) {
-        var c = this.position.clone().sub(this.lastPosition), d = a(this.position.x, b.width) + b.left, e = a(this.position.y, b.height) + b.top;
+    }, c.prototype.wrap = function(a) {
+        var c = this.position.clone().sub(this.lastPosition), d = b(this.position.x, a.width) + a.left, e = b(this.position.y, a.height) + a.top;
         this.lastPosition.x = this.lastValidPosition.x = d - c.x, this.lastPosition.y = this.lastValidPosition.y = e - c.y, 
         this.position.x = d, this.position.y = e;
-    }, b.prototype.accelerateVector = function(a) {
+    }, c.prototype.accelerateVector = function(a) {
         this.acceleration.add(a);
-    }, b.prototype.force = function(a, b, c) {
+    }, c.prototype.force = function(a, b, c) {
         c = c || this.getMass(), this.acceleration.add({
             x: a / c,
             y: b / c
         });
-    }, b.prototype.getMass = function() {
+    }, c.prototype.getMass = function() {
         return this.size * this.material.weight;
-    }, b.prototype.getSquaredSpeed = function() {
+    }, c.prototype.getSquaredSpeed = function() {
         return this.velocity.getSquaredLength();
-    }, b.prototype.attractSquare = function(a, b, c, d) {
-        var e = this.getMass(), f = new Newton.Vector(a, b).sub(this.position), g = Math.max(f.getLength(), d || 1), h = c * e / (g * g), i = c / (c + e);
+    }, c.prototype.attractSquare = function(b, c, d, e) {
+        var f = this.getMass(), g = new a.Vector(b, c).sub(this.position), h = Math.max(g.getLength(), e || 1), i = d * f / (h * h), j = d / (d + f);
         this.acceleration.add({
-            x: -h * (f.x / g) * i,
-            y: -h * (f.y / g) * i
+            x: -i * (g.x / h) * j,
+            y: -i * (g.y / h) * j
         });
-    }, b.prototype.collide = function(a) {
+    }, c.prototype.collide = function(a) {
         for (var b, c, d, e, f, g, h, i = a.length; i--; ) h = this === a[i].p1 || this === a[i].p2, 
         c = !h && a[i].findIntersection(this.lastPosition.x, this.lastPosition.y, this.position.x, this.position.y), 
         c && (d = c.x - this.lastPosition.x, e = c.y - this.lastPosition.y, b ? (f = b.dx * b.dx + b.dy * b.dy, 
@@ -186,21 +186,21 @@
             return this.position.copy(k), this.setVelocity(l.x, l.y), this.lastValidPosition = k, 
             b;
         }
-    }, window.Newton = window.Newton || {}, window.Newton.Particle = b;
-}(), function() {
-    function a(a, b, c) {
+    }, a.Particle = c;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a, b, c) {
         return (1 << 24) + (a << 16) + (b << 8) + c;
     }
-    function b(a, c, d) {
-        return this instanceof b ? (this.stage = new PIXI.Stage(0, !0), this.stage.setInteractive(!0), 
-        this.width = c, this.height = d, this.renderer = PIXI.autoDetectRenderer(this.width, this.height, null, !1, !0), 
+    function c(a, b, d) {
+        return this instanceof c ? (this.stage = new PIXI.Stage(0, !0), this.stage.setInteractive(!0), 
+        this.width = b, this.height = d, this.renderer = PIXI.autoDetectRenderer(this.width, this.height, null, !1, !0), 
         this.renderer.view.style.display = "block", a.appendChild(this.renderer.view), this.infoText = new PIXI.Text("FPS: ??", {
             fill: "#ffffff",
             font: "10pt Helvetica"
         }), this.stage.addChild(this.infoText), this.graphics = new PIXI.Graphics(), this.stage.addChild(this.graphics), 
-        this.callback = this.callback.bind(this), void 0) : new b(a);
+        this.callback = this.callback.bind(this), void 0) : new c(a);
     }
-    b.prototype = {
+    c.prototype = {
         callback: function(a, b) {
             var c = 0, d = 0;
             this.graphics.clear();
@@ -212,19 +212,19 @@
             this.infoText.setText("FPS: " + b.fps + "\nparticles: " + c + "\nedges: " + d), 
             this.renderer.render(this.stage);
         },
-        drawForces: function(a) {
+        drawForces: function(b) {
             this.graphics.lineStyle(2, 16777215, .3);
-            for (var b = 0, c = a.length; c > b; b++) {
-                var d = a[b];
-                d instanceof Newton.RadialGravity && (this.graphics.beginFill(16777215, .2), this.graphics.drawCircle(d.x, d.y, .5 * d.strength * d.strength), 
+            for (var c = 0, d = b.length; d > c; c++) {
+                var e = b[c];
+                e instanceof a.RadialGravity && (this.graphics.beginFill(16777215, .2), this.graphics.drawCircle(e.x, e.y, .5 * e.strength * e.strength), 
                 this.graphics.endFill());
             }
         },
-        drawParticles: function(b) {
-            for (var c, d, e, f, g, h = 0, i = b.length; i > h; h++) c = b[h], d = c.position, 
-            e = c.lastValidPosition, f = c.getMass(), g = ~~(128 * ((f - 1) / 5)), this.graphics.lineStyle(f, a(255, 28 + g, 108 + g), 1), 
+        drawParticles: function(a) {
+            for (var c, d, e, f, g, h = 0, i = a.length; i > h; h++) c = a[h], d = c.position, 
+            e = c.lastValidPosition, f = c.getMass(), g = ~~(128 * ((f - 1) / 5)), this.graphics.lineStyle(f, b(255, 28 + g, 108 + g), 1), 
             this.graphics.moveTo(e.x - 1, e.y), this.graphics.lineTo(d.x + 1, d.y);
-            return b.length;
+            return a.length;
         },
         drawEdges: function(a) {
             this.graphics.lineStyle(1, 16777215, .5);
@@ -232,25 +232,25 @@
             this.graphics.lineTo(b.x2, b.y2);
             return a.length;
         }
-    }, window.Newton = window.Newton || {}, window.Newton.PixiRenderer = b;
-}(), function() {
-    function a(b, c, d, e) {
-        return this instanceof a ? (this.x = b, this.y = c, this.strength = d, void 0) : new a(b, c, d, e);
+    }, a.PixiRenderer = c;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a, c, d, e) {
+        return this instanceof b ? (this.x = a, this.y = c, this.strength = d, void 0) : new b(a, c, d, e);
     }
-    a.prototype.setLocation = function(a, b) {
+    b.prototype.setLocation = function(a, b) {
         this.x = a, this.y = b;
-    }, a.prototype.setStrength = function(a) {
+    }, b.prototype.setStrength = function(a) {
         this.strength = a;
-    }, a.prototype.applyTo = function(a) {
+    }, b.prototype.applyTo = function(a) {
         a.attractSquare(this.x, this.y, this.strength, 20);
-    }, window.Newton = window.Newton || {}, window.Newton.RadialGravity = a;
-}(), function() {
-    function a(b, c, d, e) {
-        return this instanceof a ? (this.set.apply(this, arguments), void 0) : new a(b, c, d, e);
+    }, a.RadialGravity = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a, c, d, e) {
+        return this instanceof b ? (this.set.apply(this, arguments), void 0) : new b(a, c, d, e);
     }
-    a.fromVectors = function(b, c) {
-        return new a(b.x, b.y, c.x, c.y);
-    }, a.prototype = {
+    b.fromVectors = function(a, c) {
+        return new b(a.x, a.y, c.x, c.y);
+    }, b.prototype = {
         set: function(a, b, c, d) {
             return this.left = Math.min(a, c), this.top = Math.min(b, d), this.right = Math.max(c, a), 
             this.bottom = Math.max(d, b), this.width = this.right - this.left, this.height = this.bottom - this.top, 
@@ -265,13 +265,13 @@
         expand: function(a) {
             return this.left -= a, this.right += a, this.top -= a, this.bottom += a, this;
         }
-    }, window.Newton = window.Newton || {}, window.Newton.Rectangle = a;
-}(), function() {
-    function a(b) {
-        return this instanceof a ? (this.ctx = b.getContext("2d"), this.width = b.width, 
-        this.height = b.height, this.callback = this.callback.bind(this), void 0) : new a(b);
+    }, a.Rectangle = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a) {
+        return this instanceof b ? (this.ctx = a.getContext("2d"), this.width = a.width, 
+        this.height = a.height, this.callback = this.callback.bind(this), void 0) : new b(a);
     }
-    a.prototype = {
+    b.prototype = {
         callback: function(a, b) {
             var c = this.ctx, d = 0, e = 0;
             this.clear(c, a);
@@ -285,14 +285,14 @@
         clear: function(a) {
             a.save(), a.fillStyle = "#000000", a.fillRect(0, 0, this.width, this.height), a.restore();
         },
-        drawForces: function(a, b) {
-            a.save(), a.lineWidth = 2, a.strokeStyle = "rgba(255, 255, 255, 0.25)", a.fillStyle = "rgba(255, 255, 255, 0.15)";
-            for (var c = 0, d = b.length; d > c; c++) {
-                var e = b[c];
-                e instanceof Newton.RadialGravity && (a.beginPath(), a.arc(e.x, e.y, .5 * e.strength * e.strength, 0, 2 * Math.PI, !1), 
-                a.fill());
+        drawForces: function(b, c) {
+            b.save(), b.lineWidth = 2, b.strokeStyle = "rgba(255, 255, 255, 0.25)", b.fillStyle = "rgba(255, 255, 255, 0.15)";
+            for (var d = 0, e = c.length; e > d; d++) {
+                var f = c[d];
+                f instanceof a.RadialGravity && (b.beginPath(), b.arc(f.x, f.y, .5 * f.strength * f.strength, 0, 2 * Math.PI, !1), 
+                b.fill());
             }
-            a.restore();
+            b.restore();
         },
         drawParticles: function(a, b) {
             var c, d, e, f, g;
@@ -317,24 +317,24 @@
             a.save(), a.fillStyle = "#fff", a.font = "10pt Helvetica", a.fillText(c, 10, 60), 
             a.restore();
         }
-    }, window.Newton = window.Newton || {}, window.Newton.Renderer = a;
-}(), function() {
-    function a(b, c, d) {
-        return this instanceof a ? (this.simulator = b, this.renderer = c, this.step = this.getStep(), 
+    }, a.Renderer = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a, c, d) {
+        return this instanceof b ? (this.simulator = a, this.renderer = c, this.step = this.getStep(), 
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.integrationStep = 1e3 / (d || 60), 
-        this.layers = [], void 0) : new a(b, c, d);
+        this.layers = [], void 0) : new b(a, c, d);
     }
-    a.prototype.start = function() {
+    b.prototype.start = function() {
         this.running = !0, this.countTime = Date.now() + 1e3, requestAnimationFrame(this.step);
-    }, a.prototype.stop = function() {
+    }, b.prototype.stop = function() {
         this.running = !1;
-    }, a.prototype.integrate = function(a) {
+    }, b.prototype.integrate = function(a) {
         for (var b = 0, c = this.layers.length; c > b; b++) this.layers[b].integrate(a);
-    }, a.prototype.Layer = function() {
-        var a = Newton.Layer();
-        return this.layers.push(a), a;
-    }, a.prototype.getStep = function() {
+    }, b.prototype.Layer = function() {
+        var b = a.Layer();
+        return this.layers.push(b), b;
+    }, b.prototype.getStep = function() {
         var a = this;
         return function() {
             if (a.running) {
@@ -345,53 +345,53 @@
                 a.frames = 0, a.countTime = b + a.countInterval), a.lastTime = b, requestAnimationFrame(a.step);
             }
         };
-    }, window.Newton = window.Newton || {}, window.Newton.Simulator = a;
-}(), function() {
-    function a(b, c) {
-        return this instanceof a ? (this.x = b, this.y = c, void 0) : new a(b, c);
+    }, a.Simulator = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(a) {
+    function b(a, c) {
+        return this instanceof b ? (this.x = a, this.y = c, void 0) : new b(a, c);
     }
-    a.prototype.clone = function() {
-        return new Newton.Vector(this.x, this.y);
-    }, a.prototype.copy = function(a) {
+    b.prototype.clone = function() {
+        return new a.Vector(this.x, this.y);
+    }, b.prototype.copy = function(a) {
         return this.x = a.x, this.y = a.y, this;
-    }, a.prototype.zero = function() {
+    }, b.prototype.zero = function() {
         return this.x = 0, this.y = 0, this;
-    }, a.prototype.set = function(a, b) {
+    }, b.prototype.set = function(a, b) {
         return this.x = a, this.y = b, this;
-    }, a.prototype.add = function(a) {
+    }, b.prototype.add = function(a) {
         return this.x += a.x, this.y += a.y, this;
-    }, a.prototype.sub = function(a) {
+    }, b.prototype.sub = function(a) {
         return this.x -= a.x, this.y -= a.y, this;
-    }, a.prototype.subXY = function(a, b) {
+    }, b.prototype.subXY = function(a, b) {
         return this.x -= a, this.y -= b, this;
-    }, a.prototype.mult = a.prototype.multVector = function(a) {
+    }, b.prototype.mult = b.prototype.multVector = function(a) {
         return this.x *= a.x, this.y *= a.y, this;
-    }, a.prototype.reverse = function() {
+    }, b.prototype.reverse = function() {
         return this.x = -this.x, this.y = -this.y, this;
-    }, a.prototype.div = function(a) {
+    }, b.prototype.div = function(a) {
         return this.x /= a.x, this.y /= a.y, this;
-    }, a.prototype.multScalar = a.prototype.scale = function(a) {
+    }, b.prototype.multScalar = b.prototype.scale = function(a) {
         return this.x *= a, this.y *= a, this;
-    }, a.prototype.unit = function() {
+    }, b.prototype.unit = function() {
         return this.scale(1 / this.getLength()), this;
-    }, a.prototype.turnRight = function() {
+    }, b.prototype.turnRight = function() {
         var a = this.x, b = this.y;
         return this.x = -b, this.y = a, this;
-    }, a.prototype.turnLeft = function() {
+    }, b.prototype.turnLeft = function() {
         var a = this.x, b = this.y;
         return this.x = b, this.y = -a, this;
-    }, a.prototype.rotate = function(a) {
+    }, b.prototype.rotate = function(a) {
         var b = this.x, c = this.y, d = Math.sin(a), e = Math.cos(a);
         return this.x = b * e - c * d, this.y = b * d + c * e, this;
-    }, a.prototype.getDot = function(a) {
+    }, b.prototype.getDot = function(a) {
         return this.x * a.x + this.y * a.y;
-    }, a.prototype.getCross = function(a) {
+    }, b.prototype.getCross = function(a) {
         return this.x * a.y + this.y * a.x;
-    }, a.prototype.getLength = function() {
+    }, b.prototype.getLength = function() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
-    }, a.prototype.getSquaredLength = function() {
+    }, b.prototype.getSquaredLength = function() {
         return this.x * this.x + this.y * this.y;
-    }, a.prototype.getAngle = function() {
+    }, b.prototype.getAngle = function() {
         return Math.atan2(this.y, this.x);
-    }, window.Newton = window.Newton || {}, window.Newton.Vector = a;
-}();
+    }, a.Vector = b;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);

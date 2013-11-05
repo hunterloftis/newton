@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Rectangle(left, top, right, bottom) {
     if (!(this instanceof Rectangle)) return new Rectangle(left, top, right, bottom);
@@ -35,7 +35,6 @@
     }
   }
 
-  window.Newton = window.Newton || {};
-  window.Newton.Rectangle = Rectangle;
+  Newton.Rectangle = Rectangle;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

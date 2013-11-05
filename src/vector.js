@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function Vector(x, y) {
     if (!(this instanceof Vector)) return new Vector(x, y);
@@ -121,7 +121,7 @@
     return Math.atan2(this.y, this.x);
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Vector = Vector;
+  Newton.Vector = Vector;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
+

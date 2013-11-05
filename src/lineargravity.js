@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function LinearGravity(angle, strength, falloff) {
     if (!(this instanceof LinearGravity)) return new LinearGravity(angle, strength, falloff);
@@ -22,7 +22,6 @@
     particle.accelerateVector(this.vector);
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.LinearGravity = LinearGravity;
+  Newton.LinearGravity = LinearGravity;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

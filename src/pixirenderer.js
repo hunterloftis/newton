@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   function rgbToHex(r, g, b) {
     return ((1 << 24) + (r << 16) + (g << 8) + b);
@@ -9,7 +9,7 @@
     var self = this;
     this.stage = new PIXI.Stage(0x000000, true);
     this.stage.setInteractive(true);
-    
+
     this.width = width;
     this.height = height;
     this.renderer = PIXI.autoDetectRenderer(this.width, this.height, null, false, true);
@@ -39,7 +39,7 @@
       }
 
       this.infoText.setText("FPS: " + sim.fps + "\nparticles: " + particles + "\nedges: " + edges);
-      
+
       this.renderer.render(this.stage);
     },
     drawForces: function(forces) {
@@ -53,7 +53,7 @@
           this.graphics.drawCircle(force.x, force.y, force.strength * force.strength * 0.5);
           this.graphics.endFill();
         }
-      }      
+      }
     },
     drawParticles: function(particles) {
       var particle, pos, last, mass, brightness;
@@ -83,7 +83,7 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.PixiRenderer = PixiRenderer;
+  Newton.PixiRenderer = PixiRenderer;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
+

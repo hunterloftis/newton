@@ -1,4 +1,4 @@
-;(function() {
+;(function(Newton) {
 
   // Corrected modulo
   function mod(a, b) {
@@ -180,7 +180,6 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Particle = Particle;
+  Newton.Particle = Particle;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
