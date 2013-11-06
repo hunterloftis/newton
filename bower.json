@@ -1,6 +1,5 @@
 {
   "name": "newton",
-  "version": "0.0.1",
   "main": [
     "newton.js"
   ],
