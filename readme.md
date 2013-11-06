@@ -349,7 +349,7 @@ layer.addForce(gravity);
 
 - [Simple](http://hunterloftis.github.io/newton/examples/simple)
 - [Particles](http://hunterloftis.github.io/newton/examples/particles)
-- [node.js - Simple](http://hunterloftis.github.io/newton/examples/node/simple.js)
+- [node.js - Simple](https://github.com/hunterloftis/newton/blob/master/examples/node/simple.js)
 
 ## The nerdy details
 
