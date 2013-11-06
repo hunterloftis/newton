@@ -35,7 +35,7 @@ module.exports = function(grunt) {
       sync: {
         include: ['name', 'version', 'main']
       },
-      release {
+      release: {
 
       }
     });
