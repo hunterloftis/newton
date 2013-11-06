@@ -34,6 +34,8 @@ See this
 [simple demo](http://hunterloftis.github.io/newton/examples/simple) in action or check out
 [more examples](#examples).
 
+## Jump to:
+
 - [Installation](#installation)
 - [Philosophy](#philosophy)
 - [API Reference](#api-reference)
