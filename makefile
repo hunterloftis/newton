@@ -11,8 +11,8 @@ dev:
 build:
 	grunt build
 
-
-
+bench:
+	node benchmark
 
 # Publish to github, npm, & bower
 publish:
