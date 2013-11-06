@@ -1,5 +1,5 @@
 setup:
-	git branch --set-upstream github
+	git branch --set-upstream github/master
 	git config push.default upstream
 	bower install
 
