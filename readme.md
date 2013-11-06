@@ -2,6 +2,8 @@
 
 An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
+[API Reference](https://github.com/hunterloftis/newton/blob/master/docs.md)
+
 ```js
 var renderer = Newton.Renderer(document.getElementById('display'));
 var sim = Newton.Simulator(simulate, renderer.callback, 60);
@@ -33,8 +35,6 @@ function simulate(time) {
 See this
 [simple demo](http://hunterloftis.github.io/newton/examples/simple) in action or check out
 [more examples](#examples).
-
-[API Reference](https://github.com/hunterloftis/newton/blob/master/docs.md)
 
 ## Installation
 
