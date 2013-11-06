@@ -3,6 +3,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-sync-pkg');
+    grunt.loadNpmTasks('grunt-release');
 
     grunt.initConfig({
       uglify: {
@@ -33,9 +34,13 @@ module.exports = function(grunt) {
       },
       sync: {
         include: ['name', 'version', 'main']
+      },
+      release {
+
       }
     });
 
     grunt.registerTask('dev', ['uglify', 'watch']);
-    grunt.registerTask('build', ['uglify', 'sync']);
+    grunt.registerTask('build', ['uglify']);
+    grunt.registerTask('publish', ['build', 'release']);
 };
