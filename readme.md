@@ -95,6 +95,18 @@ Follow newton developments on twitter: [@hunterloftis](http://twitter.com/hunter
 - [Particles - WebGL / Pixi](http://hunterloftis.github.io/newton/examples/particles)
 - [node.js - Simple](https://github.com/hunterloftis/newton/blob/master/examples/node/simple.js)
 
+## Contributing
+
+Contributions are very welcome. You'll need:
+
+- node &amp; npm
+- grunt
+
+Common tasks are handled by the makefile:
+
+- `make setup` installs node modules, bower, and bower modules
+- `make dev` watches /src for changes, rebuilding newton.js
+
 ## The nerdy details
 
 Physics major?
@@ -132,12 +144,6 @@ collector with extraneous objects. Garbage-collector abuse is an issue with most
 including
 [Chipmunk](https://groups.google.com/forum/#!topic/v8-users/e9HNSVoovEU) and
 [Box2d](https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript).
-
-## Contributing
-
-Contributions are very welcome.
-After you clone the repository, `make setup` will install npm and bower.
-Then, `make dev` will watch the src directory and rebuild newton.js on changes.
 
 ## License
 
