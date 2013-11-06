@@ -394,6 +394,12 @@ including
 [Chipmunk](https://groups.google.com/forum/#!topic/v8-users/e9HNSVoovEU) and
 [Box2d](https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript).
 
+## Contributing
+
+1. [Fork the repo](https://github.com/hunterloftis/newton/fork)
+2. `$ make setup`
+3. `$ make dev`
+
 ## License
 
 (The MIT License)
