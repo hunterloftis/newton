@@ -6,18 +6,12 @@
     return ((1 << 24) + (r << 16) + (g << 8) + b);
   }
 
-  function PixiRenderer(el, width, height) {
-    if (!(this instanceof PixiRenderer)) return new PixiRenderer(el, width, height);
+  function PixiRenderer(renderer) {
+    if (!(this instanceof PixiRenderer)) return new PixiRenderer(renderer);
 
+    this.renderer = renderer;
     this.stage = new PIXI.Stage(0x000000, true);
     this.stage.setInteractive(true);
-
-    this.width = width;
-    this.height = height;
-    this.renderer = PIXI.autoDetectRenderer(this.width, this.height, null, false, true);
-    this.renderer.view.style.display = "block";
-    el.appendChild(this.renderer.view);
-
     this.infoText = new PIXI.Text("FPS: ??", { fill: '#ffffff', font:'10pt Helvetica' });
     this.stage.addChild(this.infoText);
     this.graphics = new PIXI.Graphics();

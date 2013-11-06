@@ -55,13 +55,15 @@
 
   function createSimulation() {
     var $display = $('#display');
-    var width = $display.width();
-    var height = $display.height();
+    var width = $display.width(); 
+    var height = $display.height(); 
+    var pixiRenderer = PIXI.autoDetectRenderer(width, height);
+    $display.append(pixiRenderer.view);
 
     particleMaterial = Newton.Material();
     wallMaterial = Newton.Material();
 
-    renderer = Newton.PixiRenderer($display[0], width, height);
+    renderer = Newton.PixiRenderer(pixiRenderer);
     sim = Newton.Simulator(simulate, renderer.callback, 60);
     walls = createWalls();
     particles = Newton.Body(particleMaterial);

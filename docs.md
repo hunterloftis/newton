@@ -47,8 +47,10 @@ var sim = Newton.Simulator(null, renderer.callback);
 And based on WebGL (you will need to include [Pixi](https://github.com/GoodBoyDigital/pixi.js) library into web page):
 
 ```js
-// viewport - is a Div element
-var renderer = Newton.PixiRenderer(document.getElementById('viewport'), 800, 600);
+var $display = $('#display');
+var pixiRenderer = PIXI.autoDetectRenderer(width, height);
+$display.append(pixiRenderer.view);
+var renderer = Newton.PixiRenderer(pixiRenderer);
 var sim = Newton.Simulator(null, renderer.callback);
 ```
 
