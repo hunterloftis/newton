@@ -42,10 +42,23 @@ Please be patient as we get everything feature-complete. We're using Newton in p
 
 ## Installation
 
-(waiting for Bower to manually update its newton package)
-
 ```
 $ bower install newton
+```
+
+Or, drop
+[newton.js](https://raw.github.com/hunterloftis/newton/master/newton.js) or
+[newton.min.js](https://raw.github.com/hunterloftis/newton/master/newton.min.js)
+into your page with a `script` tag.
+
+With node:
+
+```
+$ npm install newton --save
+```
+
+```js
+var Newton = require('newton');
 ```
 
 ## Philosophy
@@ -336,7 +349,7 @@ layer.addForce(gravity);
 
 - [Simple](http://hunterloftis.github.io/newton/examples/simple)
 - [Particles](http://hunterloftis.github.io/newton/examples/particles)
-- ~~[Boxes](http://hunterloftis.github.io/newton/examples/boxes)~~ (Broken)
+- [node.js - Simple](http://hunterloftis.github.io/newton/examples/node/simple.js)
 
 ## The nerdy details
 
