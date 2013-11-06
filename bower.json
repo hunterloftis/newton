@@ -1,11 +1,13 @@
 {
   "name": "newton",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "main": [
+    "newton.js"
+  ],
   "devDependencies": {
     "jquery": "2.0.3",
     "pixi": "1.3.0"
   },
-  "main": "newton.js",
   "authors": [
     "Hunter Loftis <hunter@hunterloftis.com>"
   ],

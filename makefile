@@ -5,7 +5,7 @@ dev:
 	grunt dev
 
 build:
-	grunt uglify
+	grunt build
 
 gh-pages:
 	@git commit -m "publish" || true

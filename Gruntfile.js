@@ -2,6 +2,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-sync-pkg');
 
     grunt.initConfig({
       uglify: {
@@ -29,10 +30,12 @@ module.exports = function(grunt) {
           tasks: ['uglify'],
           spawn: false
         }
+      },
+      sync: {
+        include: ['name', 'version', 'main']
       }
     });
 
-    grunt.registerTask('default', ['uglify']);
     grunt.registerTask('dev', ['uglify', 'watch']);
-
+    grunt.registerTask('build', ['uglify', 'sync']);
 };
