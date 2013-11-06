@@ -1,6 +1,7 @@
 # Set up for local development
 setup:
-	bower install
+	npm install
+	node_modules/bower/bin/bower install
 
 # Build newton.js then watch source files for changes
 dev:

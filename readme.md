@@ -396,9 +396,9 @@ including
 
 ## Contributing
 
-1. [Fork the repo](https://github.com/hunterloftis/newton/fork)
-2. `$ make setup`
-3. `$ make dev`
+Contributions are very welcome.
+After you clone the repository, `make setup` will install npm and bower.
+Then, `make dev` will watch the src directory and rebuild newton.js on changes.
 
 ## License
 
