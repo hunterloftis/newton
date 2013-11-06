@@ -2,10 +2,12 @@
 
   'use strict';
 
+  function noop() {}
+
   function Simulator(simulator, renderer, integrationFps) {
     if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
-    this.simulator = simulator;
-    this.renderer = renderer;
+    this.simulator = simulator || noop;
+    this.renderer = renderer || noop;
     this.step = this.getStep();
     this.lastTime = 0;
     this.running = false;

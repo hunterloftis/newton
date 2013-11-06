@@ -64,7 +64,7 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function timeoutFrame(simulator) {
-        var currTime = new Date().getTime(), timeToCall = Math.max(0, 16 - (currTime - lastTime)), id = window.setTimeout(function() {
+        var currTime = new Date().getTime(), timeToCall = Math.max(0, 16 - (currTime - lastTime)), id = setTimeout(function() {
             simulator(currTime + timeToCall);
         }, timeToCall);
         return lastTime = currTime + timeToCall, id;
@@ -349,8 +349,9 @@
     }, Newton.Renderer = Renderer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function noop() {}
     function Simulator(simulator, renderer, integrationFps) {
-        return this instanceof Simulator ? (this.simulator = simulator, this.renderer = renderer, 
+        return this instanceof Simulator ? (this.simulator = simulator || noop, this.renderer = renderer || noop, 
         this.step = this.getStep(), this.lastTime = 0, this.running = !1, this.fps = 0, 
         this.frames = 0, this.countTime = 0, this.countInterval = 250, this.accumulator = 0, 
         this.integrationStep = 1e3 / (integrationFps || 60), this.layers = [], void 0) : new Simulator(simulator, renderer, integrationFps);
