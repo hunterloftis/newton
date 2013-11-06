@@ -42,6 +42,8 @@ Please be patient as we get everything feature-complete. We're using Newton in p
 
 ## Installation
 
+### Client-side
+
 ```
 $ bower install newton
 ```
@@ -51,7 +53,7 @@ Or, drop
 [newton.min.js](https://raw.github.com/hunterloftis/newton/master/newton.min.js)
 into your page with a `script` tag.
 
-With node:
+### node.js
 
 ```
 $ npm install newton --save
@@ -347,8 +349,8 @@ layer.addForce(gravity);
 
 ## Examples
 
-- [Simple](http://hunterloftis.github.io/newton/examples/simple)
-- [Particles](http://hunterloftis.github.io/newton/examples/particles)
+- [Simple - Canvas](http://hunterloftis.github.io/newton/examples/simple)
+- [Particles - WebGL / Pixi](http://hunterloftis.github.io/newton/examples/particles)
 - [node.js - Simple](https://github.com/hunterloftis/newton/blob/master/examples/node/simple.js)
 
 ## The nerdy details
