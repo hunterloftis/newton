@@ -1,4 +1,6 @@
 setup:
+	git branch --set-upstream github
+	git config push.default upstream
 	bower install
 
 dev:
