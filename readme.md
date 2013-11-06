@@ -34,6 +34,8 @@ See this
 [simple demo](http://hunterloftis.github.io/newton/examples/simple) in action or check out
 [more examples](#examples).
 
+[API Reference](https://github.com/hunterloftis/newton/blob/master/docs.md)
+
 ## Installation
 
 **in the browser:**

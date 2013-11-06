@@ -25,7 +25,7 @@ gh-pages:
 	@git commit -m "publish" || true
 	@git push github master:gh-pages --force
 
-# Publish readme
-readme:
-	@git commit -am 'updated readme' || true
+# Publish readme & API reference
+docs:
+	@git commit -am 'updated docs' || true
 	@git push github master
