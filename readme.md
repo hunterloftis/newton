@@ -42,7 +42,7 @@ Please be patient as we get everything feature-complete. We're using Newton in p
 
 ## Installation
 
-*in the browser*
+**in the browser**
 
 ```
 $ bower install newton
@@ -53,7 +53,7 @@ Or, drop
 [newton.min.js](https://raw.github.com/hunterloftis/newton/master/newton.min.js)
 into your page with a `script` tag.
 
-*in node.js*
+**in node.js**
 
 ```
 $ npm install newton --save
