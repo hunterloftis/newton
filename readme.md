@@ -138,6 +138,7 @@ including
 Contributions are very welcome.
 After you clone the repository, `make setup` will install npm and bower.
 Then, `make dev` will watch the src directory and rebuild newton.js on changes.
+Time from time use `make bench` to see benchmarks results.
 
 ## License
 

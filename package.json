@@ -8,6 +8,7 @@
     "url": "https://github.com/hunterloftis/newton"
   },
   "devDependencies": {
+    "benchmark": "1.0.x",
     "grunt-contrib-uglify": "0.2.x",
     "grunt": "0.4.x",
     "grunt-contrib-watch": "~0.5.3",
