@@ -54,7 +54,7 @@
         if (0 === det) return !1;
         var x = (l2.b * l1.c - l1.b * l2.c) / det, y = (l1.a * l2.c - l2.a * l1.c) / det;
         if (!bounds1.contains(x, y) || !bounds2.contains(x, y)) return !1;
-        var dot = Newton.Vector(x2 - x1, y2 - y1).getDot(this.normal);
+        var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
         return dot >= 0 ? !1 : {
             x: x,
             y: y
@@ -396,7 +396,7 @@
     function Vector(x, y) {
         return this instanceof Vector ? (this.x = x, this.y = y, void 0) : new Vector(x, y);
     }
-    Vector.prototype.clone = function() {
+    Vector.scratch = new Vector(), Vector.prototype.clone = function() {
         return new Newton.Vector(this.x, this.y);
     }, Vector.prototype.copy = function(v) {
         return this.x = v.x, this.y = v.y, this;

@@ -10,6 +10,8 @@
     this.y = y;
   }
 
+  Vector.scratch = new Vector();
+
   Vector.prototype.clone = function() {
     return new Newton.Vector(this.x, this.y);
   };

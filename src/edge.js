@@ -1,7 +1,5 @@
 ;(function(Newton) {
 
-  'use strict';
-
   'use strict'
 
   function Edge(p1, p2, material) {
@@ -85,7 +83,7 @@
     if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 
     // TODO: figure out whether this should be moved up or if it's too expensive
-    var dot = Newton.Vector(x2 - x1, y2 - y1).getDot(this.normal);
+    var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
 
     if (dot >= 0) return false;
 
