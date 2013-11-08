@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -123,7 +125,7 @@
     return Math.atan2(this.y, this.x);
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Vector = Vector;
+  Newton.Vector = Vector;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
+

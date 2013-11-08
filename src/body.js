@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -33,7 +35,6 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Body = Body;
+  Newton.Body = Body;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

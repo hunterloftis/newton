@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -24,7 +26,6 @@
     particle.accelerateVector(this.vector);
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.LinearGravity = LinearGravity;
+  Newton.LinearGravity = LinearGravity;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

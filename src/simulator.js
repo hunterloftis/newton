@@ -1,11 +1,15 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
+
+  function noop() {}
 
   'use strict'
 
   function Simulator(simulator, renderer, integrationFps, iterations) {
     if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
-    this.simulator = simulator;
-    this.renderer = renderer;
+    this.simulator = simulator || noop;
+    this.renderer = renderer || noop;
     this.step = this.getStep();
     this.lastTime = 0;
     this.running = false;
@@ -22,7 +26,7 @@
   Simulator.prototype.start = function() {
     this.running = true;
     this.countTime = Date.now() + 1000;
-    requestAnimationFrame(this.step);
+    Newton.frame(this.step);
   };
 
   Simulator.prototype.stop = function() {
@@ -78,11 +82,10 @@
       }
 
       self.lastTime = time;
-      requestAnimationFrame(self.step);
+      Newton.frame(self.step);
     };
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Simulator = Simulator;
+  Newton.Simulator = Simulator;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

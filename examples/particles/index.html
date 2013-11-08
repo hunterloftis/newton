@@ -2,12 +2,12 @@
 <html>
 <head>
   <title>Newton: Particle Demo</title>
-  <link rel='stylesheet' type='text/css' href='style.css' />
+  <link rel='stylesheet' type='text/css' href='../shared/style.css' />
 </head>
 <body>
 
 <div class='wrap'>
-  <canvas id="display" width="1280" height="450"></canvas>
+  <div id="display"></div>
   <p class='caption'>
     Create particles by drawing with your mouse. Newton can maintain high framerates with hundreds of objects.
   </p>
@@ -31,22 +31,9 @@
   </form>
 </div>
 
-<script type="text/javascript" src="../../vendor/jquery-2.0.3.js"></script>
-
-<script src='../../src/frame.js'></script>
-<script src='../../src/vector.js'></script>
-<script src='../../src/rectangle.js'></script>
-
-<script src='../../src/layer.js'></script>
-<script src='../../src/body.js'></script>
-<script src='../../src/material.js'></script>
-<script src='../../src/particle.js'></script>
-<script src='../../src/edge.js'></script>
-<script src='../../src/lineargravity.js'></script>
-<script src='../../src/radialgravity.js'></script>
-
-<script src='../../src/simulator.js'></script>
-<script src='../../src/renderer.js'></script>
+<script type="text/javascript" src="../../bower_components/jquery/jquery.js"></script>
+<script type="text/javascript" src="../../bower_components/pixi/bin/pixi.js"></script>
+<script type='text/javascript' src='../../newton.js'></script>
 
 <script>
 
@@ -71,16 +58,21 @@
     var width = $display.width();
     var height = $display.height();
 
-    particleMaterial = new Newton.Material();
-    wallMaterial = new Newton.Material();
+    particleMaterial = Newton.Material();
+    wallMaterial = Newton.Material();
 
+<<<<<<< HEAD
     renderer = new Newton.Renderer($display[0]);
     sim = new Newton.Simulator(simulate, renderer.callback, 60, 1);
+=======
+    renderer = Newton.PixiRenderer($display[0], width, height);
+    sim = Newton.Simulator(simulate, renderer.callback, 60);
+>>>>>>> master
     walls = createWalls();
-    particles = new Newton.Body(particleMaterial);
-    gravity = new Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
-    radial = new Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
-    container = new Newton.Rectangle(0, 0, width, height);
+    particles = Newton.Body(particleMaterial);
+    gravity = Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
+    radial = Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
+    container = Newton.Rectangle(0, 0, width, height);
 
     globalLayer = sim.Layer();
     shapeLayer = sim.Layer();
@@ -91,7 +83,7 @@
       .addForce(gravity);
 
     windLayer
-      .addForce(new Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
+      .addForce(Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
 
     particleLayer
       .respondTo([particleLayer, shapeLayer, globalLayer])
@@ -126,7 +118,7 @@
     var mass = Math.random() * 4 + 1;
     var x = Math.random() * spread * 2 + x - spread;
     var y = Math.random() * spread * 2 + y - spread;
-    return new Newton.Particle(x, y, mass, particleMaterial);
+    return Newton.Particle(x, y, mass, particleMaterial);
   }
 
   function createWalls() {
@@ -158,11 +150,11 @@
       875, 275, 875, 125
     ];
 
-    var w = new Newton.Body(wallMaterial);
+    var w = Newton.Body(wallMaterial);
     for (var i = 0; i < polys.length; i += 4) {
-      var p1 = new Newton.Particle(polys[i], polys[i + 1]);
-      var p2 = new Newton.Particle(polys[i + 2], polys[i + 3]);
-      var e = new Newton.Edge(p1, p2, wallMaterial);
+      var p1 = Newton.Particle(polys[i], polys[i + 1]);
+      var p2 = Newton.Particle(polys[i + 2], polys[i + 3]);
+      var e = Newton.Edge(p1, p2, wallMaterial);
       w.addParticle(p1);
       w.addParticle(p2);
       w.addEdge(e);       // TODO: figure out a more concise API

@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -20,7 +22,6 @@
 
   Material.simple = new Material();
 
-  window.Newton = window.Newton || {};
-  window.Newton.Material = Material;
+  Newton.Material = Material;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

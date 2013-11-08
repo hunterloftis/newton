@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -94,7 +96,6 @@
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Layer = Layer;
+  Newton.Layer = Layer;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

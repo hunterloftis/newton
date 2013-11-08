@@ -1,0 +1,24 @@
+{
+  "name": "newton",
+  "version": "0.0.5",
+  "main": "newton.js",
+  "description": "An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hunterloftis/newton"
+  },
+  "devDependencies": {
+    "grunt-contrib-uglify": "0.2.x",
+    "grunt": "0.4.x",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-sync-pkg": "~0.1.1",
+    "grunt-release": "~0.6.0",
+    "bower": "~1.2.7"
+  },
+  "author": "Hunter Loftis <hunter@hunterloftis.com>",
+  "license": "MIT",
+  "readmeFilename": "readme.md",
+  "bugs": {
+    "url": "https://github.com/hunterloftis/newton/issues"
+  }
+}

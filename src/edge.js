@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -82,6 +84,12 @@
 
     if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 
+    // TODO: figure out whether this should be moved up or if it's too expensive
+    var coords = this.getCoords();
+    var dot = x1 * coords.x1 + y1 * coords.y1;
+
+    if (dot >= 0) return false;
+
     return {
       x: x,
       y: y
@@ -99,7 +107,6 @@
     return reflectedVel;
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Edge = Edge;
+  Newton.Edge = Edge;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

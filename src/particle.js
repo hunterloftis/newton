@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 var intersections = 0;
 
 ;(function() {
+=======
+;(function(Newton) {
+
+  'use strict';
+>>>>>>> master
 
   'use strict'
 
@@ -193,7 +199,6 @@ var intersections = 0;
     }
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.Particle = Particle;
+  Newton.Particle = Particle;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

@@ -32,6 +32,8 @@ a:hover {
   border: solid 1px #333;
   background: #000;
   cursor: crosshair;
+  width: 1280px;
+  height: 450px;
 }
 
 .caption {

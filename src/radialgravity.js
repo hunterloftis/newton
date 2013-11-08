@@ -1,4 +1,6 @@
-;(function() {
+;(function(Newton) {
+
+  'use strict';
 
   'use strict'
 
@@ -23,7 +25,6 @@
     particle.attractSquare(this.x, this.y, this.strength, 20);
   };
 
-  window.Newton = window.Newton || {};
-  window.Newton.RadialGravity = RadialGravity;
+  Newton.RadialGravity = RadialGravity;
 
-})();
+})(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
