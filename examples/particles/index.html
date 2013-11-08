@@ -62,7 +62,7 @@
     wallMaterial = Newton.Material();
 
     renderer = Newton.PixiRenderer($display[0], width, height);
-    sim = Newton.Simulator(simulate, renderer.callback, 60);
+    sim = Newton.Simulator(simulate, renderer.callback, 60, 3);
 
     walls = createWalls();
     particles = Newton.Body(particleMaterial);
@@ -96,7 +96,7 @@
   }
 
   function simulate(time) {
-    if (mouseDown) addParticles(radial.x, radial.y, time);
+    if (mouseDown) addParticles(radial.x, radial.y, ~~(time * 0.5));
   }
 
 

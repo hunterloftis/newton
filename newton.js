@@ -87,8 +87,8 @@
     "use strict";
     function Layer() {
         return this instanceof Layer ? (this.bodies = [], this.forces = [], this.watchedLayers = [ this ], 
-        this.wrapper = void 0, this.cachedParticles = [], this.cachedForces = [], this.cachedEdges = [], 
-        void 0) : new Layer();
+        this.wrapper = void 0, this.container = void 0, this.cachedParticles = [], this.cachedForces = [], 
+        this.cachedEdges = [], void 0) : new Layer();
     }
     Layer.prototype.respondTo = function(layers) {
         return this.watchedLayers = layers || [], this;
@@ -96,6 +96,8 @@
         return this.forces.push(force), this;
     }, Layer.prototype.wrapIn = function(rect) {
         return this.wrapper = rect, this;
+    }, Layer.prototype.containBy = function(rect) {
+        return this.container = rect, this;
     }, Layer.prototype.addBody = function(body) {
         return this.bodies.push(body), this;
     }, Layer.prototype.collect = function() {
@@ -110,7 +112,8 @@
             particle.integrate(time);
         }
     }, Layer.prototype.constrain = function() {
-        return;
+        for (var particles = this.cachedParticles, i = 0, ilen = particles.length; ilen > i; i++) this.wrapper && particles[i].wrap(this.wrapper), 
+        this.container && particles[i].contain(this.container);
     }, Layer.prototype.collide = function() {
         for (var particles = this.cachedParticles, edges = this.cachedEdges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
     }, Newton.Layer = Layer;
@@ -357,18 +360,18 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function noop() {}
-    function Simulator(simulator, renderer, integrationFps, iterations) {
-        return this instanceof Simulator ? (this.simulator = simulator || noop, this.renderer = renderer || noop, 
-        this.step = this.getStep(), this.lastTime = 0, this.running = !1, this.fps = 0, 
+    function Simulator(preSimulator, renderer, integrationFps, iterations) {
+        return this instanceof Simulator ? (this.preSimulator = preSimulator || noop, this.renderer = renderer || noop, 
+        this.step = this._step.bind(this), this.lastTime = 0, this.running = !1, this.fps = 0, 
         this.frames = 0, this.countTime = 0, this.countInterval = 250, this.accumulator = 0, 
-        this.integrationStep = 1e3 / (integrationFps || 60), this.layers = [], this.iterations = iterations || 3, 
-        void 0) : new Simulator(simulator, renderer, integrationFps);
+        this.simulationStep = 1e3 / (integrationFps || 60), this.layers = [], this.iterations = iterations || 3, 
+        void 0) : new Simulator(preSimulator, renderer, integrationFps, iterations);
     }
     Simulator.prototype.start = function() {
         this.running = !0, this.countTime = Date.now() + 1e3, Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
-    }, Simulator.prototype.integrate = function(time) {
+    }, Simulator.prototype.simulate = function(time) {
         var i, j, ilen = this.layers.length, jlen = this.iterations;
         for (i = 0; ilen > i; i++) this.layers[i].collect(time), this.layers[i].integrate(time);
         for (j = 0; jlen > j; j++) {
@@ -378,18 +381,15 @@
     }, Simulator.prototype.Layer = function() {
         var newLayer = Newton.Layer();
         return this.layers.push(newLayer), newLayer;
-    }, Simulator.prototype.getStep = function() {
-        var self = this;
-        return function() {
-            if (self.running) {
-                var time = Date.now(), step = time - self.lastTime;
-                for (step > 100 && (step = 0), self.accumulator += step; self.accumulator >= self.integrationStep; ) self.simulator(self.integrationStep, self), 
-                self.integrate(self.integrationStep), self.accumulator -= self.integrationStep;
-                self.renderer(step, self), self.frames++, time >= self.countTime && (self.fps = (1e3 * (self.frames / (self.countInterval + time - self.countTime))).toFixed(0), 
-                self.frames = 0, self.countTime = time + self.countInterval), self.lastTime = time, 
-                Newton.frame(self.step);
-            }
-        };
+    }, Simulator.prototype._step = function() {
+        if (this.running) {
+            var time = Date.now(), step = time - this.lastTime;
+            for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.preSimulator(this.simulationStep, this), 
+            this.simulate(this.simulationStep), this.accumulator -= this.simulationStep;
+            this.renderer(step, this), this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
+            this.frames = 0, this.countTime = time + this.countInterval), this.lastTime = time, 
+            Newton.frame(this.step);
+        }
     }, Newton.Simulator = Simulator;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -441,3 +441,4 @@
         return Math.atan2(this.y, this.x);
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);
+//# sourceMappingURL=newton-map.js

@@ -10,6 +10,9 @@ module.exports = function(grunt) {
         newton_min: {
           files: {
             'newton.min.js': ['src/**/*.js']
+          },
+          options: {
+            report: 'gzip'
           }
         },
         newton: {
@@ -21,7 +24,8 @@ module.exports = function(grunt) {
               width: 80,
               beautify: true
             },
-            mangle: false
+            mangle: false,
+            sourceMap: 'newton-map.js'
           }
         }
       },
@@ -40,7 +44,7 @@ module.exports = function(grunt) {
       }
     });
 
-    grunt.registerTask('dev', ['uglify', 'watch']);
-    grunt.registerTask('build', ['uglify']);
+    grunt.registerTask('dev', ['uglify:newton', 'watch']);
+    grunt.registerTask('build', ['uglify:newton', 'uglify:newton_min']);
     grunt.registerTask('publish', ['build', 'release']);
 };

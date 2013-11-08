@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Newton.js: Constraints Example</title>
+  <link rel='stylesheet' type='text/css' href='../shared/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <canvas id="display" width="1280" height="450"></canvas>
+</div>
+
+<script type="text/javascript" src="../../bower_components/jquery/jquery.js"></script>
+<script type='text/javascript' src='../../newton.js'></script>
+
+<script>
+
+  var renderer = Newton.Renderer(document.getElementById('display'));
+  var sim = Newton.Simulator(simulate, renderer.callback, 60);
+  var structure = buildStructure(100, 100, 100, 5);
+
+  var mainLayer = sim.Layer();
+
+  mainLayer
+    .addBody(structure)
+    .addForce(Newton.LinearGravity(0, 0.001, 0))
+    .containBy(Newton.Rectangle(0, 0, 1280, 450));
+
+  sim.start();
+
+  function simulate(time) {
+
+  }
+
+  function buildStructure(x, y, length, segments) {
+    var b = Newton.Body();
+    var top = Newton.Particle(x, y);
+    var bottom = Newton.Particle(x, y + length);
+
+    for (var i = 0; i < segments.length; i++) {
+      var nextTop = Newton.Particle(x + i * length, y);
+      var nextBottom = Newton.Particle(x + i * length, y + length);
+
+      top.DistanceConstraint(nextTop);
+      bottom.DistanceConstraint(nextBottom);
+      nextTop.DistanceConstraint(nextBottom);
+      top.DistanceConstraint(nextBottom);
+
+      top = nextTop;
+      bottom = nextBottom;
+    }
+  }
+
+</script>
+
+</body>

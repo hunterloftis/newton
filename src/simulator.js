@@ -6,11 +6,11 @@
 
   'use strict'
 
-  function Simulator(simulator, renderer, integrationFps, iterations) {
-    if (!(this instanceof Simulator)) return new Simulator(simulator, renderer, integrationFps);
-    this.simulator = simulator || noop;
+  function Simulator(preSimulator, renderer, integrationFps, iterations) {
+    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, iterations);
+    this.preSimulator = preSimulator || noop;
     this.renderer = renderer || noop;
-    this.step = this.getStep();
+    this.step = this._step.bind(this);
     this.lastTime = 0;
     this.running = false;
     this.fps = 0;
@@ -18,7 +18,7 @@
     this.countTime = 0;
     this.countInterval = 250;
     this.accumulator = 0;
-    this.integrationStep = 1000 / (integrationFps || 60);
+    this.simulationStep = 1000 / (integrationFps || 60);
     this.layers = [];
     this.iterations = iterations || 3;
   }
@@ -33,7 +33,7 @@
     this.running = false;
   };
 
-  Simulator.prototype.integrate = function(time) {
+  Simulator.prototype.simulate = function(time) {
     var i, ilen = this.layers.length;
     var j, jlen = this.iterations;
 
@@ -55,35 +55,32 @@
     return newLayer;
   };
 
-  Simulator.prototype.getStep = function() {
-    var self = this;
-    return function generatedStep() {
-      if (!self.running) return;
+  Simulator.prototype._step = function() {
+    if (!this.running) return;
 
-      var time = Date.now();
-      var step = time - self.lastTime;
-      if (step > 100) step = 0;         // in case you leave / return
+    var time = Date.now();
+    var step = time - this.lastTime;
+    if (step > 100) step = 0;         // in case you leave / return
 
-      self.accumulator += step;
+    this.accumulator += step;
 
-      while (self.accumulator >= self.integrationStep) {
-        self.simulator(self.integrationStep, self);
-        self.integrate(self.integrationStep);
-        self.accumulator -= self.integrationStep;
-      }
+    while (this.accumulator >= this.simulationStep) {
+      this.preSimulator(this.simulationStep, this);
+      this.simulate(this.simulationStep);
+      this.accumulator -= this.simulationStep;
+    }
 
-      self.renderer(step, self);
+    this.renderer(step, this);
 
-      self.frames++;
-      if (time >= self.countTime) {
-        self.fps = (self.frames / (self.countInterval + time - self.countTime) * 1000).toFixed(0);
-        self.frames = 0;
-        self.countTime = time + self.countInterval;
-      }
+    this.frames++;
+    if (time >= this.countTime) {
+      this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1000).toFixed(0);
+      this.frames = 0;
+      this.countTime = time + this.countInterval;
+    }
 
-      self.lastTime = time;
-      Newton.frame(self.step);
-    };
+    this.lastTime = time;
+    Newton.frame(this.step);
   };
 
   Newton.Simulator = Simulator;

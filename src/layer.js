@@ -10,6 +10,7 @@
     this.forces = [];
     this.watchedLayers = [this];
     this.wrapper = undefined;
+    this.container = undefined;
 
     // TODO: add flags when things change to invalidate these caches
     // instead of invalidating them at the beginning of every frame
@@ -28,8 +29,14 @@
     return this;
   };
 
+  // TODO: rename to wrapBy
   Layer.prototype.wrapIn = function(rect) {
     this.wrapper = rect;
+    return this;
+  };
+
+  Layer.prototype.containBy = function(rect) {
+    this.container = rect;
     return this;
   };
 
@@ -78,11 +85,11 @@
   };
 
   Layer.prototype.constrain = function(time) {
-    return;
     var particles = this.cachedParticles;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       if (this.wrapper) particles[i].wrap(this.wrapper);
+      if (this.container) particles[i].contain(this.container);
     }
   };
 
