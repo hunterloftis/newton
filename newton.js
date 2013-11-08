@@ -6,6 +6,9 @@
     }
     Body.prototype.addParticle = function(particle) {
         this.particles.push(particle);
+    }, Body.prototype.Particle = function(x, y, size, material) {
+        var particle = Newton.Particle(x, y, size, material);
+        return this.addParticle(particle), particle;
     }, Body.prototype.addEdge = function(edge) {
         this.edges.push(edge);
     }, Body.prototype.each = function(method, args) {
@@ -173,7 +176,7 @@
         var velocity = this.position.clone().sub(this.lastPosition), newX = mod(this.position.x, bounds.width) + bounds.left, newY = mod(this.position.y, bounds.height) + bounds.top;
         this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x, this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y, 
         this.position.x = newX, this.position.y = newY;
-    }, Particle.prototype.accelerateVector = function(vector) {
+    }, Particle.prototype.DistanceConstraint = function() {}, Particle.prototype.accelerateVector = function(vector) {
         this.acceleration.add(vector);
     }, Particle.prototype.force = function(x, y, mass) {
         mass = mass || this.getMass(), this.acceleration.add({

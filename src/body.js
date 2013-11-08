@@ -15,6 +15,12 @@
     this.particles.push(particle);
   };
 
+  Body.prototype.Particle = function(x, y, size, material) {
+    var particle = Newton.Particle(x, y, size, material);
+    this.addParticle(particle);
+    return particle;
+  }
+
   Body.prototype.addEdge = function(edge) {
     this.edges.push(edge);
   };

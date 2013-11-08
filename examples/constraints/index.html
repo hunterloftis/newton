@@ -32,14 +32,14 @@
 
   }
 
-  function buildStructure(x, y, length, segments) {
+  function buildStructure(x, y, segmentLength, segments) {
     var b = Newton.Body();
-    var top = Newton.Particle(x, y);
-    var bottom = Newton.Particle(x, y + length);
+    var top = b.Particle(x, y);
+    var bottom = b.Particle(x, y + segmentLength);
 
-    for (var i = 0; i < segments.length; i++) {
-      var nextTop = Newton.Particle(x + i * length, y);
-      var nextBottom = Newton.Particle(x + i * length, y + length);
+    for (var i = 0; i < segments; i++) {
+      var nextTop = b.Particle(x + i * segmentLength, y);
+      var nextBottom = b.Particle(x + i * segmentLength, y + segmentLength);
 
       top.DistanceConstraint(nextTop);
       bottom.DistanceConstraint(nextBottom);
@@ -49,6 +49,8 @@
       top = nextTop;
       bottom = nextBottom;
     }
+
+    return b;
   }
 
 </script>

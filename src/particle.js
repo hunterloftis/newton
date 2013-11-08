@@ -99,6 +99,10 @@
     this.position.y = newY;
   };
 
+  Particle.prototype.DistanceConstraint = function() {
+
+  };
+
   Particle.prototype.accelerateVector = function(vector) {
     this.acceleration.add(vector);
   };
