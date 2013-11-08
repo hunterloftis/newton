@@ -67,7 +67,7 @@
         mass = particle.getMass();
         brightness = ~~((mass - 1) / 5 * 128);
         if (particle.colliding) {
-          this.graphics.lineStyle(mass * 3, rgbToHex(255, 255, 100), 1);
+          this.graphics.lineStyle(mass, rgbToHex(255, 255, 100), 1);
         }
         else {
           this.graphics.lineStyle(mass, rgbToHex(255, 28 + brightness, 108 + brightness), 1);
