@@ -61,13 +61,9 @@
     particleMaterial = Newton.Material();
     wallMaterial = Newton.Material();
 
-<<<<<<< HEAD
-    renderer = new Newton.Renderer($display[0]);
-    sim = new Newton.Simulator(simulate, renderer.callback, 60, 1);
-=======
     renderer = Newton.PixiRenderer($display[0], width, height);
     sim = Newton.Simulator(simulate, renderer.callback, 60);
->>>>>>> master
+
     walls = createWalls();
     particles = Newton.Body(particleMaterial);
     gravity = Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power

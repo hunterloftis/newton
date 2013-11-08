@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-var intersections = 0;
-
-;(function() {
-=======
 ;(function(Newton) {
-
-  'use strict';
->>>>>>> master
 
   'use strict'
 

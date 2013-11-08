@@ -85,7 +85,8 @@
     "use strict";
     function Layer() {
         return this instanceof Layer ? (this.bodies = [], this.forces = [], this.watchedLayers = [ this ], 
-        this.wrapper = void 0, void 0) : new Layer();
+        this.wrapper = void 0, this.cachedParticles = [], this.cachedForces = [], this.cachedEdges = [], 
+        void 0) : new Layer();
     }
     Layer.prototype.respondTo = function(layers) {
         return this.watchedLayers = layers || [], this;
@@ -95,17 +96,21 @@
         return this.wrapper = rect, this;
     }, Layer.prototype.addBody = function(body) {
         return this.bodies.push(body), this;
+    }, Layer.prototype.collect = function() {
+        var i, ilen, j, jlen, particles = this.cachedParticles, forces = this.cachedForces, edges = this.cachedEdges, bodies = this.bodies, watched = this.watchedLayers;
+        for (particles.length = 0, forces.length = 0, edges.length = 0, i = 0, ilen = bodies.length; ilen > i; i++) particles.push.apply(particles, bodies[i].particles);
+        for (i = 0, ilen = this.watchedLayers.length; ilen > i; i++) for (forces.push.apply(forces, watched[i].forces), 
+        j = 0, jlen = watched[i].bodies.length; jlen > j; j++) edges.push.apply(edges, watched[i].bodies[j].edges);
     }, Layer.prototype.integrate = function(time) {
-        var i, ilen, j, jlen, forces, particles, particle, edges;
-        for (forces = [], particles = [], edges = [], i = 0, ilen = this.bodies.length; ilen > i; i++) particles = particles.concat(this.bodies[i].particles);
-        for (i = 0, ilen = this.watchedLayers.length; ilen > i; i++) {
-            forces = forces.concat(this.watchedLayers[i].forces);
-            for (var j = 0, jlen = this.watchedLayers[i].bodies.length; jlen > j; j++) edges = edges.concat(this.watchedLayers[i].bodies[j].edges);
+        for (var particle, particles = this.cachedParticles, forces = this.cachedForces, i = 0, ilen = particles.length; ilen > i; i++) {
+            particle = particles[i];
+            for (var j = 0, jlen = forces.length; jlen > j; j++) forces[j].applyTo(particle);
+            particle.integrate(time);
         }
-        for (i = 0, ilen = particles.length; ilen > i; i++) {
-            for (particle = particles[i], j = 0, jlen = forces.length; jlen > j; j++) forces[j].applyTo(particle);
-            particle.integrate(time), this.wrapper && particle.wrap(this.wrapper), particle.collide(edges);
-        }
+    }, Layer.prototype.constrain = function() {
+        return;
+    }, Layer.prototype.collide = function() {
+        for (var particles = this.cachedParticles, edges = this.cachedEdges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
     }, Newton.Layer = Layer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -141,14 +146,14 @@
         this.lastValidPosition = this.position.clone(), this.velocity = new Newton.Vector(0, 0), 
         this.acceleration = new Newton.Vector(0, 0), this.material = material || Newton.Material.simple, 
         this.size = size || 1, this.randomDrag = Math.random() * Particle.randomness + 1e-10, 
-        void 0) : new Particle(x, y, size, material);
+        this.colliding = !1, void 0) : new Particle(x, y, size, material);
     }
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
         this.velocity.copy(this.position).sub(this.lastPosition);
         var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
         this.velocity.scale(1 - drag), this.acceleration.scale(1 - drag).scale(time * time), 
         this.lastPosition.copy(this.position), this.position.add(this.velocity).add(this.acceleration), 
-        this.acceleration.zero(), this.lastValidPosition.copy(this.lastPosition);
+        this.acceleration.zero(), this.lastValidPosition.copy(this.lastPosition), this.colliding = !1;
     }, Particle.prototype.placeAt = function(x, y) {
         return this.position.set(x, y), this.lastPosition.copy(this.position), this.lastValidPosition.copy(this.lastPosition), 
         this;
@@ -201,7 +206,7 @@
         if (nearest) {
             var velocity = this.position.clone().sub(this.lastPosition), bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y), reflectedVelocity = nearest.wall.getReflection(velocity, this.material.restitution);
             return this.position.copy(bouncePoint), this.setVelocity(reflectedVelocity.x, reflectedVelocity.y), 
-            this.lastValidPosition = bouncePoint, nearest;
+            this.lastValidPosition = bouncePoint, this.colliding = !0, nearest;
         }
     }, Newton.Particle = Particle;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -243,7 +248,7 @@
         drawParticles: function(particles) {
             for (var particle, pos, last, mass, brightness, j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
             pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
-            brightness = ~~(128 * ((mass - 1) / 5)), this.graphics.lineStyle(mass, rgbToHex(255, 28 + brightness, 108 + brightness), 1), 
+            brightness = ~~(128 * ((mass - 1) / 5)), particle.colliding ? this.graphics.lineStyle(3 * mass, rgbToHex(255, 255, 100), 1) : this.graphics.lineStyle(mass, rgbToHex(255, 28 + brightness, 108 + brightness), 1), 
             this.graphics.moveTo(last.x - 1, last.y), this.graphics.lineTo(pos.x + 1, pos.y);
             return particles.length;
         },
@@ -327,7 +332,7 @@
             for (var j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
             pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
             brightness = ~~(128 * ((mass - 1) / 5)), ctx.beginPath(), ctx.lineWidth = mass, 
-            ctx.strokeStyle = "rgba(" + [ 255, 28 + brightness, 108 + brightness ].join(",") + ", 1)", 
+            ctx.strokeStyle = particle.colliding ? "rgba(255, 255, 100, 1)" : "rgba(" + [ 255, 28 + brightness, 108 + brightness ].join(",") + ", 1)", 
             ctx.moveTo(last.x, last.y), ctx.lineTo(pos.x, pos.y + 2), ctx.stroke();
             return ctx.restore(), particles.length;
         },
@@ -350,18 +355,24 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function noop() {}
-    function Simulator(simulator, renderer, integrationFps) {
+    function Simulator(simulator, renderer, integrationFps, iterations) {
         return this instanceof Simulator ? (this.simulator = simulator || noop, this.renderer = renderer || noop, 
         this.step = this.getStep(), this.lastTime = 0, this.running = !1, this.fps = 0, 
         this.frames = 0, this.countTime = 0, this.countInterval = 250, this.accumulator = 0, 
-        this.integrationStep = 1e3 / (integrationFps || 60), this.layers = [], void 0) : new Simulator(simulator, renderer, integrationFps);
+        this.integrationStep = 1e3 / (integrationFps || 60), this.layers = [], this.iterations = iterations || 3, 
+        void 0) : new Simulator(simulator, renderer, integrationFps);
     }
     Simulator.prototype.start = function() {
         this.running = !0, this.countTime = Date.now() + 1e3, Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
     }, Simulator.prototype.integrate = function(time) {
-        for (var i = 0, ilen = this.layers.length; ilen > i; i++) this.layers[i].integrate(time);
+        var i, j, ilen = this.layers.length, jlen = this.iterations;
+        for (i = 0; ilen > i; i++) this.layers[i].collect(time), this.layers[i].integrate(time);
+        for (j = 0; jlen > j; j++) {
+            for (i = 0; ilen > i; i++) this.layers[i].constrain(time);
+            for (i = 0; ilen > i; i++) this.layers[i].collide(time);
+        }
     }, Simulator.prototype.Layer = function() {
         var newLayer = Newton.Layer();
         return this.layers.push(newLayer), newLayer;
