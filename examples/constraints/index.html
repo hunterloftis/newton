@@ -17,12 +17,12 @@
 
   var renderer = Newton.Renderer(document.getElementById('display'));
   var sim = Newton.Simulator(simulate, renderer.callback, 60);
-  var structure = buildStructure(100, 100, 100, 5);
+  var scaffold = buildScaffold(100, 100, 100, 5);
 
   var mainLayer = sim.Layer();
 
   mainLayer
-    .addBody(structure)
+    .addBody(scaffold)
     .addForce(Newton.LinearGravity(0, 0.001, 0))
     .containBy(Newton.Rectangle(0, 0, 1280, 450));
 
@@ -32,14 +32,17 @@
 
   }
 
-  function buildStructure(x, y, segmentLength, segments) {
-    var b = Newton.Body();
-    var top = b.Particle(x, y);
-    var bottom = b.Particle(x, y + segmentLength);
+  function buildScaffold(x, y, segmentLength, segments) {
+    var body = Newton.Body();
+    var top = body.Particle(x, y);
+    var bottom = body.Particle(x, y + segmentLength);
+
+    top.PinConstraint();
+    bottom.PinConstraint();
 
     for (var i = 0; i < segments; i++) {
-      var nextTop = b.Particle(x + i * segmentLength, y);
-      var nextBottom = b.Particle(x + i * segmentLength, y + segmentLength);
+      var nextTop = body.Particle(x + i * segmentLength, y);
+      var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
 
       top.DistanceConstraint(nextTop);
       bottom.DistanceConstraint(nextBottom);
@@ -50,7 +53,7 @@
       bottom = nextBottom;
     }
 
-    return b;
+    return body;
   }
 
 </script>

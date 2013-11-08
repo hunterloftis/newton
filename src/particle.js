@@ -99,7 +99,11 @@
     this.position.y = newY;
   };
 
-  Particle.prototype.DistanceConstraint = function() {
+  Particle.prototype.PinConstraint = function(x, y) {
+
+  };
+
+  Particle.prototype.DistanceConstraint = function(toParticle, distance) {
 
   };
 
