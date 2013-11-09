@@ -8,6 +8,7 @@
 
   function Simulator(preSimulator, renderer, integrationFps, iterations) {
     if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, iterations);
+
     this.preSimulator = preSimulator || noop;
     this.renderer = renderer || noop;
     this.step = this._step.bind(this);
@@ -19,8 +20,16 @@
     this.countInterval = 250;
     this.accumulator = 0;
     this.simulationStep = 1000 / (integrationFps || 60);
-    this.layers = [];
     this.iterations = iterations || 3;
+
+    this.layers = [];
+
+    // The basic elements of the simulation
+    this.particles = [];
+    this.edges = [];
+    this.forces = [];
+    this.distanceConstraints = [];
+    this.pinConstraints = [];
   }
 
   Simulator.prototype.start = function() {
@@ -34,19 +43,87 @@
   };
 
   Simulator.prototype.simulate = function(time) {
-    var i, ilen = this.layers.length;
-    var j, jlen = this.iterations;
+    this.preSimulator(time, this);
+    this.integrate(time);
 
-    for (i = 0; i < ilen; i++) {
-      this.layers[i].collect(time);     // First, figure out which physical objects we're manipulating for each layer
-      this.layers[i].integrate(time);   // Then integrate the layer's particles over time
+    for (var i = 0, ilen = this.iterations; i < ilen; i++) {
+      this.constrain(time);
+      this.collide(time);
+    }
+  };
+
+  Simulator.prototype.integrate = function(time) {
+    var particles = this.particles;
+    var forces = this.forces;
+    var particle, force;
+
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
+      particle = particles[i];
+      for (var j = 0, jlen = forces.length; j < jlen; j++) {
+        particle.applyForce(forces[j]); // TODO: applyForce must check validity of force based on particle's layer
+      }
+      particle.integrate(time);
+    }
+  };
+
+  Simulator.prototype.constrain = function(time) {
+    var particles = this.particles;
+    var distanceConstraints = this.distanceConstraints;
+    var pinConstraints = this.pinConstraints;
+
+    for (var i = 0, ilen = distanceConstraints.length; i < ilen; i++) {
+      distanceConstraints[i].enforce();
     }
 
-    for (j = 0; j < jlen; j++) {                                  // More iterations simulates with greater accuracy at the cost of time
-      for (i = 0; i < ilen; i++) this.layers[i].constrain(time);  // Apply each particle's constraints
-      for (i = 0; i < ilen; i++) this.layers[i].collide(time);    // Resolve collisions
+    for (var i = 0, ilen = pinConstraints.length; i < ilen; i++) {
+      pinConstraints[i].enforce();
     }
 
+    this.wrap(this.wrapper);
+    this.contain(this.container);
+  };
+
+  Simulator.prototype.collide = function(time) {
+    var particles = this.particles;
+    var edges = this.edges;
+
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
+      particles[i].collide(edges);
+    }
+  };
+
+  Simulator.prototype.add = function(entity) {
+    entity.addTo(this);
+    return this;
+  };
+
+  Simulator.prototype.wrap = function(rect) {
+    if (!rect) return;
+
+    var particles = this.particles;
+    for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
+      particles[i].wrap(rect);
+    }
+  };
+
+  Simulator.prototype.containBy = function(rect) {
+    this.container = rect;
+    return this;
+  };
+
+  Simulator.prototype.contain = function(rect) {
+    if (!rect) return;
+
+    var particles = this.particles;
+    for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
+      particles[i].contain(rect);
+    }
+  };
+
+  Simulator.prototype.addBody = function(body) {
+    this.particles.push.apply(this.particles, body.particles);
+    this.edges.push.apply(this.edges, body.edges);              // TODO: handle cases where the body's particles & edges change after adding
+    this.bodies.push(body);
   };
 
   Simulator.prototype.Layer = function() {
@@ -65,7 +142,6 @@
     this.accumulator += step;
 
     while (this.accumulator >= this.simulationStep) {
-      this.preSimulator(this.simulationStep, this);
       this.simulate(this.simulationStep);
       this.accumulator -= this.simulationStep;
     }

@@ -2,15 +2,22 @@
     "use strict";
     function Body(material) {
         return this instanceof Body ? (this.particles = [], this.edges = [], this.material = material, 
-        void 0) : new Body(material);
+        this.simulator = void 0, this.simParticles = [], this.simEdges = [], void 0) : new Body(material);
     }
-    Body.prototype.addParticle = function(particle) {
-        this.particles.push(particle);
-    }, Body.prototype.Particle = function(x, y, size, material) {
-        var particle = Newton.Particle(x, y, size, material);
+    Body.prototype.addTo = function(simulator) {
+        if (this.simulator) throw new Error("Not implemented: reparenting a body");
+        this.simParticles = simulator.particles, this.simEdges = simulator.edges, this.simParticles.push.apply(this.simParticles, this.particles), 
+        this.simEdges.push.apply(this.simEdges, this.edges), this.simulator = simulator;
+    }, Body.prototype.addParticle = function(particle) {
+        this.particles.push(particle), this.simParticles.push(particle);
+    }, Body.prototype.Particle = function() {
+        var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
     }, Body.prototype.addEdge = function(edge) {
-        this.edges.push(edge);
+        this.edges.push(edge), this.simEdges.push(edge);
+    }, Body.prototype.Edge = function() {
+        var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
+        return this.addEdge(edge), edge;
     }, Body.prototype.each = function(method, args) {
         for (var particle, i = this.particles.length; i--; ) particle = this.particles[i], 
         particle[method].apply(particle, args);
@@ -124,9 +131,12 @@
     "use strict";
     function LinearGravity(angle, strength, falloff) {
         return this instanceof LinearGravity ? (this.angle = angle, this.strength = strength, 
-        this.vector = new Newton.Vector(0, strength).rotate(angle), void 0) : new LinearGravity(angle, strength, falloff);
+        this.vector = new Newton.Vector(0, strength).rotate(angle), this.simulator = void 0, 
+        void 0) : new LinearGravity(angle, strength, falloff);
     }
-    LinearGravity.prototype.setAngle = function(angle) {
+    LinearGravity.prototype.addTo = function(simulator) {
+        simulator.forces.push(this), this.simulator = simulator;
+    }, LinearGravity.prototype.setAngle = function(angle) {
         this.angle = angle, this.vector.set(0, this.strength).rotate(this.angle);
     }, LinearGravity.prototype.setStrength = function(strength) {
         this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
@@ -176,7 +186,10 @@
         var velocity = this.position.clone().sub(this.lastPosition), newX = mod(this.position.x, bounds.width) + bounds.left, newY = mod(this.position.y, bounds.height) + bounds.top;
         this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x, this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y, 
         this.position.x = newX, this.position.y = newY;
-    }, Particle.prototype.DistanceConstraint = function() {}, Particle.prototype.accelerateVector = function(vector) {
+    }, Particle.prototype.PinConstraint = function() {}, Particle.prototype.DistanceConstraint = function() {}, 
+    Particle.prototype.applyForce = function(force) {
+        this.accelerateVector(force.vector);
+    }, Particle.prototype.accelerateVector = function(vector) {
         this.acceleration.add(vector);
     }, Particle.prototype.force = function(x, y, mass) {
         mass = mass || this.getMass(), this.acceleration.add({
@@ -367,28 +380,49 @@
         return this instanceof Simulator ? (this.preSimulator = preSimulator || noop, this.renderer = renderer || noop, 
         this.step = this._step.bind(this), this.lastTime = 0, this.running = !1, this.fps = 0, 
         this.frames = 0, this.countTime = 0, this.countInterval = 250, this.accumulator = 0, 
-        this.simulationStep = 1e3 / (integrationFps || 60), this.layers = [], this.iterations = iterations || 3, 
-        void 0) : new Simulator(preSimulator, renderer, integrationFps, iterations);
+        this.simulationStep = 1e3 / (integrationFps || 60), this.iterations = iterations || 3, 
+        this.layers = [], this.particles = [], this.edges = [], this.forces = [], this.distanceConstraints = [], 
+        this.pinConstraints = [], void 0) : new Simulator(preSimulator, renderer, integrationFps, iterations);
     }
     Simulator.prototype.start = function() {
         this.running = !0, this.countTime = Date.now() + 1e3, Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
     }, Simulator.prototype.simulate = function(time) {
-        var i, j, ilen = this.layers.length, jlen = this.iterations;
-        for (i = 0; ilen > i; i++) this.layers[i].collect(time), this.layers[i].integrate(time);
-        for (j = 0; jlen > j; j++) {
-            for (i = 0; ilen > i; i++) this.layers[i].constrain(time);
-            for (i = 0; ilen > i; i++) this.layers[i].collide(time);
+        this.preSimulator(time, this), this.integrate(time);
+        for (var i = 0, ilen = this.iterations; ilen > i; i++) this.constrain(time), this.collide(time);
+    }, Simulator.prototype.integrate = function(time) {
+        for (var particle, particles = this.particles, forces = this.forces, i = 0, ilen = particles.length; ilen > i; i++) {
+            particle = particles[i];
+            for (var j = 0, jlen = forces.length; jlen > j; j++) particle.applyForce(forces[j]);
+            particle.integrate(time);
         }
+    }, Simulator.prototype.constrain = function() {
+        this.particles;
+        for (var distanceConstraints = this.distanceConstraints, pinConstraints = this.pinConstraints, i = 0, ilen = distanceConstraints.length; ilen > i; i++) distanceConstraints[i].enforce();
+        for (var i = 0, ilen = pinConstraints.length; ilen > i; i++) pinConstraints[i].enforce();
+        this.wrap(this.wrapper), this.contain(this.container);
+    }, Simulator.prototype.collide = function() {
+        for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
+    }, Simulator.prototype.add = function(entity) {
+        return entity.addTo(this), this;
+    }, Simulator.prototype.wrap = function(rect) {
+        if (rect) for (var particles = this.particles, i = 0, ilen = this.particles.length; ilen > i; i++) particles[i].wrap(rect);
+    }, Simulator.prototype.containBy = function(rect) {
+        return this.container = rect, this;
+    }, Simulator.prototype.contain = function(rect) {
+        if (rect) for (var particles = this.particles, i = 0, ilen = this.particles.length; ilen > i; i++) particles[i].contain(rect);
+    }, Simulator.prototype.addBody = function(body) {
+        this.particles.push.apply(this.particles, body.particles), this.edges.push.apply(this.edges, body.edges), 
+        this.bodies.push(body);
     }, Simulator.prototype.Layer = function() {
         var newLayer = Newton.Layer();
         return this.layers.push(newLayer), newLayer;
     }, Simulator.prototype._step = function() {
         if (this.running) {
             var time = Date.now(), step = time - this.lastTime;
-            for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.preSimulator(this.simulationStep, this), 
-            this.simulate(this.simulationStep), this.accumulator -= this.simulationStep;
+            for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep), 
+            this.accumulator -= this.simulationStep;
             this.renderer(step, this), this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
             this.frames = 0, this.countTime = time + this.countInterval), this.lastTime = time, 
             Newton.frame(this.step);

@@ -1,7 +1,5 @@
 ;(function(Newton) {
 
-  'use strict';
-
   'use strict'
 
   function LinearGravity(angle, strength, falloff) {
@@ -9,7 +7,14 @@
     this.angle = angle;
     this.strength = strength;
     this.vector = new Newton.Vector(0, strength).rotate(angle);
+
+    this.simulator = undefined;
   }
+
+  LinearGravity.prototype.addTo = function(simulator) {
+    simulator.forces.push(this);
+    this.simulator = simulator;
+  };
 
   LinearGravity.prototype.setAngle = function(angle) {
     this.angle = angle;

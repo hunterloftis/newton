@@ -17,16 +17,15 @@
 
   var renderer = Newton.Renderer(document.getElementById('display'));
   var sim = Newton.Simulator(simulate, renderer.callback, 60);
+  var gravity = Newton.LinearGravity(0, 0.001, 0);
   var scaffold = buildScaffold(100, 100, 100, 5);
+  var container = Newton.Rectangle(0, 0, 1280, 450);
 
-  var mainLayer = sim.Layer();
-
-  mainLayer
-    .addBody(scaffold)
-    .addForce(Newton.LinearGravity(0, 0.001, 0))
-    .containBy(Newton.Rectangle(0, 0, 1280, 450));
-
-  sim.start();
+  sim
+    .add(scaffold)
+    .add(gravity)
+    .containBy(container)
+    .start();
 
   function simulate(time) {
 

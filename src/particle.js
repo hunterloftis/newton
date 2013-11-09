@@ -107,6 +107,11 @@
 
   };
 
+  Particle.prototype.applyForce = function(force) {
+    // TODO: check here if the force should apply to this particle
+    this.accelerateVector(force.vector);
+  };
+
   Particle.prototype.accelerateVector = function(vector) {
     this.acceleration.add(vector);
   };
