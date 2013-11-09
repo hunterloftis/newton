@@ -7,12 +7,14 @@
 
     this.particles = [];
     this.edges = [];
+    this.constraints = [];
 
     this.material = material; // TODO: make this matter
 
     this.simulator = undefined;
     this.simParticles = [];     // Quick reference for this.simulator.particles
     this.simEdges = [];         // Quick reference for this.simulator.edges
+    this.simConstraints = [];   // Quick reference for this.simulator.constraints
   }
 
   Body.prototype.addTo = function(simulator) {
@@ -33,7 +35,8 @@
   };
 
   Body.prototype.Particle = function() {
-    var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
+    var particle = Newton.Particle.apply(Newton.Particle,
+      Array.prototype.slice.call(Newton.Particle, arguments));
     this.addParticle(particle);
     return particle;
   }
@@ -44,9 +47,22 @@
   };
 
   Body.prototype.Edge = function() {
-    var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
+    var edge = Newton.Edge.apply(Newton.Edge,
+      Array.prototype.slice.call(Newton.Edge, arguments));
     this.addEdge(edge);
     return edge;
+  };
+
+  Body.prototype.addConstraint = function(constraint) {
+    this.constraints.push(constraint);
+    this.simConstraints.push(constraint);
+  };
+
+  Body.prototype.DistanceConstraint = function() {
+    var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint,
+      Array.prototype.slice.call(Newton.DistanceConstraint, arguments));
+    this.addConstraint(constraint);
+    return constraint;
   };
 
   Body.prototype.each = function(method, args) {

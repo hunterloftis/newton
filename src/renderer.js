@@ -16,6 +16,7 @@
       var ctx = this.ctx;
 
       this.clear(ctx, time);
+      this.drawConstraints(ctx, sim.constraints);
       this.drawEdges(ctx, sim.edges);
       this.drawParticles(ctx, sim.particles);
       this.drawForces(ctx, sim.forces);
@@ -74,6 +75,22 @@
       ctx.restore();
 
       return particles.length;
+    },
+    drawConstraints: function(ctx, constraints) {
+      var constraint, p1, p2;
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(100, 100, 255, 0.25)';
+      ctx.lineWidth = 1;
+      for (var i = 0, ilen = constraints.length; i < ilen; i++) {
+        constraint = constraints[i].getCoords();
+        ctx.beginPath();
+        ctx.moveTo(constraint.x1, constraint.y1);
+        ctx.lineTo(constraint.x2, constraint.y2);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
     },
     drawEdges: function(ctx, edges) {
       ctx.save();

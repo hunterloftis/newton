@@ -36,17 +36,17 @@
     var top = body.Particle(x, y);
     var bottom = body.Particle(x, y + segmentLength);
 
-    top.PinConstraint();
-    bottom.PinConstraint();
+    top.pin();
+    bottom.pin();
 
     for (var i = 0; i < segments; i++) {
       var nextTop = body.Particle(x + i * segmentLength, y);
       var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
 
-      top.DistanceConstraint(nextTop);
-      bottom.DistanceConstraint(nextBottom);
-      nextTop.DistanceConstraint(nextBottom);
-      top.DistanceConstraint(nextBottom);
+      body.DistanceConstraint(top, nextTop);
+      body.DistanceConstraint(bottom, nextBottom);
+      body.DistanceConstraint(nextTop, nextBottom);
+      body.DistanceConstraint(top, nextBottom);
 
       top = nextTop;
       bottom = nextBottom;

@@ -1,10 +1,8 @@
 ;(function(Newton) {
 
-  'use strict';
+  'use strict'
 
   function noop() {}
-
-  'use strict'
 
   function Simulator(preSimulator, renderer, integrationFps, iterations) {
     if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, iterations);
@@ -28,8 +26,7 @@
     this.particles = [];
     this.edges = [];
     this.forces = [];
-    this.distanceConstraints = [];
-    this.pinConstraints = [];
+    this.constraints = [];
   }
 
   Simulator.prototype.start = function() {
@@ -67,16 +64,10 @@
   };
 
   Simulator.prototype.constrain = function(time) {
-    var particles = this.particles;
-    var distanceConstraints = this.distanceConstraints;
-    var pinConstraints = this.pinConstraints;
+    var constraints = this.constraints;
 
-    for (var i = 0, ilen = distanceConstraints.length; i < ilen; i++) {
-      distanceConstraints[i].enforce();
-    }
-
-    for (var i = 0, ilen = pinConstraints.length; i < ilen; i++) {
-      pinConstraints[i].enforce();
+    for (var i = 0, ilen = constraints.length; i < ilen; i++) {
+      constraints[i].resolve(time);
     }
 
     this.wrap(this.wrapper);

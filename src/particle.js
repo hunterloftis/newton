@@ -17,6 +17,7 @@
     this.material = material || Newton.Material.simple;
     this.size = size || 1.0;
     this.randomDrag = Math.random() * Particle.randomness + 0.0000000001;
+    this.pinned = false;
 
     this.colliding = false;
   }
@@ -63,10 +64,21 @@
     return this;
   };
 
+  Particle.prototype.correct = function(v) {
+    this.position.add(v);
+  };
+
   Particle.prototype.moveBy = function(dx, dy) {
     this.lastPosition = this.position.clone();
     this.position.add(dx, dy);
     return this;
+  };
+
+  Particle.prototype.pin = function(x, y) {
+    x = (typeof x !== 'undefined') ? x : this.position.x;
+    y = (typeof y !== 'undefined') ? y : this.position.y;
+    this.placeAt(x, y);
+    this.pinned = true;
   };
 
   Particle.prototype.setVelocity = function(x, y) {
@@ -97,14 +109,6 @@
     this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y;
     this.position.x = newX;
     this.position.y = newY;
-  };
-
-  Particle.prototype.PinConstraint = function(x, y) {
-
-  };
-
-  Particle.prototype.DistanceConstraint = function(toParticle, distance) {
-
   };
 
   Particle.prototype.applyForce = function(force) {
