@@ -4,7 +4,7 @@
 
   function Renderer(el) {
     if (!(this instanceof Renderer)) return new Renderer(el);
-    var self = this;
+
     this.ctx = el.getContext('2d');
     this.width = el.width;
     this.height = el.height;
@@ -14,20 +14,12 @@
   Renderer.prototype = {
     callback: function(time, sim) {
       var ctx = this.ctx;
-      var particleCount = 0;
-      var edgeCount = 0;
 
       this.clear(ctx, time);
-
-      for (var i = 0, ilen = sim.layers.length; i < ilen; i++) {
-        for (var j = 0, jlen = sim.layers[i].bodies.length; j < jlen; j++) {
-          particleCount += this.drawParticles(ctx, sim.layers[i].bodies[j].particles);
-          edgeCount += this.drawEdges(ctx, sim.layers[i].bodies[j].edges);
-        }
-        this.drawForces(ctx, sim.layers[i].forces);
-      }
-
-      this.drawCounts(ctx, particleCount, edgeCount);
+      this.drawEdges(ctx, sim.edges);
+      this.drawParticles(ctx, sim.particles);
+      this.drawForces(ctx, sim.forces);
+      this.drawCounts(ctx, sim.particles.length, sim.edges.length);
       this.drawFPS(ctx, sim);
     },
     clear: function(ctx, time) {

@@ -325,14 +325,10 @@
     }
     Renderer.prototype = {
         callback: function(time, sim) {
-            var ctx = this.ctx, particleCount = 0, edgeCount = 0;
-            this.clear(ctx, time);
-            for (var i = 0, ilen = sim.layers.length; ilen > i; i++) {
-                for (var j = 0, jlen = sim.layers[i].bodies.length; jlen > j; j++) particleCount += this.drawParticles(ctx, sim.layers[i].bodies[j].particles), 
-                edgeCount += this.drawEdges(ctx, sim.layers[i].bodies[j].edges);
-                this.drawForces(ctx, sim.layers[i].forces);
-            }
-            this.drawCounts(ctx, particleCount, edgeCount), this.drawFPS(ctx, sim);
+            var ctx = this.ctx;
+            this.clear(ctx, time), this.drawEdges(ctx, sim.edges), this.drawParticles(ctx, sim.particles), 
+            this.drawForces(ctx, sim.forces), this.drawCounts(ctx, sim.particles.length, sim.edges.length), 
+            this.drawFPS(ctx, sim);
         },
         clear: function(ctx) {
             ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
