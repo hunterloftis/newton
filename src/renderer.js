@@ -15,6 +15,9 @@
     callback: function(time, sim) {
       var ctx = this.ctx;
 
+      debugger;
+
+
       this.clear(ctx, time);
       this.drawConstraints(ctx, sim.constraints);
       this.drawEdges(ctx, sim.edges);

@@ -32,7 +32,7 @@ module.exports = function(grunt) {
       watch: {
         scripts: {
           files: ['src/**/*.js'],
-          tasks: ['uglify'],
+          tasks: ['uglify:newton'],
           spawn: false
         }
       },

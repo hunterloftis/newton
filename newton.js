@@ -413,8 +413,7 @@
     }, Simulator.prototype.stop = function() {
         this.running = !1;
     }, Simulator.prototype.simulate = function(time) {
-        this.preSimulator(time, this), this.integrate(time);
-        for (var i = 0, ilen = this.iterations; ilen > i; i++) this.constrain(time), this.collide(time);
+        return this.preSimulator(time, this), this.integrate(time), void 0;
     }, Simulator.prototype.integrate = function(time) {
         for (var particle, particles = this.particles, forces = this.forces, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i];
