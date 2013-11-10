@@ -33,9 +33,10 @@
     }, Newton.Body = Body;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
-    function DistanceConstraint(p1, p2, distance, stiffness) {
-        return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
-        this.stiffness = stiffness || 1, this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, distance, stiffness);
+    function DistanceConstraint(p1, p2, stiffness, distance) {
+        return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.stiffness = stiffness || 1, 
+        this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
+        this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, stiffness, distance);
     }
     DistanceConstraint.prototype.getDistance = function() {
         var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);

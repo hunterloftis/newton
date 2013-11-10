@@ -2,13 +2,13 @@
 
   'use strict'
 
-  function DistanceConstraint(p1, p2, distance, stiffness) {
-    if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2, distance, stiffness);
+  function DistanceConstraint(p1, p2, stiffness, distance) {
+    if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2, stiffness, distance);
 
     this.p1 = p1;
     this.p2 = p2;
-    this.distance = (typeof distance === 'undefined') ? this.getDistance() : distance;
     this.stiffness = stiffness || 1;
+    this.distance = (typeof distance === 'undefined') ? this.getDistance() : distance;
 
     this.isDestroyed = false;
   }

@@ -52,11 +52,11 @@
       var nextTop = body.Particle(x + i * segmentLength, y);
       var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
 
-      body.DistanceConstraint(top, nextTop, undefined, 0.2);
-      body.DistanceConstraint(bottom, nextBottom, undefined, 0.2);
-      body.DistanceConstraint(nextTop, nextBottom, undefined, 0.2);
-      body.DistanceConstraint(top, nextBottom, undefined, 0.2);
-      body.DistanceConstraint(nextTop, bottom, undefined, 0.2);
+      body.DistanceConstraint(top, nextTop, 0.2);
+      body.DistanceConstraint(bottom, nextBottom, 0.2);
+      body.DistanceConstraint(nextTop, nextBottom, 0.2);
+      body.DistanceConstraint(top, nextBottom, 0.2);
+      body.DistanceConstraint(nextTop, bottom, 0.2);
 
       top = nextTop;
       bottom = nextBottom;
