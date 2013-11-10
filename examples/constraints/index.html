@@ -16,9 +16,9 @@
 <script>
 
   var renderer = Newton.Renderer(document.getElementById('display'));
-  var sim = Newton.Simulator(simulate, renderer.callback, 60);
+  var sim = Newton.Simulator(simulate, renderer.callback, 60, 3);
   var gravity = Newton.LinearGravity(0, 0.001, 0);
-  var lattice = buildLattice(100, 100, 100, 5);
+  var lattice = buildLattice(100, 100, 10, 30);
   var container = Newton.Rectangle(0, 0, 1280, 450);
 
   sim
@@ -26,11 +26,6 @@
     .add(gravity)
     .containBy(container)
     .start();
-
-  $('#display').click(function(e) {
-    globalTop.pin(globalTop.position.x, globalTop.position.y + 50);
-    globalBottom.pin(globalBottom.position.x, globalBottom.position.y + 50);
-  });
 
   function simulate(time) {
 
@@ -57,6 +52,7 @@
       body.DistanceConstraint(bottom, nextBottom);
       body.DistanceConstraint(nextTop, nextBottom);
       body.DistanceConstraint(top, nextBottom);
+      body.DistanceConstraint(nextTop, bottom);
 
       top = nextTop;
       bottom = nextBottom;

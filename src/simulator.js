@@ -45,7 +45,9 @@
     this.integrate(time);
 
     for (var i = 0, ilen = this.iterations; i < ilen; i++) {
-      this.constrain(time);
+      for (var j = 0; j < 10; j++) {
+        this.constrain(time);           // TODO: figure out this balance
+      }
       this.collide(time);
     }
   };
