@@ -55,36 +55,36 @@
       var particle, pos, last, mass, brightness;
 
       ctx.save();
-      ctx.lineCap = 'butt';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
       for (var j = 0, jlen = particles.length; j < jlen; j++) {
         particle = particles[j];
         pos = particle.position;
         last = particle.lastValidPosition;
         mass = particle.getMass();
-        brightness = ~~((mass - 1) / 5 * 128);
 
         ctx.beginPath();
+
         if (particle.pinned) {
-          ctx.lineWidth = 4;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+          ctx.lineWidth = 1;
+          ctx.moveTo(last.x - 3, last.y - 3);
+          ctx.lineTo(last.x + 3, last.y + 3);
+          ctx.moveTo(last.x + 3, last.y - 3);
+          ctx.lineTo(last.x - 3, last.y + 3);
         }
         else {
-          ctx.lineWidth = mass;
+          ctx.lineWidth = ~~(mass / 3) + 2;
+          ctx.strokeStyle = particle.colliding ?
+            'rgba(255, 255, 100, 1)' : 'rgba(255, 28, 108, 1)';
+          ctx.moveTo(last.x, last.y);
+          ctx.lineTo(pos.x + 1, pos.y);
         }
-        if (particle.colliding) {
-          ctx.strokeStyle = 'rgba(255, 255, 100, 1)';
-        }
-        else {
-          ctx.strokeStyle = 'rgba(' + [255, 28 + brightness, 108 + brightness].join(',') + ', 1)';
-        }
-        ctx.moveTo(last.x, last.y);
-        ctx.lineTo(pos.x, pos.y + 2);
         ctx.stroke();
       }
 
       ctx.restore();
-
-      return particles.length;
     },
     drawConstraints: function(ctx, constraints) {
       var constraint, p1, p2;
