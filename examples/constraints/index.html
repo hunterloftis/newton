@@ -27,9 +27,16 @@
     .containBy(container)
     .start();
 
+  $('#display').click(function(e) {
+    globalTop.pin(globalTop.position.x, globalTop.position.y + 50);
+    globalBottom.pin(globalBottom.position.x, globalBottom.position.y + 50);
+  });
+
   function simulate(time) {
 
   }
+
+  var globalTop, globalBottom;
 
   function buildLattice(x, y, segmentLength, segments) {
     var body = Newton.Body();
@@ -38,6 +45,9 @@
 
     top.pin();
     bottom.pin();
+
+    globalTop = top;
+    globalBottom = bottom;
 
     for (var i = 1; i <= segments; i++) {
       var nextTop = body.Particle(x + i * segmentLength, y);
