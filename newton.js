@@ -347,8 +347,12 @@
         callback: function(time, sim) {
             var ctx = this.ctx;
             this.clear(ctx, time), this.drawConstraints(ctx, sim.constraints), this.drawEdges(ctx, sim.edges), 
-            this.drawParticles(ctx, sim.particles), this.drawForces(ctx, sim.forces), this.drawCounts(ctx, sim.particles.length, sim.edges.length), 
-            this.drawFPS(ctx, sim);
+            this.drawParticles(ctx, sim.particles), this.drawForces(ctx, sim.forces), this.drawCounts(ctx, {
+                particles: sim.particles.length,
+                edges: sim.edges.length,
+                forces: sim.forces.length,
+                constraints: sim.constraints.length
+            }), this.drawFPS(ctx, sim);
         },
         clear: function(ctx) {
             ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
@@ -387,13 +391,14 @@
             ctx.moveTo(edge.x1, edge.y1), ctx.lineTo(edge.x2, edge.y2), ctx.closePath(), ctx.stroke();
             return ctx.restore(), edges.length;
         },
-        drawCounts: function(ctx, particleCount, edgeCount) {
-            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + particleCount, 10, 20), 
-            ctx.fillText("Edges: " + edgeCount, 10, 40), ctx.restore();
+        drawCounts: function(ctx, counts) {
+            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + counts.particles, 10, 20), 
+            ctx.fillText("Edges: " + counts.edges, 10, 40), ctx.fillText("Forces: " + counts.forces, 10, 60), 
+            ctx.fillText("Constraints: " + counts.constraints, 10, 80), ctx.restore();
         },
         drawFPS: function(ctx, sim) {
             var text = "FPS: " + sim.fps;
-            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText(text, 10, 60), 
+            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText(text, 10, 120), 
             ctx.restore();
         }
     }, Newton.Renderer = Renderer;

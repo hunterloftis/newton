@@ -20,7 +20,12 @@
       this.drawEdges(ctx, sim.edges);
       this.drawParticles(ctx, sim.particles);
       this.drawForces(ctx, sim.forces);
-      this.drawCounts(ctx, sim.particles.length, sim.edges.length);
+      this.drawCounts(ctx, {
+        particles: sim.particles.length,
+        edges: sim.edges.length,
+        forces: sim.forces.length,
+        constraints: sim.constraints.length
+      });
       this.drawFPS(ctx, sim);
     },
     clear: function(ctx, time) {
@@ -109,12 +114,14 @@
 
       return edges.length;
     },
-    drawCounts: function(ctx, particleCount, edgeCount) {
+    drawCounts: function(ctx, counts) {
       ctx.save();
       ctx.fillStyle = '#fff';
       ctx.font = '10pt Helvetica';
-      ctx.fillText('Particles: ' + particleCount, 10, 20);
-      ctx.fillText('Edges: ' + edgeCount, 10, 40);
+      ctx.fillText('Particles: ' + counts.particles, 10, 20);
+      ctx.fillText('Edges: ' + counts.edges, 10, 40);
+      ctx.fillText('Forces: ' + counts.forces, 10, 60);
+      ctx.fillText('Constraints: ' + counts.constraints, 10, 80);
       ctx.restore();
     },
     drawFPS: function(ctx, sim) {
@@ -122,7 +129,7 @@
       ctx.save();
       ctx.fillStyle = '#fff';
       ctx.font = '10pt Helvetica';
-      ctx.fillText(text, 10, 60);
+      ctx.fillText(text, 10, 120);
       ctx.restore();
     }
   };
