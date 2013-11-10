@@ -81,6 +81,7 @@
     y = (typeof y !== 'undefined') ? y : this.position.y;
     this.placeAt(x, y);
     this.pinned = true;
+    this.size = Infinity;
   };
 
   Particle.prototype.setVelocity = function(x, y) {

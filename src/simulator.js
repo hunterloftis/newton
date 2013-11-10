@@ -4,8 +4,8 @@
 
   function noop() {}
 
-  function Simulator(preSimulator, renderer, integrationFps, iterations) {
-    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, iterations);
+  function Simulator(preSimulator, renderer, integrationFps, constraintIterations) {
+    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, constraintIterations);
 
     this.preSimulator = preSimulator || noop;
     this.renderer = renderer || noop;
@@ -18,7 +18,7 @@
     this.countInterval = 250;
     this.accumulator = 0;
     this.simulationStep = 1000 / (integrationFps || 60);
-    this.iterations = iterations || 3;
+    this.constraintIterations = constraintIterations || 3;
 
     this.layers = [];
 
@@ -44,12 +44,11 @@
     this.preSimulator(time, this);
     this.integrate(time);
 
-    for (var i = 0, ilen = this.iterations; i < ilen; i++) {
-      for (var j = 0; j < 10; j++) {
-        this.constrain(time);           // TODO: figure out this balance
-      }
-      this.collide(time);
+    for (var i = 0, ilen = this.constraintIterations; i < ilen; i++) {
+      this.constrain(time);
     }
+
+    this.collide(time);
   };
 
   Simulator.prototype.integrate = function(time) {

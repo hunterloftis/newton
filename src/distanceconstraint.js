@@ -20,14 +20,16 @@
   DistanceConstraint.prototype.resolve = function(time) {
     var pos1 = this.p1.position;
     var pos2 = this.p2.position;
-    var diff = pos2.clone().sub(pos1);
-    var length = diff.getLength();
-    var factor = (length - this.distance) / (length * 2.1);
-    var correction = diff.scale(factor);
+    var delta = pos2.clone().sub(pos1);
+    var length = delta.getLength();
+    var invmass1 = 1 / this.p1.getMass();   // TODO: simplify the size * materialWeight thing?
+    var invmass2 = 1 / this.p2.getMass();
+    var factor = (length - this.distance) / (length * (invmass1 + invmass2));
+    var correction1 = delta.clone().scale(factor * invmass1);
+    var correction2 = delta.clone().scale(-factor * invmass2);
 
-    this.p1.correct(correction);
-    correction.scale(-1);
-    this.p2.correct(correction);
+    this.p1.correct(correction1);
+    this.p2.correct(correction2);
   };
 
   DistanceConstraint.prototype.getCoords = function() {
