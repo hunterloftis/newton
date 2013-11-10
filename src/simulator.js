@@ -40,10 +40,20 @@
   };
 
   Simulator.prototype.simulate = function(time) {
+    this.cull(this.particles);
+    this.cull(this.constraints);
     this.preSimulator(time, this);
     this.integrate(time);
     this.constrain(time);
     this.collide(time);
+  };
+
+  Simulator.prototype.cull = function(array) {
+    var i = 0;
+    do {
+      if (array[i].isDestroyed) array.splice(i, 1);
+      else i++;
+    } while (i < array.length);
   };
 
   Simulator.prototype.integrate = function(time) {
@@ -87,11 +97,29 @@
     return this;
   };
 
+  // TODO: this could be dramatically optimized by starting with bounding boxes
+  Simulator.prototype.findParticle = function(x, y, radius) {
+    var particles = this.particles;
+    var found = undefined;
+    var nearest = radius;
+    var distance;
+
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
+      distance = particles[i].getDistance(x, y);
+      if (distance <= nearest) {
+        found = particles[i];
+        nearest = distance;
+      }
+    }
+
+    return found;
+  };
+
   Simulator.prototype.wrap = function(rect) {
     if (!rect) return;
 
     var particles = this.particles;
-    for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particles[i].wrap(rect);
     }
   };

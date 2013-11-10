@@ -8,6 +8,8 @@
     this.p1 = p1;
     this.p2 = p2;
     this.distance = (typeof distance === 'undefined') ? this.getDistance() : distance;
+
+    this.isDestroyed = false;
   }
 
   DistanceConstraint.prototype.getDistance = function() {
@@ -18,6 +20,11 @@
   };
 
   DistanceConstraint.prototype.resolve = function(time) {
+    if (this.p1.isDestroyed || this.p2.isDestroyed) {
+      this.isDestroyed = true;
+      return;
+    }
+
     var pos1 = this.p1.position;
     var pos2 = this.p2.position;
     var delta = pos2.clone().sub(pos1);

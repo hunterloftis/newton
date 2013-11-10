@@ -35,12 +35,13 @@
     "use strict";
     function DistanceConstraint(p1, p2, distance) {
         return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
-        void 0) : new DistanceConstraint(p1, p2, distance);
+        this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, distance);
     }
     DistanceConstraint.prototype.getDistance = function() {
         var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);
         return diff.getLength();
     }, DistanceConstraint.prototype.resolve = function() {
+        if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var pos1 = this.p1.position, pos2 = this.p2.position, delta = pos2.clone().sub(pos1), length = delta.getLength(), invmass1 = 1 / this.p1.getMass(), invmass2 = 1 / this.p2.getMass(), factor = (length - this.distance) / (length * (invmass1 + invmass2)), correction1 = delta.clone().scale(factor * invmass1), correction2 = delta.clone().scale(-factor * invmass2);
         this.p1.correct(correction1), this.p2.correct(correction2);
     }, DistanceConstraint.prototype.getCoords = function() {
@@ -191,7 +192,7 @@
         this.lastValidPosition = this.position.clone(), this.velocity = new Newton.Vector(0, 0), 
         this.acceleration = new Newton.Vector(0, 0), this.material = material || Newton.Material.simple, 
         this.size = size || 1, this.randomDrag = Math.random() * Particle.randomness + 1e-10, 
-        this.pinned = !1, this.colliding = !1, void 0) : new Particle(x, y, size, material);
+        this.pinned = !1, this.colliding = !1, this.isDestroyed = !1, void 0) : new Particle(x, y, size, material);
     }
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
         if (!this.pinned) {
@@ -206,8 +207,12 @@
         this;
     }, Particle.prototype.correct = function(v) {
         this.pinned || this.position.add(v);
+    }, Particle.prototype.destroy = function() {
+        this.isDestroyed = !0;
     }, Particle.prototype.moveBy = function(dx, dy) {
         return this.lastPosition = this.position.clone(), this.position.add(dx, dy), this;
+    }, Particle.prototype.getDistance = function(x, y) {
+        return this.position.clone().subXY(x, y).getLength();
     }, Particle.prototype.pin = function(x, y) {
         x = "undefined" != typeof x ? x : this.position.x, y = "undefined" != typeof y ? y : this.position.y, 
         this.placeAt(x, y), this.pinned = !0, this.size = 1/0;
@@ -433,7 +438,11 @@
     }, Simulator.prototype.stop = function() {
         this.running = !1;
     }, Simulator.prototype.simulate = function(time) {
-        this.preSimulator(time, this), this.integrate(time), this.constrain(time), this.collide(time);
+        this.cull(this.particles), this.cull(this.constraints), this.preSimulator(time, this), 
+        this.integrate(time), this.constrain(time), this.collide(time);
+    }, Simulator.prototype.cull = function(array) {
+        var i = 0;
+        do array[i].isDestroyed ? array.splice(i, 1) : i++; while (i < array.length);
     }, Simulator.prototype.integrate = function(time) {
         for (var particle, particles = this.particles, forces = this.forces, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i];
@@ -447,8 +456,12 @@
         for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
     }, Simulator.prototype.add = function(entity) {
         return entity.addTo(this), this;
+    }, Simulator.prototype.findParticle = function(x, y, radius) {
+        for (var distance, particles = this.particles, found = void 0, nearest = radius, i = 0, ilen = particles.length; ilen > i; i++) distance = particles[i].getDistance(x, y), 
+        nearest >= distance && (found = particles[i], nearest = distance);
+        return found;
     }, Simulator.prototype.wrap = function(rect) {
-        if (rect) for (var particles = this.particles, i = 0, ilen = this.particles.length; ilen > i; i++) particles[i].wrap(rect);
+        if (rect) for (var particles = this.particles, i = 0, ilen = particles.length; ilen > i; i++) particles[i].wrap(rect);
     }, Simulator.prototype.containBy = function(rect) {
         return this.container = rect, this;
     }, Simulator.prototype.contain = function(rect) {

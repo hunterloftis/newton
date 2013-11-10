@@ -17,9 +17,10 @@
     this.material = material || Newton.Material.simple;
     this.size = size || 1.0;
     this.randomDrag = Math.random() * Particle.randomness + 0.0000000001;
-    this.pinned = false;
 
+    this.pinned = false;
     this.colliding = false;
+    this.isDestroyed = false;
   }
 
   Particle.randomness = 25;
@@ -70,10 +71,18 @@
     this.position.add(v);
   };
 
+  Particle.prototype.destroy = function() {
+    this.isDestroyed = true;
+  };
+
   Particle.prototype.moveBy = function(dx, dy) {
     this.lastPosition = this.position.clone();
     this.position.add(dx, dy);
     return this;
+  };
+
+  Particle.prototype.getDistance = function(x, y) {
+    return this.position.clone().subXY(x, y).getLength();
   };
 
   Particle.prototype.pin = function(x, y) {

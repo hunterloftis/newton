@@ -18,7 +18,7 @@
   var renderer = Newton.Renderer(document.getElementById('display'));
   var sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
   var gravity = Newton.LinearGravity(0, 0.001, 0);
-  var lattice = buildLattice(100, 100, 100, 7);
+  var lattice = buildLattice(150, 75, 100, 7);
   var container = Newton.Rectangle(0, 0, 1280, 450);
 
   sim
@@ -27,11 +27,18 @@
     .containBy(container)
     .start();
 
+  $('#display').click(function(e) {
+    var offset = $(this).offset();
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+    var particle = sim.findParticle(x, y, 30);
+
+    if (particle) particle.destroy();
+  });
+
   function simulate(time) {
 
   }
-
-  var globalTop, globalBottom;
 
   function buildLattice(x, y, segmentLength, segments) {
     var body = Newton.Body();
@@ -40,9 +47,6 @@
 
     top.pin();
     bottom.pin();
-
-    globalTop = top;
-    globalBottom = bottom;
 
     for (var i = 1; i <= segments; i++) {
       var nextTop = body.Particle(x + i * segmentLength, y);
