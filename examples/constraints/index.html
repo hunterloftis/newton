@@ -48,10 +48,6 @@
       var nextTop = body.Particle(x + i * segmentLength, y);
       var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
 
-      if (i === segments) {
-        nextBottom.size = 20;
-      }
-
       body.DistanceConstraint(top, nextTop);
       body.DistanceConstraint(bottom, nextBottom);
       body.DistanceConstraint(nextTop, nextBottom);
