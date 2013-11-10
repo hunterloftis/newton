@@ -2,12 +2,13 @@
 
   'use strict'
 
-  function DistanceConstraint(p1, p2, distance) {
-    if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2, distance);
+  function DistanceConstraint(p1, p2, distance, stiffness) {
+    if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2, distance, stiffness);
 
     this.p1 = p1;
     this.p2 = p2;
     this.distance = (typeof distance === 'undefined') ? this.getDistance() : distance;
+    this.stiffness = stiffness || 1;
 
     this.isDestroyed = false;
   }
@@ -31,7 +32,7 @@
     var length = delta.getLength();
     var invmass1 = 1 / this.p1.getMass();   // TODO: simplify the size * materialWeight thing?
     var invmass2 = 1 / this.p2.getMass();
-    var factor = (length - this.distance) / (length * (invmass1 + invmass2));
+    var factor = (length - this.distance) / (length * (invmass1 + invmass2)) * this.stiffness;
     var correction1 = delta.clone().scale(factor * invmass1);
     var correction2 = delta.clone().scale(-factor * invmass2);
 

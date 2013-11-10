@@ -33,16 +33,16 @@
     }, Newton.Body = Body;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
-    function DistanceConstraint(p1, p2, distance) {
+    function DistanceConstraint(p1, p2, distance, stiffness) {
         return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
-        this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, distance);
+        this.stiffness = stiffness || 1, this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, distance, stiffness);
     }
     DistanceConstraint.prototype.getDistance = function() {
         var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);
         return diff.getLength();
     }, DistanceConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
-        var pos1 = this.p1.position, pos2 = this.p2.position, delta = pos2.clone().sub(pos1), length = delta.getLength(), invmass1 = 1 / this.p1.getMass(), invmass2 = 1 / this.p2.getMass(), factor = (length - this.distance) / (length * (invmass1 + invmass2)), correction1 = delta.clone().scale(factor * invmass1), correction2 = delta.clone().scale(-factor * invmass2);
+        var pos1 = this.p1.position, pos2 = this.p2.position, delta = pos2.clone().sub(pos1), length = delta.getLength(), invmass1 = 1 / this.p1.getMass(), invmass2 = 1 / this.p2.getMass(), factor = (length - this.distance) / (length * (invmass1 + invmass2)) * this.stiffness, correction1 = delta.clone().scale(factor * invmass1), correction2 = delta.clone().scale(-factor * invmass2);
         this.p1.correct(correction1), this.p2.correct(correction2);
     }, DistanceConstraint.prototype.getCoords = function() {
         return {
