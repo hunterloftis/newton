@@ -40,9 +40,11 @@
   };
 
   Simulator.prototype.simulate = function(time) {
+
+    debugger;
+
     this.preSimulator(time, this);
     this.integrate(time);
-    return;
 
     for (var i = 0, ilen = this.iterations; i < ilen; i++) {
       this.constrain(time);

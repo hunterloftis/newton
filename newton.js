@@ -12,17 +12,17 @@
     }, Body.prototype.addParticle = function(particle) {
         this.particles.push(particle), this.simParticles.push(particle);
     }, Body.prototype.Particle = function() {
-        var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(Newton.Particle, arguments));
+        var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
     }, Body.prototype.addEdge = function(edge) {
         this.edges.push(edge), this.simEdges.push(edge);
     }, Body.prototype.Edge = function() {
-        var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(Newton.Edge, arguments));
+        var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
         return this.addEdge(edge), edge;
     }, Body.prototype.addConstraint = function(constraint) {
         this.constraints.push(constraint), this.simConstraints.push(constraint);
     }, Body.prototype.DistanceConstraint = function() {
-        var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint, Array.prototype.slice.call(Newton.DistanceConstraint, arguments));
+        var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint, Array.prototype.slice.call(arguments));
         return this.addConstraint(constraint), constraint;
     }, Body.prototype.each = function(method, args) {
         for (var particle, i = this.particles.length; i--; ) particle = this.particles[i], 
@@ -413,7 +413,8 @@
     }, Simulator.prototype.stop = function() {
         this.running = !1;
     }, Simulator.prototype.simulate = function(time) {
-        return this.preSimulator(time, this), this.integrate(time), void 0;
+        this.preSimulator(time, this), this.integrate(time);
+        for (var i = 0, ilen = this.iterations; ilen > i; i++) this.constrain(time), this.collide(time);
     }, Simulator.prototype.integrate = function(time) {
         for (var particle, particles = this.particles, forces = this.forces, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i];
