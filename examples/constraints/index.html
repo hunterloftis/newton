@@ -34,6 +34,11 @@
     var particle = sim.findParticle(x, y, 30);
 
     if (particle) particle.destroy();
+    else {
+      for (var i = 0; i < lattice.constraints.length; i++) {
+        lattice.constraints[i].stiffness = lattice.constraints[i].stiffness === 0.2 ? 1.0 : 0.2;
+      }
+    }
   });
 
   function simulate(time) {
@@ -52,11 +57,11 @@
       var nextTop = body.Particle(x + i * segmentLength, y);
       var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
 
-      body.DistanceConstraint(top, nextTop, 0.2);
-      body.DistanceConstraint(bottom, nextBottom, 0.2);
-      body.DistanceConstraint(nextTop, nextBottom, 0.2);
-      body.DistanceConstraint(top, nextBottom, 0.2);
-      body.DistanceConstraint(nextTop, bottom, 0.2);
+      body.DistanceConstraint(top, nextTop);
+      body.DistanceConstraint(bottom, nextBottom);
+      body.DistanceConstraint(nextTop, nextBottom);
+      body.DistanceConstraint(top, nextBottom);
+      body.DistanceConstraint(nextTop, bottom);
 
       top = nextTop;
       bottom = nextBottom;
