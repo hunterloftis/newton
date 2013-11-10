@@ -41,8 +41,6 @@
 
   Simulator.prototype.simulate = function(time) {
 
-    debugger;
-
     this.preSimulator(time, this);
     this.integrate(time);
 

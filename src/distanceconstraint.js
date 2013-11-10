@@ -7,20 +7,42 @@
 
     this.p1 = p1;
     this.p2 = p2;
-    this.distance = distance;
+    this.distance = (typeof distance === 'undefined') ? this.getDistance() : distance;
   }
+
+  DistanceConstraint.prototype.getDistance = function() {
+    var pos1 = this.p1.position;
+    var pos2 = this.p2.position;
+    var diff = pos2.clone().sub(pos1);
+    return diff.getLength();
+  };
 
   DistanceConstraint.prototype.resolve = function(time) {
     var pos1 = this.p1.position;
     var pos2 = this.p2.position;
     var diff = pos2.clone().sub(pos1);
     var length = diff.getLength();
+    // console.log('p1, p2:', this.p1, this.p2);
+    // console.log('equal?', this.p1 === this.p2);
+    // console.log('diff:', diff);
+    // console.log('length:', length);
+    // console.log('target:', this.distance);
+    // throw new Error('ok');
     var factor = (length - this.distance) / (length * 2.1);
     var correction = diff.scale(factor);
 
     this.p1.correct(correction);
     correction.scale(-1);
     this.p2.correct(correction);
+  };
+
+  DistanceConstraint.prototype.getCoords = function() {
+    return {
+      x1: this.p1.position.x,
+      y1: this.p1.position.y,
+      x2: this.p2.position.x,
+      y2: this.p2.position.y
+    };
   };
 
   Newton.DistanceConstraint = DistanceConstraint;

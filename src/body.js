@@ -20,11 +20,13 @@
   Body.prototype.addTo = function(simulator) {
     if (this.simulator) throw new Error('Not implemented: reparenting a body');
 
-    // Add our particles and edges to the simulation
+    // Add our particles, edges, and constraints to the simulation
     this.simParticles = simulator.particles;
     this.simEdges = simulator.edges;
     this.simParticles.push.apply(this.simParticles, this.particles);
     this.simEdges.push.apply(this.simEdges, this.edges);
+    this.simConstraints = simulator.constraints;
+    this.simConstraints.push.apply(this.simConstraints, this.constraints);
 
     this.simulator = simulator;
   };

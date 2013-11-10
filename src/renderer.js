@@ -85,7 +85,7 @@
       var constraint, p1, p2;
 
       ctx.save();
-      ctx.strokeStyle = 'rgba(100, 100, 255, 0.25)';
+      ctx.strokeStyle = 'rgba(100, 100, 255, 1)';
       ctx.lineWidth = 1;
       for (var i = 0, ilen = constraints.length; i < ilen; i++) {
         constraint = constraints[i].getCoords();

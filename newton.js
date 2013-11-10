@@ -8,7 +8,8 @@
     Body.prototype.addTo = function(simulator) {
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
         this.simParticles = simulator.particles, this.simEdges = simulator.edges, this.simParticles.push.apply(this.simParticles, this.particles), 
-        this.simEdges.push.apply(this.simEdges, this.edges), this.simulator = simulator;
+        this.simEdges.push.apply(this.simEdges, this.edges), this.simConstraints = simulator.constraints, 
+        this.simConstraints.push.apply(this.simConstraints, this.constraints), this.simulator = simulator;
     }, Body.prototype.addParticle = function(particle) {
         this.particles.push(particle), this.simParticles.push(particle);
     }, Body.prototype.Particle = function() {
@@ -33,12 +34,22 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function DistanceConstraint(p1, p2, distance) {
-        return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.distance = distance, 
+        return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
         void 0) : new DistanceConstraint(p1, p2, distance);
     }
-    DistanceConstraint.prototype.resolve = function() {
+    DistanceConstraint.prototype.getDistance = function() {
+        var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);
+        return diff.getLength();
+    }, DistanceConstraint.prototype.resolve = function() {
         var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1), length = diff.getLength(), factor = (length - this.distance) / (2.1 * length), correction = diff.scale(factor);
         this.p1.correct(correction), correction.scale(-1), this.p2.correct(correction);
+    }, DistanceConstraint.prototype.getCoords = function() {
+        return {
+            x1: this.p1.position.x,
+            y1: this.p1.position.y,
+            x2: this.p2.position.x,
+            y2: this.p2.position.y
+        };
     }, Newton.DistanceConstraint = DistanceConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -379,7 +390,7 @@
         },
         drawConstraints: function(ctx, constraints) {
             var constraint;
-            ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 0.25)", ctx.lineWidth = 1;
+            ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 1)", ctx.lineWidth = 1;
             for (var i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i].getCoords(), 
             ctx.beginPath(), ctx.moveTo(constraint.x1, constraint.y1), ctx.lineTo(constraint.x2, constraint.y2), 
             ctx.closePath(), ctx.stroke();
