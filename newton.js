@@ -194,16 +194,18 @@
         this.pinned = !1, this.colliding = !1, void 0) : new Particle(x, y, size, material);
     }
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
-        this.velocity.copy(this.position).sub(this.lastPosition);
-        var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
-        this.velocity.scale(1 - drag), this.acceleration.scale(1 - drag).scale(time * time), 
-        this.lastPosition.copy(this.position), this.position.add(this.velocity).add(this.acceleration), 
-        this.acceleration.zero(), this.lastValidPosition.copy(this.lastPosition), this.colliding = !1;
+        if (!this.pinned) {
+            this.velocity.copy(this.position).sub(this.lastPosition);
+            var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
+            this.velocity.scale(1 - drag), this.acceleration.scale(1 - drag).scale(time * time), 
+            this.lastPosition.copy(this.position), this.position.add(this.velocity).add(this.acceleration), 
+            this.acceleration.zero(), this.lastValidPosition.copy(this.lastPosition), this.colliding = !1;
+        }
     }, Particle.prototype.placeAt = function(x, y) {
         return this.position.set(x, y), this.lastPosition.copy(this.position), this.lastValidPosition.copy(this.lastPosition), 
         this;
     }, Particle.prototype.correct = function(v) {
-        this.position.add(v);
+        this.pinned || this.position.add(v);
     }, Particle.prototype.moveBy = function(dx, dy) {
         return this.lastPosition = this.position.clone(), this.position.add(dx, dy), this;
     }, Particle.prototype.pin = function(x, y) {
@@ -219,7 +221,7 @@
         this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x, this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y, 
         this.position.x = newX, this.position.y = newY;
     }, Particle.prototype.applyForce = function(force) {
-        this.accelerateVector(force.vector);
+        this.pinned || this.accelerateVector(force.vector);
     }, Particle.prototype.accelerateVector = function(vector) {
         this.acceleration.add(vector);
     }, Particle.prototype.force = function(x, y, mass) {
@@ -383,7 +385,7 @@
             ctx.save(), ctx.lineCap = "butt";
             for (var j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
             pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
-            brightness = ~~(128 * ((mass - 1) / 5)), ctx.beginPath(), ctx.lineWidth = mass, 
+            brightness = ~~(128 * ((mass - 1) / 5)), ctx.beginPath(), ctx.lineWidth = particle.pinned ? 4 : mass, 
             ctx.strokeStyle = particle.colliding ? "rgba(255, 255, 100, 1)" : "rgba(" + [ 255, 28 + brightness, 108 + brightness ].join(",") + ", 1)", 
             ctx.moveTo(last.x, last.y), ctx.lineTo(pos.x, pos.y + 2), ctx.stroke();
             return ctx.restore(), particles.length;

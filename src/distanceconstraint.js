@@ -22,12 +22,6 @@
     var pos2 = this.p2.position;
     var diff = pos2.clone().sub(pos1);
     var length = diff.getLength();
-    // console.log('p1, p2:', this.p1, this.p2);
-    // console.log('equal?', this.p1 === this.p2);
-    // console.log('diff:', diff);
-    // console.log('length:', length);
-    // console.log('target:', this.distance);
-    // throw new Error('ok');
     var factor = (length - this.distance) / (length * 2.1);
     var correction = diff.scale(factor);
 

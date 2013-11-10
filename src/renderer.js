@@ -65,7 +65,12 @@
         brightness = ~~((mass - 1) / 5 * 128);
 
         ctx.beginPath();
-        ctx.lineWidth = mass;
+        if (particle.pinned) {
+          ctx.lineWidth = 4;
+        }
+        else {
+          ctx.lineWidth = mass;
+        }
         if (particle.colliding) {
           ctx.strokeStyle = 'rgba(255, 255, 100, 1)';
         }

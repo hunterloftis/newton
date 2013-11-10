@@ -25,6 +25,7 @@
   Particle.randomness = 25;
 
   Particle.prototype.integrate = function(time) {
+    if (this.pinned) return;
 
     // Find velocity
     this.velocity
@@ -65,6 +66,7 @@
   };
 
   Particle.prototype.correct = function(v) {
+    if (this.pinned) return;
     this.position.add(v);
   };
 
@@ -112,6 +114,7 @@
   };
 
   Particle.prototype.applyForce = function(force) {
+    if (this.pinned) return;
     // TODO: check here if the force should apply to this particle
     this.accelerateVector(force.vector);
   };
