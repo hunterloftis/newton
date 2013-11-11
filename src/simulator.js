@@ -74,7 +74,7 @@
     var constraints = this.constraints;
 
     for (var j = 0, jlen = this.iterations; j < jlen; j++) {
-      for (var i = 0, ilen = constraints.length; i < ilen; i++) {
+      for (var i = constraints.length - 1; i >= 0; i--) {
         constraints[i].resolve(time);
       }
     }
