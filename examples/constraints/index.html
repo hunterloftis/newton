@@ -16,7 +16,7 @@
 <script>
 
   var renderer = Newton.Renderer(document.getElementById('display'));
-  var sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
+  var sim = Newton.Simulator(simulate, renderer.callback, 60, 100);
   var gravity = Newton.LinearGravity(0, 0.001, 0);
   var lattice = buildLattice(150, 75, 100, 7);
   var container = Newton.Rectangle(0, 0, 1280, 450);
@@ -34,11 +34,6 @@
     var particle = sim.findParticle(x, y, 30);
 
     if (particle) particle.destroy();
-    else {
-      for (var i = 0; i < lattice.constraints.length; i++) {
-        lattice.constraints[i].stiffness = lattice.constraints[i].stiffness === 0.2 ? 1.0 : 0.2;
-      }
-    }
   });
 
   function simulate(time) {
