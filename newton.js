@@ -25,11 +25,9 @@
     }, Body.prototype.DistanceConstraint = function() {
         var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint, Array.prototype.slice.call(arguments));
         return this.addConstraint(constraint), constraint;
-    }, Body.prototype.each = function(method, args) {
-        for (var particle, i = this.particles.length; i--; ) particle = this.particles[i], 
-        particle[method].apply(particle, args);
-    }, Body.prototype.callback = function(callback) {
-        for (var i = this.particles.length; i--; ) callback(this.particles[i]);
+    }, Body.prototype.RigidConstraint = function() {
+        var constraint = Newton.RigidConstraint.apply(Newton.RigidConstraint, Array.prototype.slice.call(arguments));
+        return this.addConstraint(constraint), constraint;
     }, Newton.Body = Body;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -38,7 +36,7 @@
         this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
         this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, stiffness, distance);
     }
-    DistanceConstraint.prototype.getDistance = function() {
+    DistanceConstraint.prototype.category = "linear", DistanceConstraint.prototype.getDistance = function() {
         var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);
         return diff.getLength();
     }, DistanceConstraint.prototype.resolve = function() {
@@ -399,11 +397,11 @@
             ctx.restore();
         },
         drawConstraints: function(ctx, constraints) {
-            var constraint;
+            var coords;
             ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 1)", ctx.lineWidth = 1;
-            for (var i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i].getCoords(), 
-            ctx.beginPath(), ctx.moveTo(constraint.x1, constraint.y1), ctx.lineTo(constraint.x2, constraint.y2), 
-            ctx.closePath(), ctx.stroke();
+            for (var i = 0, ilen = constraints.length; ilen > i; i++) "linear" === constraints[i].category && (coords = constraints[i].getCoords(), 
+            ctx.beginPath(), ctx.moveTo(coords.x1, coords.y1), ctx.lineTo(coords.x2, coords.y2), 
+            ctx.closePath(), ctx.stroke());
             ctx.restore();
         },
         drawEdges: function(ctx, edges) {
@@ -423,6 +421,12 @@
             ctx.restore();
         }
     }, Newton.Renderer = Renderer;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function RigidConstraint(particles, iterations) {
+        return this instanceof RigidConstraint ? void 0 : new RigidConstraint(particles, iterations);
+    }
+    RigidConstraint.prototype.resolve = function() {}, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function noop() {}

@@ -13,6 +13,8 @@
     this.isDestroyed = false;
   }
 
+  DistanceConstraint.prototype.category = 'linear';
+
   DistanceConstraint.prototype.getDistance = function() {
     var pos1 = this.p1.position;
     var pos2 = this.p2.position;

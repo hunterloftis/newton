@@ -87,18 +87,21 @@
       ctx.restore();
     },
     drawConstraints: function(ctx, constraints) {
-      var constraint, p1, p2;
+      var coords;
 
       ctx.save();
       ctx.strokeStyle = 'rgba(100, 100, 255, 1)';
       ctx.lineWidth = 1;
       for (var i = 0, ilen = constraints.length; i < ilen; i++) {
-        constraint = constraints[i].getCoords();
-        ctx.beginPath();
-        ctx.moveTo(constraint.x1, constraint.y1);
-        ctx.lineTo(constraint.x2, constraint.y2);
-        ctx.closePath();
-        ctx.stroke();
+
+        if (constraints[i].category === 'linear') {
+          coords = constraints[i].getCoords();
+          ctx.beginPath();
+          ctx.moveTo(coords.x1, coords.y1);
+          ctx.lineTo(coords.x2, coords.y2);
+          ctx.closePath();
+          ctx.stroke();
+        }
       }
       ctx.restore();
     },

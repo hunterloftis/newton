@@ -24,6 +24,7 @@
 
   sim
     .add(lattice)
+    .add(arrow)
     .add(gravity)
     .containBy(container)
     .start();
@@ -71,21 +72,22 @@
   }
 
   function buildArrow(x, y, length, width) {
-    var body = Newton.RigidBody();
+    var body = Newton.Body();
 
-    body.Particle(0, 0);
-    body.Particle(length * 0.5, width * -0.5);
-    body.Particle(length, 0);
-    body.Particle(length * 0.75, width * 0.5);
-    body.Particle(length * 0.5, 0);
-    body.Particle(length * 0.25, width * 0.5);
+    body.Particle(x, y);
+    body.Particle(x + length * 0.5, y + width * -0.5);
+    body.Particle(x + length, y);
+    body.Particle(x + length * 0.75, y + width * 0.5);
+    body.Particle(x + length * 0.5, y);
+    body.Particle(x + length * 0.25, y + width * 0.5);
+
+    body.RigidConstraint(body.particles, 3);
 
     for (var i = 0; i < body.particles.length - 1; i++) {
-      body.Edge(body.particles[i], body.particles[i + 1]);
+      //body.Edge(body.particles[i], body.particles[i + 1]);
     }
-    body.Edge(body.particles[body.particles.length - 1], body.particles[0]);
+    //body.Edge(body.particles[body.particles.length - 1], body.particles[0]);
 
-    body.orient();  // required for computing center of mass and building new relative angles and distances
     return body;
   }
 
