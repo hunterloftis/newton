@@ -16,7 +16,7 @@
 <script>
 
   var renderer = Newton.Renderer(document.getElementById('display'));
-  var sim = Newton.Simulator(simulate, renderer.callback, 60, 100);
+  var sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
   var gravity = Newton.LinearGravity(0, 0.001, 0);
   var lattice = buildLattice(150, 75, 100, 7);
   var container = Newton.Rectangle(0, 0, 1280, 450);
@@ -54,13 +54,17 @@
 
       body.DistanceConstraint(top, nextTop);
       body.DistanceConstraint(bottom, nextBottom);
-      body.DistanceConstraint(nextTop, nextBottom);
       body.DistanceConstraint(top, nextBottom);
       body.DistanceConstraint(nextTop, bottom);
+
+      if (i < segments) body.DistanceConstraint(nextTop, nextBottom);
 
       top = nextTop;
       bottom = nextBottom;
     }
+
+    top.pin();
+    bottom.pin();
 
     return body;
   }
