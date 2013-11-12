@@ -206,6 +206,8 @@
         this;
     }, Particle.prototype.correct = function(v) {
         this.pinned || this.position.add(v);
+    }, Particle.prototype.moveTo = function(x, y) {
+        return this.position.set(x, y), this;
     }, Particle.prototype.destroy = function() {
         this.isDestroyed = !0;
     }, Particle.prototype.moveBy = function(dx, dy) {
@@ -397,10 +399,13 @@
             ctx.restore();
         },
         drawConstraints: function(ctx, constraints) {
-            var coords;
+            var coords, constraint;
             ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 1)", ctx.lineWidth = 1;
-            for (var i = 0, ilen = constraints.length; ilen > i; i++) "linear" === constraints[i].category && (coords = constraints[i].getCoords(), 
-            ctx.beginPath(), ctx.moveTo(coords.x1, coords.y1), ctx.lineTo(coords.x2, coords.y2), 
+            for (var i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
+            "linear" === constraint.category ? (coords = constraint.getCoords(), ctx.beginPath(), 
+            ctx.moveTo(coords.x1, coords.y1), ctx.lineTo(coords.x2, coords.y2), ctx.closePath(), 
+            ctx.stroke()) : "rigid" === constraint.category && (coords = constraint.centerMass, 
+            ctx.beginPath(), ctx.moveTo(coords.x - 3, coords.y - 3), ctx.lineTo(coords.x + 3, coords.y + 3), 
             ctx.closePath(), ctx.stroke());
             ctx.restore();
         },
@@ -423,10 +428,40 @@
     }, Newton.Renderer = Renderer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
-    function RigidConstraint(particles, iterations) {
-        return this instanceof RigidConstraint ? void 0 : new RigidConstraint(particles, iterations);
+    function map(array, fn) {
+        for (var index = -1, length = array.length, result = Array(length); ++index < length; ) result[index] = fn(array[index]);
+        return result;
     }
-    RigidConstraint.prototype.resolve = function() {}, Newton.RigidConstraint = RigidConstraint;
+    function RigidConstraint(particles, iterations) {
+        return this instanceof RigidConstraint ? (this.particles = particles, this.centerMass = this.getCenterMass(), 
+        this.baseAngle = this.getAverageAngle(), this.deltas = this.getDeltas(), console.log("centerMass:", this.getCenterMass()), 
+        console.log("averageAngle:", this.getAverageAngle()), console.log("deltas:", this.getDeltas()), 
+        void 0) : new RigidConstraint(particles, iterations);
+    }
+    RigidConstraint.prototype.category = "rigid", RigidConstraint.prototype.getCenterMass = function() {
+        for (var centerMass = Newton.Vector(0, 0), length = this.particles.length, index = -1; ++index < length; ) centerMass.add(this.particles[index].position);
+        return centerMass.scale(1 / length), centerMass;
+    }, RigidConstraint.prototype.getAverageAngle = function() {
+        for (var average = 0, delta = Newton.Vector(), length = this.particles.length, index = -1, centerMass = this.getCenterMass(); ++index < length; ) delta.copy(this.particles[index].position).sub(centerMass), 
+        average += delta.getAngle();
+        return average;
+    }, RigidConstraint.prototype.getDeltas = function() {
+        var centerMass = this.getCenterMass(), delta = Newton.Vector();
+        return map(this.particles, function(particle) {
+            return delta.copy(particle.position).sub(centerMass), {
+                distance: delta.getLength(),
+                angle: delta.getAngle(),
+                delta: delta.clone()
+            };
+        });
+    };
+    var flags = 0;
+    RigidConstraint.prototype.resolve = function() {
+        var delta, centerMass = this.getCenterMass(), angle = this.getAverageAngle() - this.baseAngle, length = this.particles.length, index = -1, correctedPosition = Newton.Vector();
+        for (flags++ < 30 && console.log("angle:", angle); ++index < length; ) delta = this.deltas[index], 
+        correctedPosition.copy(centerMass).add(delta.delta), this.particles[index].moveTo(correctedPosition.x, correctedPosition.y);
+        this.centerMass = centerMass;
+    }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function noop() {}
@@ -455,7 +490,7 @@
             particle.integrate(time);
         }
     }, Simulator.prototype.constrain = function(time) {
-        for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time);
+        for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = constraints.length - 1; i >= 0; i--) constraints[i].resolve(time, this.particles);
         this.wrap(this.wrapper), this.contain(this.container);
     }, Simulator.prototype.collide = function() {
         for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
@@ -502,6 +537,8 @@
         return this.x = x, this.y = y, this;
     }, Vector.prototype.add = function(v) {
         return this.x += v.x, this.y += v.y, this;
+    }, Vector.prototype.addXY = function(x, y) {
+        return this.x += x, this.y += y, this;
     }, Vector.prototype.sub = function(v) {
         return this.x -= v.x, this.y -= v.y, this;
     }, Vector.prototype.subXY = function(x, y) {

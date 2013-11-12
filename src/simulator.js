@@ -73,9 +73,11 @@
   Simulator.prototype.constrain = function(time) {
     var constraints = this.constraints;
 
+    // TODO: sort constraints by priority, eg PinConstraint.priority = 0, RigidConstraint.priority = 2, DistanceConstraint.priority = 4, etc
+    // TODO: possibly sort on insert? avoid other classes using sim.constraints.push and instead provide a pusher method that re-sorts as well
     for (var j = 0, jlen = this.iterations; j < jlen; j++) {
       for (var i = constraints.length - 1; i >= 0; i--) {
-        constraints[i].resolve(time);
+        constraints[i].resolve(time, this.particles);
       }
     }
 

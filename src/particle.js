@@ -71,6 +71,11 @@
     this.position.add(v);
   };
 
+  Particle.prototype.moveTo = function(x, y) {
+    this.position.set(x, y);
+    return this;
+  };
+
   Particle.prototype.destroy = function() {
     this.isDestroyed = true;
   };

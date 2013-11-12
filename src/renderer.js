@@ -88,17 +88,28 @@
     },
     drawConstraints: function(ctx, constraints) {
       var coords;
+      var constraint;
 
       ctx.save();
       ctx.strokeStyle = 'rgba(100, 100, 255, 1)';
       ctx.lineWidth = 1;
-      for (var i = 0, ilen = constraints.length; i < ilen; i++) {
 
-        if (constraints[i].category === 'linear') {
-          coords = constraints[i].getCoords();
+      for (var i = 0, ilen = constraints.length; i < ilen; i++) {
+        constraint = constraints[i];
+
+        if (constraint.category === 'linear') {
+          coords = constraint.getCoords();
           ctx.beginPath();
           ctx.moveTo(coords.x1, coords.y1);
           ctx.lineTo(coords.x2, coords.y2);
+          ctx.closePath();
+          ctx.stroke();
+        }
+        else if (constraint.category === 'rigid') {
+          coords = constraint.centerMass;
+          ctx.beginPath();
+          ctx.moveTo(coords.x - 3, coords.y - 3);
+          ctx.lineTo(coords.x + 3, coords.y + 3);
           ctx.closePath();
           ctx.stroke();
         }

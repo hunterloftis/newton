@@ -40,6 +40,12 @@
     return this;
   };
 
+  Vector.prototype.addXY = function(x, y) {
+    this.x += x;
+    this.y += y;
+    return this;
+  };
+
   Vector.prototype.sub = function(v) {
     this.x -= v.x;
     this.y -= v.y;
