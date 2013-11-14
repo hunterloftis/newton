@@ -33,7 +33,7 @@
       .copy(this.position)
       .sub(this.lastPosition);
 
-    var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
+    var drag = 0; //Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
 
     this.velocity.scale(1 - drag);
 

@@ -41,7 +41,7 @@
   };
 
   RigidConstraint.prototype.getAverageAngle = function() {
-    var average = 0;
+    var total = 0;
     var delta = Newton.Vector();
     var length = this.particles.length;
     var index = -1;
@@ -49,10 +49,10 @@
 
     while (++index < length) {
       delta.copy(this.particles[index].position).sub(centerMass);
-      average += delta.getAngle();
+      total += delta.getAngle();
     }
 
-    return average;
+    return total / length;
   };
 
   RigidConstraint.prototype.getDeltas = function() {
@@ -73,21 +73,22 @@
 
   RigidConstraint.prototype.resolve = function(time) {
     var centerMass = this.getCenterMass();
+    var averageAngle = this.getAverageAngle();
     var angle = this.getAverageAngle() - this.baseAngle;
+    var angleDelta = averageAngle - this.baseAngle;
     var length = this.particles.length;
     var index = -1;
     var delta;
     var correctedPosition = Newton.Vector();
 
-    if (flags++ < 30) console.log('angle:', angle);
+    if (flags++ < 30) console.log(angle);
 
     while(++index < length) {
       delta = this.deltas[index];
-      correctedPosition.copy(centerMass).add(delta.delta);
-      // correctedPosition
-      //   .copy(centerMass)
-      //   .addXY(delta.distance, 0)
-      //   .rotate(delta.angle);
+      var correction = delta.delta.clone().rotate(0);
+      correctedPosition
+        .copy(centerMass)
+        .add(correction);
       this.particles[index].moveTo(correctedPosition.x, correctedPosition.y);
     }
 

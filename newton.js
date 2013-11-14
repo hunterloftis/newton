@@ -196,7 +196,7 @@
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
         if (!this.pinned) {
             this.velocity.copy(this.position).sub(this.lastPosition);
-            var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
+            var drag = 0;
             this.velocity.scale(1 - drag), this.acceleration.scale(1 - drag).scale(time * time), 
             this.lastPosition.copy(this.position), this.position.add(this.velocity).add(this.acceleration), 
             this.acceleration.zero(), this.lastValidPosition.copy(this.lastPosition), this.colliding = !1;
@@ -442,9 +442,9 @@
         for (var centerMass = Newton.Vector(0, 0), length = this.particles.length, index = -1; ++index < length; ) centerMass.add(this.particles[index].position);
         return centerMass.scale(1 / length), centerMass;
     }, RigidConstraint.prototype.getAverageAngle = function() {
-        for (var average = 0, delta = Newton.Vector(), length = this.particles.length, index = -1, centerMass = this.getCenterMass(); ++index < length; ) delta.copy(this.particles[index].position).sub(centerMass), 
-        average += delta.getAngle();
-        return average;
+        for (var total = 0, delta = Newton.Vector(), length = this.particles.length, index = -1, centerMass = this.getCenterMass(); ++index < length; ) delta.copy(this.particles[index].position).sub(centerMass), 
+        total += delta.getAngle();
+        return total / length;
     }, RigidConstraint.prototype.getDeltas = function() {
         var centerMass = this.getCenterMass(), delta = Newton.Vector();
         return map(this.particles, function(particle) {
@@ -457,9 +457,14 @@
     };
     var flags = 0;
     RigidConstraint.prototype.resolve = function() {
-        var delta, centerMass = this.getCenterMass(), angle = this.getAverageAngle() - this.baseAngle, length = this.particles.length, index = -1, correctedPosition = Newton.Vector();
-        for (flags++ < 30 && console.log("angle:", angle); ++index < length; ) delta = this.deltas[index], 
-        correctedPosition.copy(centerMass).add(delta.delta), this.particles[index].moveTo(correctedPosition.x, correctedPosition.y);
+        var centerMass = this.getCenterMass(), averageAngle = this.getAverageAngle(), angle = this.getAverageAngle() - this.baseAngle;
+        averageAngle - this.baseAngle;
+        var delta, length = this.particles.length, index = -1, correctedPosition = Newton.Vector();
+        for (flags++ < 30 && console.log(angle); ++index < length; ) {
+            delta = this.deltas[index];
+            var correction = delta.delta.clone().rotate(0);
+            correctedPosition.copy(centerMass).add(correction), this.particles[index].moveTo(correctedPosition.x, correctedPosition.y);
+        }
         this.centerMass = centerMass;
     }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {

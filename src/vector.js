@@ -103,6 +103,7 @@
     return this;
   };
 
+  // TODO: rename to 'rotateBy'
   Vector.prototype.rotate = function(angle) {
     var x = this.x;
     var y = this.y;
