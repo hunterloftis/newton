@@ -2,26 +2,24 @@
     "use strict";
     function Body(material) {
         return this instanceof Body ? (this.particles = [], this.edges = [], this.constraints = [], 
-        this.material = material, this.simulator = void 0, this.simParticles = [], this.simEdges = [], 
-        this.simConstraints = [], void 0) : new Body(material);
+        this.material = material, this.simulator = void 0, void 0) : new Body(material);
     }
     Body.prototype.addTo = function(simulator) {
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
-        this.simParticles = simulator.particles, this.simEdges = simulator.edges, this.simParticles.push.apply(this.simParticles, this.particles), 
-        this.simEdges.push.apply(this.simEdges, this.edges), this.simConstraints = simulator.constraints, 
-        this.simConstraints.push.apply(this.simConstraints, this.constraints), this.simulator = simulator;
+        simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
+        this.simulator = simulator;
     }, Body.prototype.addParticle = function(particle) {
-        this.particles.push(particle), this.simParticles.push(particle);
+        this.particles.push(particle), this.simulator && this.simulator.addParticles([ particle ]);
     }, Body.prototype.Particle = function() {
         var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
     }, Body.prototype.addEdge = function(edge) {
-        this.edges.push(edge), this.simEdges.push(edge);
+        this.edges.push(edge), this.simulator && this.simulator.addEdges([ edge ]);
     }, Body.prototype.Edge = function() {
         var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
         return this.addEdge(edge), edge;
     }, Body.prototype.addConstraint = function(constraint) {
-        this.constraints.push(constraint), this.simConstraints.push(constraint);
+        this.constraints.push(constraint), this.simulator && this.simulator.addConstraints([ constraint ]);
     }, Body.prototype.DistanceConstraint = function() {
         var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint, Array.prototype.slice.call(arguments));
         return this.addConstraint(constraint), constraint;
@@ -36,7 +34,8 @@
         this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
         this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, stiffness, distance);
     }
-    DistanceConstraint.prototype.category = "linear", DistanceConstraint.prototype.getDistance = function() {
+    DistanceConstraint.prototype.category = "linear", DistanceConstraint.prototype.priority = 4, 
+    DistanceConstraint.prototype.getDistance = function() {
         var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);
         return diff.getLength();
     }, DistanceConstraint.prototype.resolve = function() {
@@ -432,7 +431,8 @@
         return this instanceof RigidConstraint ? (this.particles = particles, this.deltas = this.getDeltas(), 
         void 0) : new RigidConstraint(particles, iterations);
     }
-    RigidConstraint.prototype.category = "", RigidConstraint.prototype.getCenterMass = function() {
+    RigidConstraint.prototype.category = "", RigidConstraint.prototype.priority = 2, 
+    RigidConstraint.prototype.getCenterMass = function() {
         for (var i = -1, len = this.particles.length, center = Newton.Vector(0, 0); ++i < len; ) center.add(this.particles[i].position);
         return center.scale(1 / len), center;
     }, RigidConstraint.prototype.getDeltas = function() {
@@ -450,6 +450,9 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function noop() {}
+    function prioritySort(a, b) {
+        return b.priority - a.priority;
+    }
     function Simulator(preSimulator, renderer, integrationFps, iterations) {
         return this instanceof Simulator ? (this.preSimulator = preSimulator || noop, this.renderer = renderer || noop, 
         this.step = this._step.bind(this), this.lastTime = 0, this.running = !1, this.fps = 0, 
@@ -481,6 +484,12 @@
         for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
     }, Simulator.prototype.add = function(entity) {
         return entity.addTo(this), this;
+    }, Simulator.prototype.addParticles = function(particles) {
+        this.particles.push.apply(this.particles, particles);
+    }, Simulator.prototype.addEdges = function(edges) {
+        this.edges.push.apply(this.edges, edges);
+    }, Simulator.prototype.addConstraints = function(constraints) {
+        this.constraints.push.apply(this.constraints, constraints), this.constraints.sort(prioritySort);
     }, Simulator.prototype.findParticle = function(x, y, radius) {
         for (var distance, particles = this.particles, found = void 0, nearest = radius, i = 0, ilen = particles.length; ilen > i; i++) distance = particles[i].getDistance(x, y), 
         nearest >= distance && (found = particles[i], nearest = distance);

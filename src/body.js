@@ -12,28 +12,22 @@
     this.material = material; // TODO: make this matter
 
     this.simulator = undefined;
-    this.simParticles = [];     // Quick reference for this.simulator.particles
-    this.simEdges = [];         // Quick reference for this.simulator.edges
-    this.simConstraints = [];   // Quick reference for this.simulator.constraints
   }
 
   Body.prototype.addTo = function(simulator) {
     if (this.simulator) throw new Error('Not implemented: reparenting a body');
 
     // Add our particles, edges, and constraints to the simulation
-    this.simParticles = simulator.particles;
-    this.simEdges = simulator.edges;
-    this.simParticles.push.apply(this.simParticles, this.particles);
-    this.simEdges.push.apply(this.simEdges, this.edges);
-    this.simConstraints = simulator.constraints;
-    this.simConstraints.push.apply(this.simConstraints, this.constraints);
+    simulator.addParticles(this.particles);
+    simulator.addEdges(this.edges);
+    simulator.addConstraints(this.constraints);
 
     this.simulator = simulator;
   };
 
   Body.prototype.addParticle = function(particle) {
     this.particles.push(particle);
-    this.simParticles.push(particle);
+    if (this.simulator) this.simulator.addParticles([particle]);
   };
 
   Body.prototype.Particle = function() {
@@ -45,7 +39,7 @@
 
   Body.prototype.addEdge = function(edge) {
     this.edges.push(edge);
-    this.simEdges.push(edge);
+    if (this.simulator) this.simulator.addEdges([edge]);
   };
 
   Body.prototype.Edge = function() {
@@ -57,7 +51,7 @@
 
   Body.prototype.addConstraint = function(constraint) {
     this.constraints.push(constraint);
-    this.simConstraints.push(constraint);
+    if (this.simulator) this.simulator.addConstraints([constraint]);
   };
 
   Body.prototype.DistanceConstraint = function() {

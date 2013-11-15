@@ -14,6 +14,7 @@
   }
 
   DistanceConstraint.prototype.category = 'linear';
+  DistanceConstraint.prototype.priority = 4;
 
   DistanceConstraint.prototype.getDistance = function() {
     var pos1 = this.p1.position;

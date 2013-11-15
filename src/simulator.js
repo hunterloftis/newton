@@ -4,6 +4,10 @@
 
   function noop() {}
 
+  function prioritySort(a, b) {
+    return b.priority - a.priority;
+  }
+
   function Simulator(preSimulator, renderer, integrationFps, iterations) {
     if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, iterations);
 
@@ -97,6 +101,19 @@
   Simulator.prototype.add = function(entity) {
     entity.addTo(this);
     return this;
+  };
+
+  Simulator.prototype.addParticles = function(particles) {
+    this.particles.push.apply(this.particles, particles);
+  };
+
+  Simulator.prototype.addEdges = function(edges) {
+    this.edges.push.apply(this.edges, edges);
+  };
+
+  Simulator.prototype.addConstraints = function(constraints) {
+    this.constraints.push.apply(this.constraints, constraints);
+    this.constraints.sort(prioritySort);
   };
 
   // TODO: this could be dramatically optimized by starting with bounding boxes

@@ -10,6 +10,7 @@
   }
 
   RigidConstraint.prototype.category = '';
+  RigidConstraint.prototype.priority = 2;
 
   // TODO: make respect individual particle mass
   RigidConstraint.prototype.getCenterMass = function() {
