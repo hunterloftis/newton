@@ -1,2 +1,5 @@
 node_modules
 bower_components
+
+!bower_components/jquery/jquery.js
+!bower_components/pixi/bin/pixi.js
