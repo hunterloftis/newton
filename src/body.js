@@ -12,9 +12,10 @@
     this.material = material; // TODO: make this matter
 
     this.simulator = undefined;
+    this.layer = undefined;
   }
 
-  Body.prototype.addTo = function(simulator) {
+  Body.prototype.addTo = function(simulator, layer) {
     if (this.simulator) throw new Error('Not implemented: reparenting a body');
 
     // Add our particles, edges, and constraints to the simulation
@@ -23,10 +24,12 @@
     simulator.addConstraints(this.constraints);
 
     this.simulator = simulator;
+    this.layer = layer;
   };
 
   Body.prototype.addParticle = function(particle) {
     this.particles.push(particle);
+    particle.layer = this.layer;  // TODO: make sure this stays in sync
     if (this.simulator) this.simulator.addParticles([particle]);
   };
 

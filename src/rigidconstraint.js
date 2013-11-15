@@ -52,7 +52,7 @@
 
   RigidConstraint.prototype.resolve = function(time) {
     var center = this.getCenterMass();
-    var angleDelta = this.getAngleAbout(center);
+    var angleDelta = 0; //this.getAngleAbout(center);
 
     var cos = Math.cos(angleDelta);
     var sin = Math.sin(angleDelta);

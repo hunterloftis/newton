@@ -21,6 +21,8 @@
     this.pinned = false;
     this.colliding = false;
     this.isDestroyed = false;
+
+    this.layer = undefined;
   }
 
   Particle.randomness = 25;

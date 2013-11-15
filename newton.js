@@ -2,14 +2,14 @@
     "use strict";
     function Body(material) {
         return this instanceof Body ? (this.particles = [], this.edges = [], this.constraints = [], 
-        this.material = material, this.simulator = void 0, void 0) : new Body(material);
+        this.material = material, this.simulator = void 0, this.layer = void 0, void 0) : new Body(material);
     }
-    Body.prototype.addTo = function(simulator) {
+    Body.prototype.addTo = function(simulator, layer) {
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
         simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
-        this.simulator = simulator;
+        this.simulator = simulator, this.layer = layer;
     }, Body.prototype.addParticle = function(particle) {
-        this.particles.push(particle), this.simulator && this.simulator.addParticles([ particle ]);
+        this.particles.push(particle), particle.layer = this.layer, this.simulator && this.simulator.addParticles([ particle ]);
     }, Body.prototype.Particle = function() {
         var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
@@ -170,16 +170,16 @@
     function LinearGravity(angle, strength, falloff) {
         return this instanceof LinearGravity ? (this.angle = angle, this.strength = strength, 
         this.vector = new Newton.Vector(0, strength).rotate(angle), this.simulator = void 0, 
-        void 0) : new LinearGravity(angle, strength, falloff);
+        this.layer = void 0, void 0) : new LinearGravity(angle, strength, falloff);
     }
-    LinearGravity.prototype.addTo = function(simulator) {
-        simulator.forces.push(this), this.simulator = simulator;
+    LinearGravity.prototype.addTo = function(simulator, layer) {
+        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
     }, LinearGravity.prototype.setAngle = function(angle) {
         this.angle = angle, this.vector.set(0, this.strength).rotate(this.angle);
     }, LinearGravity.prototype.setStrength = function(strength) {
         this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
     }, LinearGravity.prototype.applyTo = function(particle) {
-        particle.pinned || particle.accelerateVector(this.vector);
+        particle.pinned || particle.layer === this.layer && particle.accelerateVector(this.vector);
     }, Newton.LinearGravity = LinearGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -202,7 +202,7 @@
         this.lastValidPosition = this.position.clone(), this.velocity = new Newton.Vector(0, 0), 
         this.acceleration = new Newton.Vector(0, 0), this.material = material || Newton.Material.simple, 
         this.size = size || 1, this.randomDrag = 0, this.pinned = !1, this.colliding = !1, 
-        this.isDestroyed = !1, void 0) : new Particle(x, y, size, material);
+        this.isDestroyed = !1, this.layer = void 0, void 0) : new Particle(x, y, size, material);
     }
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
         if (!this.pinned) {
@@ -334,16 +334,16 @@
     "use strict";
     function RadialGravity(x, y, strength, falloff) {
         return this instanceof RadialGravity ? (this.x = x, this.y = y, this.strength = strength, 
-        this.simulator = void 0, void 0) : new RadialGravity(x, y, strength, falloff);
+        this.simulator = void 0, this.layer = void 0, void 0) : new RadialGravity(x, y, strength, falloff);
     }
-    RadialGravity.prototype.addTo = function(simulator) {
-        simulator.forces.push(this), this.simulator = simulator;
+    RadialGravity.prototype.addTo = function(simulator, layer) {
+        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
     }, RadialGravity.prototype.setLocation = function(x, y) {
         this.x = x, this.y = y;
     }, RadialGravity.prototype.setStrength = function(strength) {
         this.strength = strength;
     }, RadialGravity.prototype.applyTo = function(particle) {
-        particle.pinned || particle.attractSquare(this.x, this.y, this.strength, 20);
+        particle.pinned || particle.layer === this.layer && particle.attractSquare(this.x, this.y, this.strength, 20);
     }, Newton.RadialGravity = RadialGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -456,7 +456,7 @@
         for (var angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) angleDelta += this.particles[i].position.clone().sub(center).getAngleFrom(this.deltas[i]);
         return angleDelta / len;
     }, RigidConstraint.prototype.resolve = function() {
-        for (var center = this.getCenterMass(), angleDelta = this.getAngleAbout(center), cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), i = -1, len = this.particles.length; ++i < len; ) {
+        for (var center = this.getCenterMass(), angleDelta = 0, cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), i = -1, len = this.particles.length; ++i < len; ) {
             var q = this.deltas[i], correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
             correction.add(center).sub(this.particles[i].position).scale(1), this.particles[i].position.add(correction);
         }
@@ -494,8 +494,10 @@
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
     }, Simulator.prototype.collide = function() {
         for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
-    }, Simulator.prototype.add = function(entity) {
-        return entity.addTo(this), this;
+    }, Simulator.prototype.add = function(entity, layer) {
+        return entity.addTo(this, layer), this;
+    }, Simulator.prototype.link = function() {
+        return this;
     }, Simulator.prototype.addParticles = function(particles) {
         this.particles.push.apply(this.particles, particles);
     }, Simulator.prototype.addEdges = function(edges) {
@@ -580,11 +582,11 @@
     "use strict";
     function WrapConstraint(left, top, right, bottom, particles) {
         return this instanceof WrapConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
-        this.particles = particles, void 0) : new WrapConstraint(left, top, right, bottom, particles);
+        this.particles = particles, this.layer = void 0, void 0) : new WrapConstraint(left, top, right, bottom, particles);
     }
     WrapConstraint.prototype.category = "WrapConstraint", WrapConstraint.prototype.priority = 0, 
-    WrapConstraint.prototype.addTo = function(simulator) {
-        simulator.addConstraints([ this ]);
+    WrapConstraint.prototype.addTo = function(simulator, layer) {
+        simulator.addConstraints([ this ]), this.layer = layer;
     }, WrapConstraint.prototype.resolve = function(time, allParticles) {
         for (var particles = this.particles || allParticles, i = -1, len = particles.length; ++i < len; ) particles[i].wrap(this.rect);
     }, Newton.WrapConstraint = WrapConstraint;

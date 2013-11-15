@@ -7,7 +7,7 @@
 <body>
 
 <div class='wrap'>
-  <div id="display"></div>
+  <canvas id="display" width='1280' height='450'></canvas>
   <p class='caption'>
     Create particles by drawing with your mouse. Newton can maintain high framerates with hundreds of objects.
   </p>
@@ -40,7 +40,6 @@
   // Globals
 
   var sim, renderer, container;
-  var shapeLayer, particleLayer, globalLayer, windLayer;
   var particles, walls, particleMaterial, wallMaterial;
   var gravity, radial, wind;
   var mouseDown = false;
@@ -61,7 +60,7 @@
     particleMaterial = Newton.Material();
     wallMaterial = Newton.Material();
 
-    renderer = Newton.PixiRenderer($display[0], width, height);
+    renderer = Newton.Renderer($display[0]);
     sim = Newton.Simulator(simulate, renderer.callback, 60, 3);
 
     walls = createWalls();
@@ -69,27 +68,16 @@
     gravity = Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
     radial = Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
     wind = Newton.LinearGravity(Math.PI * 0.5, 0.001, 0);
-    container = Newton.Rectangle(0, 0, width, height);
+    container = Newton.WrapConstraint(0, 0, width, height);
 
-    globalLayer = sim.Layer();
-    shapeLayer = sim.Layer();
-    particleLayer = sim.Layer();
-    windLayer = sim.Layer();
-
-    globalLayer
-      .add(gravity);
-
-    windLayer
-      .add(wind);
-
-    particleLayer
-      .respondTo([particleLayer, shapeLayer, globalLayer])
-      .addForce(radial)
-      .addBody(particles)
-      .wrapIn(container);
-
-    shapeLayer
-      .addBody(walls);
+    sim
+      .add(gravity, 'particles')
+      //.add(wind, 'wind')
+      .add(walls, 'shapes')
+      .add(particles, 'particles')
+      .add(radial, 'particles')
+      .add(container, 'particles')
+      .link('particles', 'particles shapes globals');
   }
 
   function startSimulation() {

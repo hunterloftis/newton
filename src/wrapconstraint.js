@@ -7,13 +7,16 @@
 
     this.rect = Newton.Rectangle(left, top, right, bottom);
     this.particles = particles;
+
+    this.layer = undefined;
   }
 
   WrapConstraint.prototype.category = 'WrapConstraint';
   WrapConstraint.prototype.priority = 0;
 
-  WrapConstraint.prototype.addTo = function(simulator) {
+  WrapConstraint.prototype.addTo = function(simulator, layer) {
     simulator.addConstraints([this]);
+    this.layer = layer;
   };
 
   WrapConstraint.prototype.resolve = function(time, allParticles) {

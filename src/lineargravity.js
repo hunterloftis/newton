@@ -9,11 +9,13 @@
     this.vector = new Newton.Vector(0, strength).rotate(angle);
 
     this.simulator = undefined;
+    this.layer = undefined;
   }
 
-  LinearGravity.prototype.addTo = function(simulator) {
+  LinearGravity.prototype.addTo = function(simulator, layer) {
     simulator.forces.push(this);
     this.simulator = simulator;
+    this.layer = layer;
   };
 
   LinearGravity.prototype.setAngle = function(angle) {
@@ -29,6 +31,7 @@
   // TODO: make falloff matter
   LinearGravity.prototype.applyTo = function(particle) {
     if (particle.pinned) return;
+    if (particle.layer !== this.layer) return;
     particle.accelerateVector(this.vector);
   };
 

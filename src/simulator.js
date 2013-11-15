@@ -93,8 +93,12 @@
     }
   };
 
-  Simulator.prototype.add = function(entity) {
-    entity.addTo(this);
+  Simulator.prototype.add = function(entity, layer) {
+    entity.addTo(this, layer);
+    return this;
+  };
+
+  Simulator.prototype.link = function(layer, linkedLayers) {
     return this;
   };
 

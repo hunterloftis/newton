@@ -21,7 +21,7 @@
   var gravity = Newton.LinearGravity(0, 0.001, 0);
   var container = Newton.BoxConstraint(0, 0, 1280, 450);
 
-  var lattice = buildLattice(150, 75, 100, 7);
+  var lattice = buildLattice(100, 175, 50, 7);
   var arrow = buildArrow(200, 200, 100, 100);
 
   sim
@@ -35,7 +35,7 @@
     var offset = $(this).offset();
     var x = e.pageX - offset.left;
     var y = e.pageY - offset.top;
-    var particle = sim.findParticle(x, y, 30);
+    var particle = sim.findParticle(x, y, 20);
 
     if (particle) particle.destroy();
   });
@@ -46,15 +46,15 @@
 
   function buildLattice(x, y, segmentLength, segments) {
     var body = Newton.Body();
-    var top = body.Particle(x, y);
-    var bottom = body.Particle(x, y + segmentLength);
+    var top = body.Particle(y, x);
+    var bottom = body.Particle(y + segmentLength, x);
 
-    top.pin();
-    bottom.pin();
+    //top.pin();
+    //bottom.pin();
 
     for (var i = 1; i <= segments; i++) {
-      var nextTop = body.Particle(x + i * segmentLength, y);
-      var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
+      var nextTop = body.Particle(y, x + i * segmentLength);
+      var nextBottom = body.Particle(y + segmentLength, x + i * segmentLength);
 
       body.DistanceConstraint(top, nextTop);
       body.DistanceConstraint(bottom, nextBottom);
@@ -81,7 +81,7 @@
     body.Particle(x + length, y);
     body.Particle(x + length * 0.75, y + width * 0.5);
     body.Particle(x + length * 0.5, y);
-    body.Particle(x + length * 0.25, y + width * 0.4);
+    body.Particle(x + length * 0.25, y + width * 0.25);
 
     body.RigidConstraint(body.particles, 3);
 

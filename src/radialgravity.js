@@ -11,11 +11,13 @@
     this.strength = strength;
 
     this.simulator = undefined;
+    this.layer = undefined;
   }
 
-  RadialGravity.prototype.addTo = function(simulator) {
+  RadialGravity.prototype.addTo = function(simulator, layer) {
     simulator.forces.push(this);
     this.simulator = simulator;
+    this.layer = layer;
   };
 
   RadialGravity.prototype.setLocation = function(x, y) {
@@ -30,6 +32,7 @@
   // TODO: make falloff matter
   RadialGravity.prototype.applyTo = function(particle) {
     if (particle.pinned) return;
+    if (particle.layer !== this.layer) return;
     particle.attractSquare(this.x, this.y, this.strength, 20);
   };
 
