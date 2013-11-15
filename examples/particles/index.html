@@ -42,7 +42,7 @@
   var sim, renderer, container;
   var shapeLayer, particleLayer, globalLayer, windLayer;
   var particles, walls, particleMaterial, wallMaterial;
-  var gravity, radial;
+  var gravity, radial, wind;
   var mouseDown = false;
 
   // Simulation
@@ -68,6 +68,7 @@
     particles = Newton.Body(particleMaterial);
     gravity = Newton.LinearGravity(0, 0, 0);           // angle, strength, falloff power
     radial = Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
+    wind = Newton.LinearGravity(Math.PI * 0.5, 0.001, 0);
     container = Newton.Rectangle(0, 0, width, height);
 
     globalLayer = sim.Layer();
@@ -76,10 +77,10 @@
     windLayer = sim.Layer();
 
     globalLayer
-      .addForce(gravity);
+      .add(gravity);
 
     windLayer
-      .addForce(Newton.LinearGravity(Math.PI * 0.5, 0.001, 0));
+      .add(wind);
 
     particleLayer
       .respondTo([particleLayer, shapeLayer, globalLayer])
