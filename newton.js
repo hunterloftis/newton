@@ -438,13 +438,11 @@
     }, RigidConstraint.prototype.getDeltas = function() {
         for (var center = this.getCenterMass(), i = -1, len = this.particles.length, deltas = Array(len); ++i < len; ) deltas[i] = this.particles[i].position.clone().sub(center);
         return deltas;
+    }, RigidConstraint.prototype.getAngleAbout = function(center) {
+        for (var angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) angleDelta += this.particles[i].position.clone().sub(center).getAngleFrom(this.deltas[i]);
+        return angleDelta / len;
     }, RigidConstraint.prototype.resolve = function() {
-        for (var center = this.getCenterMass(), angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) {
-            var p = this.particles[i].position.clone().sub(center), q = this.deltas[i], cos = p.x * q.x + p.y * q.y, sin = p.y * q.x - p.x * q.y;
-            angleDelta += 1 * Math.atan2(sin, cos);
-        }
-        for (angleDelta /= len, cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), 
-        i = -1; ++i < len; ) {
+        for (var center = this.getCenterMass(), angleDelta = this.getAngleAbout(center), cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), i = -1, len = this.particles.length; ++i < len; ) {
             var q = this.deltas[i], correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
             correction.add(center).sub(this.particles[i].position).scale(1), this.particles[i].position.add(correction);
         }
@@ -559,6 +557,9 @@
         return this.x * this.x + this.y * this.y;
     }, Vector.prototype.getAngle = function() {
         return Math.atan2(this.y, this.x);
+    }, Vector.prototype.getAngleFrom = function(v) {
+        var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
+        return Math.atan2(sin, cos);
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);
 //# sourceMappingURL=newton-map.js

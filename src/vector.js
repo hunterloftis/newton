@@ -134,6 +134,13 @@
     return Math.atan2(this.y, this.x);
   };
 
+  Vector.prototype.getAngleFrom = function(v) {
+    var cos = this.x * v.x + this.y * v.y;
+    var sin = this.y * v.x - this.x * v.y;
+
+    return Math.atan2(sin, cos);
+  }
+
   Newton.Vector = Vector;
 
 })(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

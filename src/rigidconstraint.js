@@ -34,33 +34,34 @@
     }
 
     return deltas;
-  }
+  };
 
-  RigidConstraint.prototype.resolve = function(time) {
-    var center = this.getCenterMass();
+  RigidConstraint.prototype.getAngleAbout = function(center) {
     var angleDelta = 0;
     var i = -1, len = this.particles.length;
 
     while (++i < len) {
-      var p = this.particles[i].position.clone().sub(center);
-      var q = this.deltas[i];
-
-      var cos = p.x * q.x + p.y * q.y;
-      var sin = p.y * q.x - p.x * q.y;
-
-      angleDelta += Math.atan2(sin, cos) * 1; // TODO: replace 1 with particle[i].getMass()
+      angleDelta += this.particles[i].position.clone()
+        .sub(center)
+        .getAngleFrom(this.deltas[i]);
     }
 
-    angleDelta /= len;
+    return angleDelta / len;
+  };
 
-    cos = Math.cos(angleDelta);
-    sin = Math.sin(angleDelta);
+  RigidConstraint.prototype.resolve = function(time) {
+    var center = this.getCenterMass();
+    var angleDelta = this.getAngleAbout(center);
 
-    i = -1;
+    var cos = Math.cos(angleDelta);
+    var sin = Math.sin(angleDelta);
+
+    var i = -1, len = this.particles.length;
+
     while (++i < len) {
       var q = this.deltas[i];
       var correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
-      correction.add(center).sub(this.particles[i].position).scale(1);
+      correction.add(center).sub(this.particles[i].position).scale(1);              // TODO: replace 1 with some spring constant
       this.particles[i].position.add(correction)
     }
   };
