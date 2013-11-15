@@ -129,7 +129,7 @@
   };
 
   Particle.prototype.applyForce = function(force) {
-    if (this.pinned) return;
+
     // TODO: check here if the force should apply to this particle
     this.accelerateVector(force.vector);
   };

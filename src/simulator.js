@@ -54,10 +54,10 @@
 
   Simulator.prototype.cull = function(array) {
     var i = 0;
-    do {
+    while (i < array.length) {
       if (array[i].isDestroyed) array.splice(i, 1);
       else i++;
-    } while (i < array.length);
+    }
   };
 
   Simulator.prototype.integrate = function(time) {
@@ -68,7 +68,7 @@
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
       for (var j = 0, jlen = forces.length; j < jlen; j++) {
-        particle.applyForce(forces[j]); // TODO: applyForce must check validity of force based on particle's layer
+        forces[j].applyTo(particle);  // TODO: applyForce must check validity of force based on particle's layer
       }
       particle.integrate(time);
     }

@@ -179,7 +179,7 @@
     }, LinearGravity.prototype.setStrength = function(strength) {
         this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
     }, LinearGravity.prototype.applyTo = function(particle) {
-        particle.accelerateVector(this.vector);
+        particle.pinned || particle.accelerateVector(this.vector);
     }, Newton.LinearGravity = LinearGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -238,7 +238,7 @@
         this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x, this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y, 
         this.position.x = newX, this.position.y = newY;
     }, Particle.prototype.applyForce = function(force) {
-        this.pinned || this.accelerateVector(force.vector);
+        this.accelerateVector(force.vector);
     }, Particle.prototype.accelerateVector = function(vector) {
         this.acceleration.add(vector);
     }, Particle.prototype.force = function(x, y, mass) {
@@ -334,14 +334,16 @@
     "use strict";
     function RadialGravity(x, y, strength, falloff) {
         return this instanceof RadialGravity ? (this.x = x, this.y = y, this.strength = strength, 
-        void 0) : new RadialGravity(x, y, strength, falloff);
+        this.simulator = void 0, void 0) : new RadialGravity(x, y, strength, falloff);
     }
-    RadialGravity.prototype.setLocation = function(x, y) {
+    RadialGravity.prototype.addTo = function(simulator) {
+        simulator.forces.push(this), this.simulator = simulator;
+    }, RadialGravity.prototype.setLocation = function(x, y) {
         this.x = x, this.y = y;
     }, RadialGravity.prototype.setStrength = function(strength) {
         this.strength = strength;
     }, RadialGravity.prototype.applyTo = function(particle) {
-        particle.attractSquare(this.x, this.y, this.strength, 20);
+        particle.pinned || particle.attractSquare(this.x, this.y, this.strength, 20);
     }, Newton.RadialGravity = RadialGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -481,12 +483,11 @@
         this.cull(this.particles), this.cull(this.constraints), this.preSimulator(time, this), 
         this.integrate(time), this.constrain(time), this.collide(time);
     }, Simulator.prototype.cull = function(array) {
-        var i = 0;
-        do array[i].isDestroyed ? array.splice(i, 1) : i++; while (i < array.length);
+        for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
         for (var particle, particles = this.particles, forces = this.forces, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i];
-            for (var j = 0, jlen = forces.length; jlen > j; j++) particle.applyForce(forces[j]);
+            for (var j = 0, jlen = forces.length; jlen > j; j++) forces[j].applyTo(particle);
             particle.integrate(time);
         }
     }, Simulator.prototype.constrain = function(time) {
@@ -575,5 +576,17 @@
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
     }, Newton.Vector = Vector;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function WrapConstraint(left, top, right, bottom, particles) {
+        return this instanceof WrapConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
+        this.particles = particles, void 0) : new WrapConstraint(left, top, right, bottom, particles);
+    }
+    WrapConstraint.prototype.category = "WrapConstraint", WrapConstraint.prototype.priority = 0, 
+    WrapConstraint.prototype.addTo = function(simulator) {
+        simulator.addConstraints([ this ]);
+    }, WrapConstraint.prototype.resolve = function(time, allParticles) {
+        for (var particles = this.particles || allParticles, i = -1, len = particles.length; ++i < len; ) particles[i].wrap(this.rect);
+    }, Newton.WrapConstraint = WrapConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);
 //# sourceMappingURL=newton-map.js
