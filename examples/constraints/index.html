@@ -17,16 +17,18 @@
 
   var renderer = Newton.Renderer(document.getElementById('display'));
   var sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
+
   var gravity = Newton.LinearGravity(0, 0.001, 0);
+  var container = Newton.BoxConstraint(0, 0, 1280, 450);
+
   var lattice = buildLattice(150, 75, 100, 7);
-  var container = Newton.Rectangle(0, 0, 1280, 450);
   var arrow = buildArrow(200, 200, 100, 100);
 
   sim
     .add(lattice)
     .add(arrow)
     .add(gravity)
-    .containBy(container)
+    .add(container)
     .start();
 
   $('#display').click(function(e) {

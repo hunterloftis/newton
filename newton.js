@@ -29,6 +29,18 @@
     }, Newton.Body = Body;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function BoxConstraint(left, top, right, bottom, particles) {
+        return this instanceof BoxConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
+        this.particles = particles, void 0) : new BoxConstraint(left, top, right, bottom, particles);
+    }
+    BoxConstraint.prototype.category = "boxconstraint", BoxConstraint.prototype.priority = 0, 
+    BoxConstraint.prototype.addTo = function(simulator) {
+        simulator.addConstraints([ this ]);
+    }, BoxConstraint.prototype.resolve = function(time, allParticles) {
+        for (var particles = this.particles || allParticles, i = -1, len = particles.length; ++i < len; ) particles[i].contain(this.rect);
+    }, Newton.BoxConstraint = BoxConstraint;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
     function DistanceConstraint(p1, p2, stiffness, distance) {
         return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.stiffness = stiffness || 1, 
         this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
@@ -478,8 +490,7 @@
             particle.integrate(time);
         }
     }, Simulator.prototype.constrain = function(time) {
-        for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = constraints.length - 1; i >= 0; i--) constraints[i].resolve(time, this.particles);
-        this.wrap(this.wrapper), this.contain(this.container);
+        for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
     }, Simulator.prototype.collide = function() {
         for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
     }, Simulator.prototype.add = function(entity) {
@@ -494,12 +505,6 @@
         for (var distance, particles = this.particles, found = void 0, nearest = radius, i = 0, ilen = particles.length; ilen > i; i++) distance = particles[i].getDistance(x, y), 
         nearest >= distance && (found = particles[i], nearest = distance);
         return found;
-    }, Simulator.prototype.wrap = function(rect) {
-        if (rect) for (var particles = this.particles, i = 0, ilen = particles.length; ilen > i; i++) particles[i].wrap(rect);
-    }, Simulator.prototype.containBy = function(rect) {
-        return this.container = rect, this;
-    }, Simulator.prototype.contain = function(rect) {
-        if (rect) for (var particles = this.particles, i = 0, ilen = this.particles.length; ilen > i; i++) particles[i].contain(rect);
     }, Simulator.prototype.addBody = function(body) {
         this.particles.push.apply(this.particles, body.particles), this.edges.push.apply(this.edges, body.edges), 
         this.bodies.push(body);
