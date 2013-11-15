@@ -16,7 +16,7 @@
     this.acceleration = new Newton.Vector(0, 0);
     this.material = material || Newton.Material.simple;
     this.size = size || 1.0;
-    this.randomDrag = Math.random() * Particle.randomness + 0.0000000001;
+    this.randomDrag = 0; // TODO: make this optional: Math.random() * Particle.randomness + 0.0000000001;
 
     this.pinned = false;
     this.colliding = false;
@@ -33,7 +33,7 @@
       .copy(this.position)
       .sub(this.lastPosition);
 
-    var drag = 0; //Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
+    var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
 
     this.velocity.scale(1 - drag);
 
