@@ -117,7 +117,7 @@
     },
     initBuffers: function() {
       var gl = this.gl;
-      this.particlePosBuffer = gl.createBuffer();
+      this.particlePositionBuffer = gl.createBuffer();
       this.particleColorBuffer = gl.createBuffer();
       this.particleSizeBuffer = gl.createBuffer();
 
@@ -125,8 +125,46 @@
       gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
     },
     callback: function(time, sim) {
+      var gl = this.gl;
+
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      var vertices = [];
+      var colors = [];
+      var sizes = [];
+      var particle;
+
+      for (var i = 0, ilen = sim.particles.length; i < ilen; i++) {
+        particle = sim.particles[i];
+        vertices.push(particle.position.x, particle.position.y, 0);
+        colors.push(255, 255, 255, 255);
+        sizes.push(1);
+      }
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
+      gl.useProgram(this.particleShader);
+
+      // position buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.particleShader.attributes.position);
+
+      // color buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleColorBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(this.particleShader.attributes.color);
+      gl.vertexAttribPointer(this.particleShader.attributes.color, 4, gl.FLOAT, false, 0, 0);
+
+      // size buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(this.particleShader.attributes.size);
+      gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, false, 0, 0);
+
+      gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
       return;
-      var ctx = this.ctx;
 
       this.clear(ctx, time);
       this.drawConstraints(ctx, sim.constraints);

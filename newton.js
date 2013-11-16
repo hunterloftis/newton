@@ -622,12 +622,25 @@
         },
         initBuffers: function() {
             var gl = this.gl;
-            this.particlePosBuffer = gl.createBuffer(), this.particleColorBuffer = gl.createBuffer(), 
+            this.particlePositionBuffer = gl.createBuffer(), this.particleColorBuffer = gl.createBuffer(), 
             this.particleSizeBuffer = gl.createBuffer(), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleColorBuffer), 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
         },
         callback: function(time, sim) {
-            return;
+            var gl = this.gl;
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            for (var particle, vertices = [], colors = [], sizes = [], i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
+            vertices.push(particle.position.x, particle.position.y, 0), colors.push(255, 255, 255, 255), 
+            sizes.push(1);
+            gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
+            gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleColorBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW), gl.enableVertexAttribArray(this.particleShader.attributes.color), 
+            gl.vertexAttribPointer(this.particleShader.attributes.color, 4, gl.FLOAT, !1, 0, 0), 
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW), 
+            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
+            gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
         },
         clear: function(ctx) {
             ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
