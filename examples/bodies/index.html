@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Newton.js: Bodies Example</title>
+  <link rel='stylesheet' type='text/css' href='../shared/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <canvas id="display" width="1280" height="450"></canvas>
+</div>
+
+<script type="text/javascript" src="../../bower_components/jquery/jquery.js"></script>
+<script type='text/javascript' src='../../newton.js'></script>
+
+<script>
+
+  var renderer = Newton.Renderer(document.getElementById('display')),
+      sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
+      gravity = Newton.LinearGravity(0, 0.002, 0),
+      container = Newton.BoxConstraint(0, 0, 1280, 450),
+      squishy = createSquishy(600, 250, 70, 20),
+      boxes = createBoxes(300, 100, 25, 3);
+
+  var anchor;
+
+  sim
+    .add(gravity)
+    .add(squishy, 'squishy')
+    .link('squishy', 'boxes')
+    .add(boxes, 'boxes')
+    .link('boxes', 'boxes squishy')
+    .add(container)
+    .start();
+
+  $('#display').on('mousemove', function(e) {
+    var offset = $(this).offset();
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+
+    anchor.pin(x, y);
+  });
+
+  function createBoxes(x, y, size, amount) {
+    var boxes = [];
+    while (amount--) {
+      boxes.push(Newton.Box(x - amount * size, y + amount * size * 3, size).body);
+    }
+    return boxes;
+  }
+
+  function createSquishy(ox, oy, r, points) {
+    var spacing = (Math.PI * 2) / points;
+
+    var body = Newton.Body();
+    var current, last;
+
+    for (var i = 0; i < points; i++) {
+      var x = ox + r * Math.cos(i * spacing);
+      var y = oy + r * Math.sin(i * spacing);
+      current = body.Particle(x, y);
+      if (last) body.Edge(last, current);
+      last = current;
+    }
+    body.Edge(last, body.particles[0]);
+
+    for (var i = 0; i < points; i++) {
+      for (var j = 0; j < points; j++) {
+        if (i !== j) {
+          if (i === 0) body.DistanceConstraint(body.particles[i], body.particles[j], 0.001);
+          else body.DistanceConstraint(body.particles[i], body.particles[j], 0.001);
+        }
+      }
+    }
+
+    anchor = body.particles[0];
+
+    return body;
+  }
+
+</script>
+
+</body>

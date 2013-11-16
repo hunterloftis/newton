@@ -486,7 +486,7 @@
     }, Simulator.prototype.integrate = function(time) {
         for (var particle, force, linked, particles = this.particles, forces = this.forces, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
             if (particle = particles[i], linked = layers[particle.layer].linked, !particle.pinned) for (var j = 0, jlen = forces.length; jlen > j; j++) force = forces[j], 
-            -1 !== linked.indexOf(force.layer) && force.applyTo(particle);
+            force.layer && -1 === linked.indexOf(force.layer) || force.applyTo(particle);
             particle.integrate(time);
         }
     }, Simulator.prototype.constrain = function(time) {
@@ -497,16 +497,18 @@
         for (var intersect, particle, edge, nearest, linked, particles = this.particles, edges = this.edges, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = layers[particle.layer].linked, intersect = void 0, 
             nearest = void 0;
-            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], -1 !== linked.indexOf(edge.layer) && particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
+            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
         }
     }, Simulator.prototype.ensureLayer = function(name) {
-        this.layers[name] || (this.layers[name] = {
+        name && (this.layers[name] || (this.layers[name] = {
             linked: [ name ]
-        });
+        }));
     }, Simulator.prototype.add = function(entity, layer) {
-        return entity.addTo(this, layer), this.ensureLayer(layer), this;
+        var entities = Array.isArray(entity) ? entity : [ entity ];
+        for (this.ensureLayer(layer); entities.length; ) entities.shift().addTo(this, layer);
+        return this;
     }, Simulator.prototype.link = function(layer, linkedLayers) {
         return this.ensureLayer(layer), this.layers[layer].linked = linkedLayers.split(" "), 
         this;

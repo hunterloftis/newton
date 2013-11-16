@@ -83,7 +83,7 @@
         for (var j = 0, jlen = forces.length; j < jlen; j++) {
           force = forces[j];
           // TODO: optimize for speed
-          if (linked.indexOf(force.layer) !== -1) {
+          if (!force.layer || linked.indexOf(force.layer) !== -1) {
             force.applyTo(particle);
           }
         }
@@ -125,7 +125,7 @@
       nearest = undefined;
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
         edge = edges[j];
-        if (linked.indexOf(edge.layer) !== -1) {
+        if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
           if (particle !== edge.p1 && particle !== edge.p2) {
             intersect = edge.findIntersection(particle.lastPosition, particle.position);
 
@@ -140,14 +140,18 @@
   };
 
   Simulator.prototype.ensureLayer = function(name) {
+    if (!name) return;
     if (!this.layers[name]) this.layers[name] = {
       linked: [name]
     };
   };
 
   Simulator.prototype.add = function(entity, layer) {
-    entity.addTo(this, layer);
+    var entities = Array.isArray(entity) ? entity : [entity];
+
     this.ensureLayer(layer);
+    while (entities.length) entities.shift().addTo(this, layer);
+
     return this;
   };
 
