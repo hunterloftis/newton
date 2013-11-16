@@ -164,6 +164,21 @@
     } else Newton.frame = timeoutFrame, Newton.cancelFrame = cancelTimeoutFrame;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function Lattice(x, y, segmentLength, segments, pinLeft, pinRight) {
+        var body = Newton.Body(), top = body.Particle(x, y), bottom = body.Particle(x, y + segmentLength);
+        pinLeft && (top.pin(), bottom.pin());
+        for (var i = 1; segments >= i; i++) {
+            var nextTop = body.Particle(x + i * segmentLength, y), nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
+            body.DistanceConstraint(top, nextTop), body.DistanceConstraint(bottom, nextBottom), 
+            body.DistanceConstraint(top, nextBottom), body.DistanceConstraint(nextTop, bottom), 
+            body.DistanceConstraint(nextTop, nextBottom), body.Edge(top, nextTop), body.Edge(bottom, nextBottom), 
+            i === segments && body.Edge(nextTop, nextBottom), top = nextTop, bottom = nextBottom;
+        }
+        return pinRight && (top.pin(), bottom.pin()), body;
+    }
+    Newton.Lattice = Lattice;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
     function Layer() {
         return this instanceof Layer ? (this.bodies = [], this.forces = [], this.watchedLayers = [ this ], 
         this.wrapper = void 0, this.container = void 0, this.cachedParticles = [], this.cachedForces = [], 

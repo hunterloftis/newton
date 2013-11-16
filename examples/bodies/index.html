@@ -26,22 +26,25 @@
       sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
-      squishy = Newton.Squishy(600, 250, 70, 20),
+      squishy = Newton.Squishy(525, 250, 70, 20),
       anchor = squishy.particles[0],
-      boxes = createBoxes(300, 100, 25, 3),
-      fabric = Newton.Fabric(700, 50, 1200, 50, 40, 20);
+      boxes = createBoxes(60, 60, 25, 3),
+      fabric = Newton.Fabric(700, 0, 1250, 50, 40, 22),
+      lattice = Newton.Lattice(0, 200, 70, 5, true, false);
+
+  anchor.pin(525, 0);
 
   sim
     .add(gravity)
     .add(squishy, 'squishy')
-    .link('squishy', 'boxes fabric')
     .add(boxes, 'boxes')
-    .link('boxes', 'boxes squishy fabric')
     .add(fabric, 'fabric')
-    .link('fabric', 'boxes squishy')
+    .add(lattice, 'boxes')
     .add(container)
+    .link('squishy', 'boxes fabric')
+    .link('boxes', 'boxes squishy fabric')
+    .link('fabric', 'boxes squishy')
     .start();
-
 
   $('#display').on('mousemove', function(e) {
     var offset = $(this).offset();
@@ -65,7 +68,7 @@
   function createBoxes(x, y, size, amount) {
     var boxes = [];
     while (amount--) {
-      boxes.push(Newton.Box(x - amount * size, y + amount * size * 3, size));
+      boxes.push(Newton.Box(x + amount * size * 3, y, size));
     }
     return boxes;
   }
