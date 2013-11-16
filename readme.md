@@ -87,8 +87,8 @@ Follow newton developments on twitter: [@hunterloftis](http://twitter.com/hunter
 
 ## Examples
 
-- [Simple - Canvas](http://hunterloftis.github.io/newton/examples/simple)
-- [Particles - WebGL / Pixi](http://hunterloftis.github.io/newton/examples/particles)
+- [Particles - WebGL](http://hunterloftis.github.io/newton/examples/particles)
+- [Constraints - Canvas](http://hunterloftis.github.com/newton/examples/constraints)
 - [node.js - Simple](https://github.com/hunterloftis/newton/blob/master/examples/node/simple.js)
 
 ## Contributing
