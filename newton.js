@@ -618,7 +618,6 @@
         this.gl = getGLContext(el), this.callback = this.callback.bind(this), this.gl.viewport(0, 0, this.width, this.height), 
         console.log("width, height:", this.width, this.height), this.initShaders(), this.initBuffers(), 
         this.particleTexture = createCircleTexture(this.gl), this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), 
-        this.gl.enable(this.gl.VERTEX_PROGRAM_POINT_SIZE), this.gl.enable(this.gl.TEXTURE_2D), 
         this.gl.enable(this.gl.BLEND), void 0) : new GLRenderer(el);
     }
     var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec3 p = position;", "float s = size;", "vec2 zeroToOne = position.xy / viewport;", "zeroToOne.y = 1.0 - zeroToOne.y;", "vec2 zeroToTwo = zeroToOne * 2.0;", "vec2 clipSpace = zeroToTwo - 1.0;", "vec2 test = vec2(100, 100);", "gl_Position = vec4(clipSpace, 0, 1);", "gl_PointSize = 128.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), last = 0;
@@ -637,9 +636,7 @@
             this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer();
         },
         callback: function(time, sim) {
-            var gl = this.gl;
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            for (var particle, vertices = [], sizes = [], i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
+            for (var particle, gl = this.gl, vertices = [], sizes = [], i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
             vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
             gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
             gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
