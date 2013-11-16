@@ -67,7 +67,7 @@
     particleMaterial = Newton.Material();
     wallMaterial = Newton.Material();
 
-    renderer = Newton.Renderer($display[0]);
+    renderer = Newton.GLRenderer($display[0]);
     sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
 
     walls = createWalls();
@@ -76,6 +76,8 @@
     radial = Newton.RadialGravity(0, 0, -4, 2);        // x, y, strength, falloff power
     wind = Newton.LinearGravity(Math.PI * 0.5, 0.001, 0);
     container = Newton.WrapConstraint(0, 0, width, height);
+
+    particles.free();
 
     sim
       .add(gravity, 'global')

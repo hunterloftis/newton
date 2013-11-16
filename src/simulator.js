@@ -39,6 +39,9 @@
     this.edges = [];
     this.forces = [];
     this.constraints = [];
+
+    // only these particles can collide with things
+    this.collisionParticles = [];
   }
 
   Simulator.prototype.start = function() {
@@ -111,7 +114,7 @@
   };
 
   Simulator.prototype.collide = function(time) {
-    var particles = this.particles;
+    var particles = this.collisionParticles;
     var edges = this.edges;
     var intersect;
     var particle, edge;
@@ -169,6 +172,17 @@
 
   Simulator.prototype.addEdges = function(edges) {
     this.edges.push.apply(this.edges, edges);
+    for (var i = 0; i < edges.length; i++) {
+      this.addCollisionParticles([edges[i].p1, edges[i].p2]);
+    }
+  };
+
+  Simulator.prototype.addCollisionParticles = function(particles) {
+    var i = particles.length;
+    while (i--) if (this.collisionParticles.indexOf(particles[i]) === -1) {
+      this.collisionParticles.push(particles[i]);
+    }
+    return this;
   };
 
   Simulator.prototype.addConstraints = function(constraints) {

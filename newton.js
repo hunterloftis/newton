@@ -2,7 +2,8 @@
     "use strict";
     function Body(material) {
         return this instanceof Body ? (this.particles = [], this.edges = [], this.constraints = [], 
-        this.material = material, this.simulator = void 0, this.layer = void 0, void 0) : new Body(material);
+        this.material = material, this.simulator = void 0, this.layer = void 0, this.isFree = !1, 
+        void 0) : new Body(material);
     }
     Body.prototype.addTo = function(simulator, layer) {
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
@@ -10,8 +11,11 @@
         this.simulator = simulator, this.layer = layer;
         for (var i = 0, ilen = this.particles.length; ilen > i; i++) this.particles[i].layer = layer;
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].layer = layer;
+    }, Body.prototype.free = function() {
+        this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles);
     }, Body.prototype.addParticle = function(particle) {
-        this.particles.push(particle), particle.layer = this.layer, this.simulator && this.simulator.addParticles([ particle ]);
+        this.particles.push(particle), particle.layer = this.layer, this.simulator && (this.simulator.addParticles([ particle ]), 
+        this.isFree && this.simulator.addCollisionParticles([ particle ]));
     }, Body.prototype.Particle = function() {
         var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
@@ -497,7 +501,8 @@
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
         this.iterations = iterations || 3, this.startTime = 0, this.layers = {}, this.particles = [], 
-        this.edges = [], this.forces = [], this.constraints = [], void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
+        this.edges = [], this.forces = [], this.constraints = [], this.collisionParticles = [], 
+        void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
@@ -522,7 +527,7 @@
     }, Simulator.prototype.updateEdges = function() {
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].compute();
     }, Simulator.prototype.collide = function() {
-        for (var intersect, particle, edge, nearest, linked, particles = this.particles, edges = this.edges, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
+        for (var intersect, particle, edge, nearest, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = layers[particle.layer].linked, intersect = void 0, 
             nearest = void 0;
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
@@ -544,6 +549,10 @@
         this.particles.push.apply(this.particles, particles);
     }, Simulator.prototype.addEdges = function(edges) {
         this.edges.push.apply(this.edges, edges);
+        for (var i = 0; i < edges.length; i++) this.addCollisionParticles([ edges[i].p1, edges[i].p2 ]);
+    }, Simulator.prototype.addCollisionParticles = function(particles) {
+        for (var i = particles.length; i--; ) -1 === this.collisionParticles.indexOf(particles[i]) && this.collisionParticles.push(particles[i]);
+        return this;
     }, Simulator.prototype.addConstraints = function(constraints) {
         this.constraints.push.apply(this.constraints, constraints), this.constraints.sort(prioritySort);
     }, Simulator.prototype.findParticle = function(x, y, radius) {

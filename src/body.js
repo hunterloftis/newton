@@ -13,6 +13,8 @@
 
     this.simulator = undefined;
     this.layer = undefined;
+
+    this.isFree = false;
   }
 
   Body.prototype.addTo = function(simulator, layer) {
@@ -35,10 +37,18 @@
     }
   };
 
+  Body.prototype.free = function() {
+    this.isFree = true;
+    if (this.simulator) this.simulator.addCollisionParticles(this.particles);
+  }
+
   Body.prototype.addParticle = function(particle) {
     this.particles.push(particle);
     particle.layer = this.layer;  // TODO: make sure this stays in sync
-    if (this.simulator) this.simulator.addParticles([particle]);
+    if (this.simulator) {
+      this.simulator.addParticles([particle]);
+      if (this.isFree) this.simulator.addCollisionParticles([particle]);
+    }
   };
 
   Body.prototype.Particle = function() {
