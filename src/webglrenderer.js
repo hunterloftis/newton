@@ -135,8 +135,6 @@
     this.particleTexture = createCircleTexture(this.gl);
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
 
-    this.gl.enable(this.gl.VERTEX_PROGRAM_POINT_SIZE);
-    this.gl.enable(this.gl.TEXTURE_2D);
     this.gl.enable(this.gl.BLEND);
   }
 
