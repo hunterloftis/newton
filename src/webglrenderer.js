@@ -114,8 +114,11 @@
     this.width = el.width;
     this.height = el.height;
     this.gl = getGLContext(el);
+
     this.vertices = [];
     this.sizes = [];
+    this.vArray = new Float32Array(30000);
+    this.sArray = new Float32Array(10000);
 
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
 
@@ -153,50 +156,14 @@
       this.particleSizeBuffer = gl.createBuffer();
     },
     callback: function(time, sim) {
-      var gl = this.gl;
-
-      //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-      var vertices = this.vertices;
-      var sizes = this.sizes;
-
-      vertices.length = 0;
-      sizes.length = 0;
-
-      var particle;
-
-      for (var i = 0, ilen = sim.particles.length; i < ilen; i++) {
-        particle = sim.particles[i];
-        vertices.push(particle.position.x, particle.position.y, 0);
-        sizes.push(1);
-      }
-
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
-
-      gl.useProgram(this.particleShader);
-      gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray);
-
-      // position buffer
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-      gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(this.particleShader.attributes.position);
-
-      // size buffer
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
-      gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(this.particleShader.attributes.size);
-
-      gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+      this.clear(time);
+      this.drawParticles(sim.particles);
 
       return;
 
-      this.clear(ctx, time);
       this.drawConstraints(ctx, sim.constraints);
       this.drawEdges(ctx, sim.edges);
-      this.drawParticles(ctx, sim.particles);
+
       this.drawForces(ctx, sim.forces);
       this.drawCounts(ctx, {
         particles: sim.particles.length,
@@ -204,13 +171,11 @@
         forces: sim.forces.length,
         constraints: sim.constraints.length
       });
-      this.drawFPS(ctx, sim);
+      this.drawFPS(sim);
     },
-    clear: function(ctx, time) {
-      ctx.save();
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, this.width, this.height);
-      ctx.restore();
+    clear: function(time) {
+      var gl = this.gl;
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     },
     drawForces: function(ctx, forces) {
       ctx.save();
@@ -229,40 +194,47 @@
 
       ctx.restore();
     },
-    drawParticles: function(ctx, particles) {
-      var particle, pos, last, mass, brightness;
+    drawParticles: function(particles) {
+      var gl = this.gl;
 
-      ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      var vertices = this.vertices;
+      var sizes = this.sizes;
 
-      for (var j = 0, jlen = particles.length; j < jlen; j++) {
-        particle = particles[j];
-        pos = particle.position;
-        last = particle.lastValidPosition;
-        mass = particle.getMass();
+      vertices.length = 0;
+      sizes.length = 0;
 
-        ctx.beginPath();
+      var particle;
 
-        if (particle.pinned) {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
-          ctx.lineWidth = 1;
-          ctx.moveTo(last.x - 3, last.y - 3);
-          ctx.lineTo(last.x + 3, last.y + 3);
-          ctx.moveTo(last.x + 3, last.y - 3);
-          ctx.lineTo(last.x - 3, last.y + 3);
-        }
-        else {
-          ctx.lineWidth = ~~(mass / 3) + 2;
-          ctx.strokeStyle = particle.colliding ?
-            'rgba(255, 255, 100, 1)' : 'rgba(255, 28, 108, 1)';
-          ctx.moveTo(last.x, last.y);
-          ctx.lineTo(pos.x + 1, pos.y);
-        }
-        ctx.stroke();
+      for (var i = 0, ilen = sim.particles.length; i < ilen; i++) {
+        particle = sim.particles[i];
+        vertices.push(particle.position.x, particle.position.y, 0);
+        sizes.push(1);
       }
 
-      ctx.restore();
+      this.vArray.set(vertices, 0);
+      this.sArray.set(sizes, 0);
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
+
+      gl.useProgram(this.particleShader);
+      gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray);
+
+      // position buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.particleShader.attributes.position);
+
+      // size buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.particleShader.attributes.size);
+
+      gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+
+      return;
     },
     drawConstraints: function(ctx, constraints) {
       var coords;
@@ -321,7 +293,7 @@
       ctx.fillText('Constraints: ' + counts.constraints, 10, 80);
       ctx.restore();
     },
-    drawFPS: function(ctx, sim) {
+    drawFPS: function(sim) {
       var text = 'FPS: ' + sim.fps;
       ctx.save();
       ctx.fillStyle = '#fff';

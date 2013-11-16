@@ -194,9 +194,6 @@
     }, Material.simple = new Material(), Newton.Material = Material;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
-    function mod(a, b) {
-        return (a % b + b) % b;
-    }
     function Particle(x, y, size, material) {
         return this instanceof Particle ? (this.position = new Newton.Vector(x, y), this.lastPosition = this.position.clone(), 
         this.lastValidPosition = this.position.clone(), this.velocity = new Newton.Vector(0, 0), 
@@ -219,6 +216,9 @@
         this.pinned || this.position.add(v);
     }, Particle.prototype.moveTo = function(x, y) {
         return this.position.set(x, y), this;
+    }, Particle.prototype.shiftTo = function(x, y) {
+        var deltaX = x - this.position.x, deltaY = y - this.position.y;
+        this.position.addXY(deltaX, deltaY), this.lastPosition.addXY(deltaX, deltaY);
     }, Particle.prototype.destroy = function() {
         this.isDestroyed = !0;
     }, Particle.prototype.moveBy = function(dx, dy) {
@@ -233,10 +233,6 @@
     }, Particle.prototype.contain = function(bounds) {
         this.position.x > bounds.right ? this.position.x = this.lastPosition.x = this.lastValidPosition.x = bounds.right : this.position.x < bounds.left && (this.position.x = this.lastPosition.x = this.lastValidPosition.x = bounds.left), 
         this.position.y > bounds.bottom ? this.position.y = this.lastPosition.y = this.lastValidPosition.y = bounds.bottom : this.position.y < bounds.top && (this.position.y = this.lastPosition.y = this.lastValidPosition.y = bounds.top);
-    }, Particle.prototype.wrap = function(bounds) {
-        var velocity = this.position.clone().sub(this.lastPosition), newX = mod(this.position.x, bounds.width) + bounds.left, newY = mod(this.position.y, bounds.height) + bounds.top;
-        this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x, this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y, 
-        this.position.x = newX, this.position.y = newY;
     }, Particle.prototype.applyForce = function(force) {
         this.accelerateVector(force.vector);
     }, Particle.prototype.accelerateVector = function(vector) {
@@ -615,11 +611,12 @@
     }
     function GLRenderer(el) {
         return this instanceof GLRenderer ? (this.el = el, this.width = el.width, this.height = el.height, 
-        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.callback = this.callback.bind(this), 
-        this.gl.viewport(0, 0, this.width, this.height), this.viewportArray = new Float32Array([ this.width, this.height ]), 
-        console.log("width, height:", this.width, this.height), this.initShaders(), this.initBuffers(), 
-        this.particleTexture = createCircleTexture(this.gl), this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), 
-        this.gl.enable(this.gl.BLEND), void 0) : new GLRenderer(el);
+        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.vArray = new Float32Array(3e4), 
+        this.sArray = new Float32Array(1e4), this.callback = this.callback.bind(this), this.gl.viewport(0, 0, this.width, this.height), 
+        this.viewportArray = new Float32Array([ this.width, this.height ]), console.log("width, height:", this.width, this.height), 
+        this.initShaders(), this.initBuffers(), this.particleTexture = createCircleTexture(this.gl), 
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
+        void 0) : new GLRenderer(el);
     }
     var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size * 4.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n");
     GLRenderer.prototype = {
@@ -637,21 +634,11 @@
             this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer();
         },
         callback: function(time, sim) {
-            var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
-            vertices.length = 0, sizes.length = 0;
-            for (var particle, i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
-            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
-            gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
-            gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), 
-            gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+            this.clear(time), this.drawParticles(sim.particles);
         },
-        clear: function(ctx) {
-            ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
-            ctx.restore();
+        clear: function() {
+            var gl = this.gl;
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         },
         drawForces: function(ctx, forces) {
             ctx.save(), ctx.lineWidth = 2, ctx.strokeStyle = "rgba(255, 255, 255, 0.25)", ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
@@ -662,17 +649,18 @@
             }
             ctx.restore();
         },
-        drawParticles: function(ctx, particles) {
-            var particle, pos, last, mass;
-            ctx.save(), ctx.lineCap = "round", ctx.lineJoin = "round";
-            for (var j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
-            pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
-            ctx.beginPath(), particle.pinned ? (ctx.strokeStyle = "rgba(255, 255, 255, 1)", 
-            ctx.lineWidth = 1, ctx.moveTo(last.x - 3, last.y - 3), ctx.lineTo(last.x + 3, last.y + 3), 
-            ctx.moveTo(last.x + 3, last.y - 3), ctx.lineTo(last.x - 3, last.y + 3)) : (ctx.lineWidth = ~~(mass / 3) + 2, 
-            ctx.strokeStyle = particle.colliding ? "rgba(255, 255, 100, 1)" : "rgba(255, 28, 108, 1)", 
-            ctx.moveTo(last.x, last.y), ctx.lineTo(pos.x + 1, pos.y)), ctx.stroke();
-            ctx.restore();
+        drawParticles: function() {
+            var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
+            vertices.length = 0, sizes.length = 0;
+            for (var particle, i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
+            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
+            this.vArray.set(vertices, 0), this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), 
+            gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), gl.useProgram(this.particleShader), 
+            gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
         },
         drawConstraints: function(ctx, constraints) {
             var coords, constraint;
@@ -696,7 +684,7 @@
             ctx.fillText("Edges: " + counts.edges, 10, 40), ctx.fillText("Forces: " + counts.forces, 10, 60), 
             ctx.fillText("Constraints: " + counts.constraints, 10, 80), ctx.restore();
         },
-        drawFPS: function(ctx, sim) {
+        drawFPS: function(sim) {
             var text = "FPS: " + sim.fps;
             ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText(text, 10, 120), 
             ctx.restore();
@@ -704,6 +692,9 @@
     }, Newton.GLRenderer = GLRenderer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function mod(a, b) {
+        return (a % b + b) % b;
+    }
     function WrapConstraint(left, top, right, bottom, particles) {
         return this instanceof WrapConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
         this.particles = particles, this.layer = void 0, void 0) : new WrapConstraint(left, top, right, bottom, particles);
@@ -712,7 +703,12 @@
     WrapConstraint.prototype.addTo = function(simulator, layer) {
         simulator.addConstraints([ this ]), this.layer = layer;
     }, WrapConstraint.prototype.resolve = function(time, allParticles) {
-        for (var particles = this.particles || allParticles, i = -1, len = particles.length; ++i < len; ) particles[i].wrap(this.rect);
+        for (var particle, pos, particles = this.particles || allParticles, i = -1, len = particles.length, rect = this.rect; ++i < len; ) if (pos = particles[i].position, 
+        pos.x < rect.left || pos.x > rect.right || pos.y < rect.top || pos.y > rect.bottom) {
+            particle = particles[i];
+            var newX = mod(particle.position.x, this.rect.width) + this.rect.left, newY = mod(particle.position.y, this.rect.height) + this.rect.top;
+            particle.shiftTo(newX, newY);
+        }
     }, Newton.WrapConstraint = WrapConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);
 //# sourceMappingURL=newton-map.js

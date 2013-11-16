@@ -2,11 +2,6 @@
 
   'use strict'
 
-  // Corrected modulo
-  function mod(a, b) {
-    return ((a % b) + b) % b;
-  }
-
   function Particle(x, y, size, material) {
     if (!(this instanceof Particle)) return new Particle(x, y, size, material);
     this.position = new Newton.Vector(x, y);
@@ -68,14 +63,24 @@
     return this;
   };
 
+  // Adds a vector to position (move by force)
   Particle.prototype.correct = function(v) {
     if (this.pinned) return;
     this.position.add(v);
   };
 
+  // Sets the position to a coord (place by force)
   Particle.prototype.moveTo = function(x, y) {
     this.position.set(x, y);
     return this;
+  };
+
+  // Sets the position to a coord, preserving existing velocity
+  Particle.prototype.shiftTo = function(x, y) {
+    var deltaX = x - this.position.x;
+    var deltaY = y - this.position.y;
+    this.position.addXY(deltaX, deltaY);
+    this.lastPosition.addXY(deltaX, deltaY);
   };
 
   Particle.prototype.destroy = function() {
@@ -118,16 +123,6 @@
     else if (this.position.y < bounds.top) {
       this.position.y = this.lastPosition.y = this.lastValidPosition.y = bounds.top;
     }
-  };
-
-  Particle.prototype.wrap = function(bounds) {
-    var velocity = this.position.clone().sub(this.lastPosition);
-    var newX = mod(this.position.x, bounds.width) + bounds.left;
-    var newY = mod(this.position.y, bounds.height) + bounds.top;
-    this.lastPosition.x = this.lastValidPosition.x = newX - velocity.x;
-    this.lastPosition.y = this.lastValidPosition.y = newY - velocity.y;
-    this.position.x = newX;
-    this.position.y = newY;
   };
 
   Particle.prototype.applyForce = function(force) {
