@@ -3,30 +3,56 @@
   'use strict'
 
   var PARTICLE_VS = [
+
+    'uniform vec2 viewport;',
     'attribute vec3 position;',
     'attribute float size;',
-    'attribute vec4 color;',
-    'varying vec4 tint;',
 
     'void main() {',
 
-      'tint = color;',
+      'vec3 p = position;',
+      'float s = size;',
 
-      'gl_Position = vec4(position, 1.0);',
-      'gl_PointSize = size;',
+      'vec2 zeroToOne = position.xy / viewport;',
+      'zeroToOne.y = 1.0 - zeroToOne.y;',
+
+      'vec2 zeroToTwo = zeroToOne * 2.0;',
+
+      'vec2 clipSpace = zeroToTwo - 1.0;',
+
+      'vec2 test = vec2(100, 100);',
+
+      'gl_Position = vec4(clipSpace, 0, 1);',
+      'gl_PointSize = 128.0;',  // size * 2.0
     '}'
   ].join('\n');
 
   var PARTICLE_FS = [
     'precision mediump float;',
-
     'uniform sampler2D texture;',
-    'varying vec4 tint;',
 
-    'void main() {',
-        'gl_FragColor = texture2D(texture, gl_PointCoord) * tint;',
+    'void main(void) {',
+      'gl_FragColor = texture2D(texture, gl_PointCoord);',
     '}'
   ].join('\n');
+
+  function getGLContext(canvas) {
+    var names = [
+      'webgl',
+      'experimental-webgl',
+      'webkit-3d',
+      'moz-webgl'
+    ];
+
+    var i = 0, gl;
+    while (!gl && i++ < names.length) {
+      try {
+        gl = canvas.getContext(names[i]);
+      } catch(e) {}
+    }
+
+    return gl;
+  }
 
   function createShaderProgram(gl, vsText, fsText) {
     var vs = gl.createShader(gl.VERTEX_SHADER);
@@ -39,13 +65,13 @@
     gl.compileShader(fs);
 
     if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-      throw new Error('error compiling VS shaders:', gl.getShaderInfoLog(vs));
-      return;
+      console.error('error compiling VS shaders:', gl.getShaderInfoLog(vs));
+      throw new Error('shader failure');
     }
 
     if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
-      throw new Error('error compiling FS shaders:', gl.getShaderInfoLog(fs));
-      return;
+      console.error('error compiling FS shaders:', gl.getShaderInfoLog(fs));
+      throw new Error('shader failure');
     }
 
     var program = gl.createProgram();
@@ -53,6 +79,8 @@
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
     gl.linkProgram(program);
+
+    console.log('Program Linked', gl.getProgramParameter(program, gl.LINK_STATUS));
 
     return program;
   }
@@ -95,34 +123,42 @@
     this.el = el;
     this.width = el.width;
     this.height = el.height;
-    this.gl = el.getContext('experimental-webgl');
+    this.gl = getGLContext(el);
 
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
 
+    this.gl.viewport(0, 0, this.width, this.height);
+    console.log('width, height:', this.width, this.height);
     this.initShaders();
     this.initBuffers();
 
     this.particleTexture = createCircleTexture(this.gl);
+    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
+
+    this.gl.enable(this.gl.VERTEX_PROGRAM_POINT_SIZE);
+    this.gl.enable(this.gl.TEXTURE_2D);
+    this.gl.enable(this.gl.BLEND);
   }
+
+  var last = 0;
 
   GLRenderer.prototype = {
     initShaders: function() {
       var gl = this.gl;
       this.particleShader = createShaderProgram(gl, PARTICLE_VS, PARTICLE_FS);
+      this.particleShader.uniforms = {
+        viewport: gl.getUniformLocation(this.particleShader, 'viewport')
+      };
       this.particleShader.attributes = {
         position: gl.getAttribLocation(this.particleShader, 'position'),
-        size: gl.getAttribLocation(this.particleShader, 'size'),
-        color: gl.getAttribLocation(this.particleShader, 'color')
+        size: gl.getAttribLocation(this.particleShader, 'size')
       };
+      console.log('particleShader:', this.particleShader);
     },
     initBuffers: function() {
       var gl = this.gl;
       this.particlePositionBuffer = gl.createBuffer();
-      this.particleColorBuffer = gl.createBuffer();
       this.particleSizeBuffer = gl.createBuffer();
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleColorBuffer);
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
     },
     callback: function(time, sim) {
       var gl = this.gl;
@@ -130,19 +166,18 @@
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       var vertices = [];
-      var colors = [];
       var sizes = [];
       var particle;
 
       for (var i = 0, ilen = sim.particles.length; i < ilen; i++) {
         particle = sim.particles[i];
         vertices.push(particle.position.x, particle.position.y, 0);
-        colors.push(255, 255, 255, 255);
         sizes.push(1);
       }
 
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
+
       gl.useProgram(this.particleShader);
 
       // position buffer
@@ -151,19 +186,19 @@
       gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(this.particleShader.attributes.position);
 
-      // color buffer
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.particleColorBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(this.particleShader.attributes.color);
-      gl.vertexAttribPointer(this.particleShader.attributes.color, 4, gl.FLOAT, false, 0, 0);
-
       // size buffer
       gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(this.particleShader.attributes.size);
       gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.particleShader.attributes.size);
 
       gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+
+      if (ilen > last) {
+        last = ilen;
+        console.log('vertices:', vertices.length / 3, 'particles:', sim.particles.length);
+      }
+
       return;
 
       this.clear(ctx, time);
