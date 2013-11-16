@@ -9,21 +9,11 @@
     'attribute float size;',
 
     'void main() {',
+      'vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;',
+      'vec2 flipped = vec2(scaled.x, -scaled.y);',
 
-      'vec3 p = position;',
-      'float s = size;',
-
-      'vec2 zeroToOne = position.xy / viewport;',
-      'zeroToOne.y = 1.0 - zeroToOne.y;',
-
-      'vec2 zeroToTwo = zeroToOne * 2.0;',
-
-      'vec2 clipSpace = zeroToTwo - 1.0;',
-
-      'vec2 test = vec2((position.x / 1280.0 - 0.5) * 2.0, (-position.y / 450.0 + 0.5) * 2.0);',
-
-      'gl_Position = vec4(test, 0, 1);',
-      'gl_PointSize = size * 4.0;',  // size * 2.0
+      'gl_Position = vec4(flipped, 0, 1);',
+      'gl_PointSize = size * 4.0;',
     '}'
   ].join('\n');
 
@@ -130,17 +120,19 @@
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
 
     this.gl.viewport(0, 0, this.width, this.height);
+    this.viewportArray = new Float32Array([this.width, this.height]);
+
     console.log('width, height:', this.width, this.height);
+
     this.initShaders();
     this.initBuffers();
 
     this.particleTexture = createCircleTexture(this.gl);
+
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
 
     this.gl.enable(this.gl.BLEND);
   }
-
-  var last = 0;
 
   GLRenderer.prototype = {
     initShaders: function() {
@@ -183,6 +175,7 @@
       gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
 
       gl.useProgram(this.particleShader);
+      gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray);
 
       // position buffer
       gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer);
@@ -197,11 +190,6 @@
       gl.enableVertexAttribArray(this.particleShader.attributes.size);
 
       gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
-
-      if (ilen > last) {
-        last = ilen;
-        console.log('vertices:', vertices.length / 3, 'particles:', sim.particles.length);
-      }
 
       return;
 

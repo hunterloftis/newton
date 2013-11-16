@@ -616,12 +616,12 @@
     function GLRenderer(el) {
         return this instanceof GLRenderer ? (this.el = el, this.width = el.width, this.height = el.height, 
         this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.callback = this.callback.bind(this), 
-        this.gl.viewport(0, 0, this.width, this.height), console.log("width, height:", this.width, this.height), 
-        this.initShaders(), this.initBuffers(), this.particleTexture = createCircleTexture(this.gl), 
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
-        void 0) : new GLRenderer(el);
+        this.gl.viewport(0, 0, this.width, this.height), this.viewportArray = new Float32Array([ this.width, this.height ]), 
+        console.log("width, height:", this.width, this.height), this.initShaders(), this.initBuffers(), 
+        this.particleTexture = createCircleTexture(this.gl), this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), 
+        this.gl.enable(this.gl.BLEND), void 0) : new GLRenderer(el);
     }
-    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec3 p = position;", "float s = size;", "vec2 zeroToOne = position.xy / viewport;", "zeroToOne.y = 1.0 - zeroToOne.y;", "vec2 zeroToTwo = zeroToOne * 2.0;", "vec2 clipSpace = zeroToTwo - 1.0;", "vec2 test = vec2((position.x / 1280.0 - 0.5) * 2.0, (-position.y / 450.0 + 0.5) * 2.0);", "gl_Position = vec4(test, 0, 1);", "gl_PointSize = size * 4.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), last = 0;
+    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size * 4.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n");
     GLRenderer.prototype = {
         initShaders: function() {
             var gl = this.gl;
@@ -642,12 +642,12 @@
             for (var particle, i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
             vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
             gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
-            gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), 
+            gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3), 
-            ilen > last && (last = ilen, console.log("vertices:", vertices.length / 3, "particles:", sim.particles.length));
+            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
         },
         clear: function(ctx) {
             ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
