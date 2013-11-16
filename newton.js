@@ -95,17 +95,21 @@
         return this.angle - vector.getAngle();
     }, Edge.prototype.getAbc = function() {
         return Edge.getAbc(this.p1.position.x, this.p1.position.y, this.p2.position.x, this.p2.position.y);
-    }, Edge.prototype.findIntersection = function(x1, y1, x2, y2) {
-        var bounds1 = this.bounds, bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+    }, Edge.prototype.findIntersection = function(v1, v2) {
+        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, bounds1 = this.bounds, bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
         if (!bounds1.overlaps(bounds2)) return !1;
         var l1 = this.getAbc(), l2 = Edge.getAbc(x1, y1, x2, y2), det = l1.a * l2.b - l2.a * l1.b;
         if (0 === det) return !1;
         var x = (l2.b * l1.c - l1.b * l2.c) / det, y = (l1.a * l2.c - l2.a * l1.c) / det;
         if (!bounds1.contains(x, y) || !bounds2.contains(x, y)) return !1;
-        var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
-        return dot >= 0 ? !1 : {
+        var dx = x - x1, dy = y - y1;
+        return {
             x: x,
-            y: y
+            y: y,
+            dx: dx,
+            dy: dy,
+            distance: dx * dx + dy * dy,
+            wall: this
         };
     }, Edge.prototype.getReflection = function(velocity, restitution) {
         var dir = this.normal.clone(), friction = this.material.friction, velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution), velT = velocity.clone().sub(velN).multScalar(1 - friction), reflectedVel = velT.sub(velN);
@@ -252,29 +256,10 @@
             x: -f * (delta.x / r) * ratio,
             y: -f * (delta.y / r) * ratio
         });
-    }, Particle.prototype.collide = function(edges) {
-        for (var nearest, intersect, dx, dy, oldDistance, newDistance, partOfEdge, i = edges.length; i--; ) partOfEdge = this === edges[i].p1 || this === edges[i].p2, 
-        intersect = !partOfEdge && edges[i].findIntersection(this.lastPosition.x, this.lastPosition.y, this.position.x, this.position.y), 
-        intersect && (dx = intersect.x - this.lastPosition.x, dy = intersect.y - this.lastPosition.y, 
-        nearest ? (oldDistance = nearest.dx * nearest.dx + nearest.dy * nearest.dy, newDistance = dx * dx + dy * dy, 
-        oldDistance > newDistance && (nearest = {
-            dx: dx,
-            dy: dy,
-            x: intersect.x,
-            y: intersect.y,
-            wall: edges[i]
-        })) : nearest = {
-            dx: dx,
-            dy: dy,
-            x: intersect.x,
-            y: intersect.y,
-            wall: edges[i]
-        });
-        if (nearest) {
-            var velocity = this.position.clone().sub(this.lastPosition), bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y), reflectedVelocity = nearest.wall.getReflection(velocity, this.material.restitution);
-            return this.position.copy(bouncePoint), this.setVelocity(reflectedVelocity.x, reflectedVelocity.y), 
-            this.lastValidPosition = bouncePoint, this.colliding = !0, nearest;
-        }
+    }, Particle.prototype.collide = function(intersection) {
+        var velocity = this.position.clone().sub(this.lastPosition), bouncePoint = intersection.wall.getRepelled(intersection.x, intersection.y), reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
+        this.position.copy(bouncePoint), this.setVelocity(reflectedVelocity.x, reflectedVelocity.y), 
+        this.lastValidPosition = bouncePoint, this.colliding = !0;
     }, Newton.Particle = Particle;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -489,7 +474,12 @@
     }, Simulator.prototype.constrain = function(time) {
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
     }, Simulator.prototype.collide = function() {
-        for (var particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
+        for (var intersect, particle, edge, nearest, particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) {
+            particle = particles[i], intersect = void 0, nearest = void 0;
+            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], particle !== edge.p1 && particle !== edge.p2 && Newton.Vector.scratch.set(particle.position.x - particle.lastPosition.x, particle.position.y - particle.lastPosition.y).getDot(edge.normal) < 0 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
+            intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
+            nearest && particle.collide(nearest);
+        }
     }, Simulator.prototype.add = function(entity, layer) {
         return entity.addTo(this, layer), this;
     }, Simulator.prototype.link = function() {
@@ -591,7 +581,6 @@
         new Error("shader failure");
         var program = gl.createProgram();
         return gl.attachShader(program, vs), gl.attachShader(program, fs), gl.linkProgram(program), 
-        console.log("Program Linked", gl.getProgramParameter(program, gl.LINK_STATUS)), 
         program;
     }
     function createCircleTexture(gl, size) {
@@ -611,15 +600,15 @@
     }
     function GLRenderer(el) {
         return this instanceof GLRenderer ? (this.el = el, this.width = el.width, this.height = el.height, 
-        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.vArray = new Float32Array(3e4), 
-        this.sArray = new Float32Array(1e4), this.callback = this.callback.bind(this), this.gl.viewport(0, 0, this.width, this.height), 
-        this.viewportArray = new Float32Array([ this.width, this.height ]), console.log("width, height:", this.width, this.height), 
+        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.vArray = new Float32Array(3 * GLRenderer.MAX_PARTICLES), 
+        this.sArray = new Float32Array(GLRenderer.MAX_PARTICLES), this.callback = this.callback.bind(this), 
+        this.gl.viewport(0, 0, this.width, this.height), this.viewportArray = new Float32Array([ this.width, this.height ]), 
         this.initShaders(), this.initBuffers(), this.particleTexture = createCircleTexture(this.gl), 
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
         void 0) : new GLRenderer(el);
     }
     var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size * 4.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n");
-    GLRenderer.prototype = {
+    GLRenderer.MAX_PARTICLES = 1e4, GLRenderer.prototype = {
         initShaders: function() {
             var gl = this.gl;
             this.particleShader = createShaderProgram(gl, PARTICLE_VS, PARTICLE_FS), this.particleShader.uniforms = {
@@ -627,7 +616,7 @@
             }, this.particleShader.attributes = {
                 position: gl.getAttribLocation(this.particleShader, "position"),
                 size: gl.getAttribLocation(this.particleShader, "size")
-            }, console.log("particleShader:", this.particleShader);
+            };
         },
         initBuffers: function() {
             var gl = this.gl;

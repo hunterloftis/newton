@@ -1,7 +1,5 @@
 ;(function(Newton) {
 
-  'use strict';
-
   'use strict'
 
   function Rectangle(left, top, right, bottom) {

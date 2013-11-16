@@ -164,63 +164,18 @@
     });
   };
 
-  Particle.prototype.collide = function(edges) {
-    var nearest, intersect;
-    var dx, dy, oldDistance, newDistance;
-    var partOfEdge;
-    var i = edges.length;
+  Particle.prototype.collide = function(intersection) {
+    // intersection contains: dx, dy, x, y, wall, distance (squared)
 
-    while (i--) {
+    var velocity = this.position.clone().sub(this.lastPosition);
+    var bouncePoint = intersection.wall.getRepelled(intersection.x, intersection.y);
+    var reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
 
-      // TODO: this is wonky
-      partOfEdge = this === edges[i].p1 || this === edges[i].p2;
-      intersect = !partOfEdge && edges[i].findIntersection(
-        this.lastPosition.x, this.lastPosition.y,
-        this.position.x, this.position.y);
+    this.position.copy(bouncePoint);
+    this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
+    this.lastValidPosition = bouncePoint;
 
-      if (intersect) {
-        //debugger
-
-        dx = intersect.x - this.lastPosition.x;
-        dy = intersect.y - this.lastPosition.y;
-        if (nearest) {
-          oldDistance = nearest.dx * nearest.dx + nearest.dy * nearest.dy;
-          newDistance = dx * dx + dy * dy;
-          if (newDistance < oldDistance) {
-            nearest = {
-              dx: dx,
-              dy: dy,
-              x: intersect.x,
-              y: intersect.y,
-              wall: edges[i]
-            };
-          }
-        }
-        else {
-          nearest = {
-            dx: dx,
-            dy: dy,
-            x: intersect.x,
-            y: intersect.y,
-            wall: edges[i]
-          };
-        }
-      }
-    }
-    if (nearest) {
-
-      var velocity = this.position.clone().sub(this.lastPosition);
-      var bouncePoint = nearest.wall.getRepelled(nearest.x, nearest.y);
-      var reflectedVelocity = nearest.wall.getReflection(velocity, this.material.restitution);
-
-      this.position.copy(bouncePoint);
-      this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
-      this.lastValidPosition = bouncePoint;
-
-      this.colliding = true;
-
-      return nearest;
-    }
+    this.colliding = true;
   };
 
   Newton.Particle = Particle;

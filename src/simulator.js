@@ -63,7 +63,7 @@
   Simulator.prototype.integrate = function(time) {
     var particles = this.particles;
     var forces = this.forces;
-    var particle, force;
+    var particle;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
@@ -87,9 +87,29 @@
   Simulator.prototype.collide = function(time) {
     var particles = this.particles;
     var edges = this.edges;
+    var intersect;
+    var particle, edge;
+    var nearest, nearestDistance;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
-      particles[i].collide(edges);
+      particle = particles[i];
+      intersect = undefined;
+      nearest = undefined;
+      for (var j = 0, jlen = edges.length; j < jlen; j++) {
+        edge = edges[j];
+        if (particle !== edge.p1 && particle !== edge.p2) {
+
+          // inline for speed
+          if (Newton.Vector.scratch.set(particle.position.x - particle.lastPosition.x, particle.position.y - particle.lastPosition.y).getDot(edge.normal) < 0) {
+            intersect = edge.findIntersection(particle.lastPosition, particle.position);
+
+            if (intersect && (!nearest || intersect.distance < nearest.distance)) {
+              nearest = intersect;
+            }
+          }
+        }
+      }
+      if (nearest) particle.collide(nearest);
     }
   };
 

@@ -63,8 +63,18 @@
       this.p2.position.x, this.p2.position.y);
   }
 
-  Edge.prototype.findIntersection = function(x1, y1, x2, y2) {
+  Edge.prototype.findIntersection = function(v1, v2) {
     // TODO: determine whether or not it's moving into or out of this one-way edge!
+
+    var x1 = v1.x;
+    var y1 = v1.y;
+    var x2 = v2.x;
+    var y2 = v2.y;
+
+    // Dot product determines whether particle is moving towards (>0) or away (<0)
+    // var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
+
+    // if (dot >= 0) return false;
 
     var bounds1 = this.bounds;
     var bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
@@ -82,14 +92,16 @@
 
     if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 
-    // TODO: figure out whether this should be moved up or if it's too expensive
-    var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
-
-    if (dot >= 0) return false;
+    var dx = x - x1;
+    var dy = y - y1;
 
     return {
       x: x,
-      y: y
+      y: y,
+      dx: dx,
+      dy: dy,
+      distance: dx * dx + dy * dy,
+      wall: this
     };
   };
 

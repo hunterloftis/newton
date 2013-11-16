@@ -70,8 +70,6 @@
     gl.attachShader(program, fs);
     gl.linkProgram(program);
 
-    console.log('Program Linked', gl.getProgramParameter(program, gl.LINK_STATUS));
-
     return program;
   }
 
@@ -117,15 +115,14 @@
 
     this.vertices = [];
     this.sizes = [];
-    this.vArray = new Float32Array(30000);
-    this.sArray = new Float32Array(10000);
+    // TODO: convert this from a vec3 to a vec2
+    this.vArray = new Float32Array(GLRenderer.MAX_PARTICLES * 3);
+    this.sArray = new Float32Array(GLRenderer.MAX_PARTICLES);
 
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
 
     this.gl.viewport(0, 0, this.width, this.height);
     this.viewportArray = new Float32Array([this.width, this.height]);
-
-    console.log('width, height:', this.width, this.height);
 
     this.initShaders();
     this.initBuffers();
@@ -136,6 +133,8 @@
 
     this.gl.enable(this.gl.BLEND);
   }
+
+  GLRenderer.MAX_PARTICLES = 10000;
 
   GLRenderer.prototype = {
     initShaders: function() {
@@ -148,7 +147,6 @@
         position: gl.getAttribLocation(this.particleShader, 'position'),
         size: gl.getAttribLocation(this.particleShader, 'size')
       };
-      console.log('particleShader:', this.particleShader);
     },
     initBuffers: function() {
       var gl = this.gl;
