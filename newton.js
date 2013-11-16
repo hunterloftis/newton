@@ -654,10 +654,12 @@
             vertices.length = 0, sizes.length = 0;
             for (var particle, i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
             vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
-            this.vArray.set(vertices, 0), this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), 
-            gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), gl.useProgram(this.particleShader), 
-            gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            if (vertices.length > this.vArray.length) throw new Error("vArray too small to hold vertices");
+            if (this.vArray.set(vertices, 0), sizes.length > this.sArray.length) throw new Error("sArray too small to hold sizes");
+            this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
+            gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), 
+            gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);

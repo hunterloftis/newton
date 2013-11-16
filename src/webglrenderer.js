@@ -211,7 +211,9 @@
         sizes.push(1);
       }
 
+      if (vertices.length > this.vArray.length) throw new Error('vArray too small to hold vertices');
       this.vArray.set(vertices, 0);
+      if (sizes.length > this.sArray.length) throw new Error('sArray too small to hold sizes');
       this.sArray.set(sizes, 0);
 
       gl.activeTexture(gl.TEXTURE0);
