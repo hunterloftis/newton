@@ -225,7 +225,8 @@
         return this.position.set(x, y), this;
     }, Particle.prototype.shiftTo = function(x, y) {
         var deltaX = x - this.position.x, deltaY = y - this.position.y;
-        this.position.addXY(deltaX, deltaY), this.lastPosition.addXY(deltaX, deltaY);
+        this.position.addXY(deltaX, deltaY), this.lastValidPosition.addXY(deltaX, deltaY), 
+        this.lastPosition.addXY(deltaX, deltaY);
     }, Particle.prototype.destroy = function() {
         this.isDestroyed = !0;
     }, Particle.prototype.moveBy = function(dx, dy) {

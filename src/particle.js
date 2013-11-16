@@ -80,6 +80,7 @@
     var deltaX = x - this.position.x;
     var deltaY = y - this.position.y;
     this.position.addXY(deltaX, deltaY);
+    this.lastValidPosition.addXY(deltaX, deltaY);
     this.lastPosition.addXY(deltaX, deltaY);
   };
 
