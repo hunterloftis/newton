@@ -8,6 +8,7 @@
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
         simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
         this.simulator = simulator, this.layer = layer;
+        for (var i = 0, ilen = this.particles.length; ilen > i; i++) this.particles[i].layer = layer;
     }, Body.prototype.addParticle = function(particle) {
         this.particles.push(particle), particle.layer = this.layer, this.simulator && this.simulator.addParticles([ particle ]);
     }, Body.prototype.Particle = function() {
@@ -185,7 +186,7 @@
     }, LinearGravity.prototype.setStrength = function(strength) {
         this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
     }, LinearGravity.prototype.applyTo = function(particle) {
-        particle.pinned || particle.layer === this.layer && particle.accelerateVector(this.vector);
+        particle.accelerateVector(this.vector);
     }, Newton.LinearGravity = LinearGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -326,7 +327,7 @@
     }, RadialGravity.prototype.setStrength = function(strength) {
         this.strength = strength;
     }, RadialGravity.prototype.applyTo = function(particle) {
-        particle.pinned || particle.layer === this.layer && particle.attractSquare(this.x, this.y, this.strength, 20);
+        particle.attractSquare(this.x, this.y, this.strength, 20);
     }, Newton.RadialGravity = RadialGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -455,7 +456,7 @@
         Array.isArray(this.renderers) || (this.renderers = [ this.renderers ]), this.step = this._step.bind(this), 
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
-        this.iterations = iterations || 3, this.layers = [], this.particles = [], this.edges = [], 
+        this.iterations = iterations || 3, this.layers = {}, this.particles = [], this.edges = [], 
         this.forces = [], this.constraints = [], void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
     }
     Array.isArray || (Array.isArray = function(vArg) {
@@ -470,9 +471,10 @@
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
-        for (var particle, particles = this.particles, forces = this.forces, i = 0, ilen = particles.length; ilen > i; i++) {
-            particle = particles[i];
-            for (var j = 0, jlen = forces.length; jlen > j; j++) forces[j].applyTo(particle);
+        for (var particle, force, linked, particles = this.particles, forces = this.forces, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
+            if (particle = particles[i], layers[particle.layer] || console.log(particle), linked = layers[particle.layer].linked, 
+            !particle.pinned) for (var j = 0, jlen = forces.length; jlen > j; j++) force = forces[j], 
+            -1 !== linked.indexOf(force.layer) && force.applyTo(particle);
             particle.integrate(time);
         }
     }, Simulator.prototype.constrain = function(time) {
@@ -484,10 +486,15 @@
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
         }
+    }, Simulator.prototype.ensureLayer = function(name) {
+        this.layers[name] || (this.layers[name] = {
+            linked: [ name ]
+        });
     }, Simulator.prototype.add = function(entity, layer) {
-        return entity.addTo(this, layer), this;
-    }, Simulator.prototype.link = function() {
-        return this;
+        return entity.addTo(this, layer), this.ensureLayer(layer), this;
+    }, Simulator.prototype.link = function(layer, linkedLayers) {
+        return this.ensureLayer(layer), this.layers[layer].linked = linkedLayers.split(" "), 
+        this;
     }, Simulator.prototype.addParticles = function(particles) {
         this.particles.push.apply(this.particles, particles);
     }, Simulator.prototype.addEdges = function(edges) {

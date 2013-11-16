@@ -31,8 +31,6 @@
 
   // TODO: make falloff matter
   RadialGravity.prototype.applyTo = function(particle) {
-    if (particle.pinned) return;
-    if (particle.layer !== this.layer) return;
     particle.attractSquare(this.x, this.y, this.strength, 20);
   };
 

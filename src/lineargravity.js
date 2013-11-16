@@ -30,8 +30,6 @@
 
   // TODO: make falloff matter
   LinearGravity.prototype.applyTo = function(particle) {
-    if (particle.pinned) return;
-    if (particle.layer !== this.layer) return;
     particle.accelerateVector(this.vector);
   };
 

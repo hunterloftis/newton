@@ -78,13 +78,13 @@
     container = Newton.WrapConstraint(0, 0, width, height);
 
     sim
-      .add(gravity, 'particles')
-      //.add(wind, 'wind')
+      .add(gravity, 'global')
+      .add(wind, 'wind')
       .add(walls, 'shapes')
       .add(particles, 'particles')
       .add(radial, 'particles')
       .add(container, 'particles')
-      .link('particles', 'particles shapes globals');
+      .link('particles', 'particles shapes global');
   }
 
   function startSimulation() {
@@ -174,7 +174,7 @@
       .on('change', 'input[data-bind="DRAG"]', updateDrag);
 
     $('#whatever').click(function() {
-      particleLayer.respondTo([particleLayer, shapeLayer, globalLayer, windLayer]);
+      sim.link('particles', 'particles shapes global wind');
       return false;
     });
 

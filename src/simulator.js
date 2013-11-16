@@ -31,7 +31,7 @@
     this.simulationStep = 1000 / (integrationFps || 60);
     this.iterations = iterations || 3;
 
-    this.layers = [];
+    this.layers = {};
 
     // The basic elements of the simulation
     this.particles = [];
@@ -70,12 +70,23 @@
   Simulator.prototype.integrate = function(time) {
     var particles = this.particles;
     var forces = this.forces;
-    var particle;
+    var particle, force;
+
+    var layers = this.layers;
+    var linked;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
-      for (var j = 0, jlen = forces.length; j < jlen; j++) {
-        forces[j].applyTo(particle);  // TODO: applyForce must check validity of force based on particle's layer
+      if (!layers[particle.layer]) console.log(particle);
+      linked = layers[particle.layer].linked;
+      if (!particle.pinned) {
+        for (var j = 0, jlen = forces.length; j < jlen; j++) {
+          force = forces[j];
+          // TODO: optimize for speed
+          if (linked.indexOf(force.layer) !== -1) {
+            force.applyTo(particle);
+          }
+        }
       }
       particle.integrate(time);
     }
@@ -116,12 +127,21 @@
     }
   };
 
+  Simulator.prototype.ensureLayer = function(name) {
+    if (!this.layers[name]) this.layers[name] = {
+      linked: [name]
+    };
+  };
+
   Simulator.prototype.add = function(entity, layer) {
     entity.addTo(this, layer);
+    this.ensureLayer(layer);
     return this;
   };
 
   Simulator.prototype.link = function(layer, linkedLayers) {
+    this.ensureLayer(layer);
+    this.layers[layer].linked = linkedLayers.split(' ');
     return this;
   };
 

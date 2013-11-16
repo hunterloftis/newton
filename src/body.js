@@ -25,6 +25,11 @@
 
     this.simulator = simulator;
     this.layer = layer;
+
+    // TODO: this is hacky
+    for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
+      this.particles[i].layer = layer;
+    }
   };
 
   Body.prototype.addParticle = function(particle) {
