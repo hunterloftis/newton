@@ -72,9 +72,9 @@
     var y2 = v2.y;
 
     // Dot product determines whether particle is moving towards (>0) or away (<0)
-    // var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
+    var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
 
-    // if (dot >= 0) return false;
+    if (dot >= 0) return false;
 
     var bounds1 = this.bounds;
     var bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);

@@ -8,11 +8,18 @@
     return b.priority - a.priority;
   }
 
-  function Simulator(preSimulator, renderer, integrationFps, iterations) {
-    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderer, integrationFps, iterations);
+  if(!Array.isArray) {
+    Array.isArray = function (vArg) {
+      return Object.prototype.toString.call(vArg) === "[object Array]";
+    };
+  }
+
+  function Simulator(preSimulator, renderers, integrationFps, iterations) {
+    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderers, integrationFps, iterations);
 
     this.preSimulator = preSimulator || noop;
-    this.renderer = renderer || noop;
+    this.renderers = renderers || noop;
+    if (!Array.isArray(this.renderers)) this.renderers = [this.renderers];
     this.step = this._step.bind(this);
     this.lastTime = 0;
     this.running = false;
@@ -89,7 +96,7 @@
     var edges = this.edges;
     var intersect;
     var particle, edge;
-    var nearest, nearestDistance;
+    var nearest;
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
@@ -98,14 +105,10 @@
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
         edge = edges[j];
         if (particle !== edge.p1 && particle !== edge.p2) {
+          intersect = edge.findIntersection(particle.lastPosition, particle.position);
 
-          // inline for speed
-          if (Newton.Vector.scratch.set(particle.position.x - particle.lastPosition.x, particle.position.y - particle.lastPosition.y).getDot(edge.normal) < 0) {
-            intersect = edge.findIntersection(particle.lastPosition, particle.position);
-
-            if (intersect && (!nearest || intersect.distance < nearest.distance)) {
-              nearest = intersect;
-            }
+          if (intersect && (!nearest || intersect.distance < nearest.distance)) {
+            nearest = intersect;
           }
         }
       }
@@ -179,7 +182,9 @@
       this.accumulator -= this.simulationStep;
     }
 
-    this.renderer(step, this);
+    for (var i = 0; i < this.renderers.length; i++) {
+      this.renderers[i](step, this);
+    }
 
     this.frames++;
     if (time >= this.countTime) {

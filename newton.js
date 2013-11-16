@@ -96,7 +96,9 @@
     }, Edge.prototype.getAbc = function() {
         return Edge.getAbc(this.p1.position.x, this.p1.position.y, this.p2.position.x, this.p2.position.y);
     }, Edge.prototype.findIntersection = function(v1, v2) {
-        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, bounds1 = this.bounds, bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
+        if (dot >= 0) return !1;
+        var bounds1 = this.bounds, bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
         if (!bounds1.overlaps(bounds2)) return !1;
         var l1 = this.getAbc(), l2 = Edge.getAbc(x1, y1, x2, y2), det = l1.a * l2.b - l2.a * l1.b;
         if (0 === det) return !1;
@@ -448,15 +450,17 @@
     function prioritySort(a, b) {
         return b.priority - a.priority;
     }
-    function Simulator(preSimulator, renderer, integrationFps, iterations) {
-        return this instanceof Simulator ? (this.preSimulator = preSimulator || noop, this.renderer = renderer || noop, 
-        this.step = this._step.bind(this), this.lastTime = 0, this.running = !1, this.fps = 0, 
-        this.frames = 0, this.countTime = 0, this.countInterval = 250, this.accumulator = 0, 
-        this.simulationStep = 1e3 / (integrationFps || 60), this.iterations = iterations || 3, 
-        this.layers = [], this.particles = [], this.edges = [], this.forces = [], this.constraints = [], 
-        void 0) : new Simulator(preSimulator, renderer, integrationFps, iterations);
+    function Simulator(preSimulator, renderers, integrationFps, iterations) {
+        return this instanceof Simulator ? (this.preSimulator = preSimulator || noop, this.renderers = renderers || noop, 
+        Array.isArray(this.renderers) || (this.renderers = [ this.renderers ]), this.step = this._step.bind(this), 
+        this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
+        this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
+        this.iterations = iterations || 3, this.layers = [], this.particles = [], this.edges = [], 
+        this.forces = [], this.constraints = [], void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
     }
-    Simulator.prototype.start = function() {
+    Array.isArray || (Array.isArray = function(vArg) {
+        return "[object Array]" === Object.prototype.toString.call(vArg);
+    }), Simulator.prototype.start = function() {
         this.running = !0, this.countTime = Date.now() + 1e3, Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
@@ -476,7 +480,7 @@
     }, Simulator.prototype.collide = function() {
         for (var intersect, particle, edge, nearest, particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], intersect = void 0, nearest = void 0;
-            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], particle !== edge.p1 && particle !== edge.p2 && Newton.Vector.scratch.set(particle.position.x - particle.lastPosition.x, particle.position.y - particle.lastPosition.y).getDot(edge.normal) < 0 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
+            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
         }
@@ -505,7 +509,8 @@
             var time = Date.now(), step = time - this.lastTime;
             for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep), 
             this.accumulator -= this.simulationStep;
-            this.renderer(step, this), this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
+            for (var i = 0; i < this.renderers.length; i++) this.renderers[i](step, this);
+            this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
             this.frames = 0, this.countTime = time + this.countInterval), this.lastTime = time, 
             Newton.frame(this.step);
         }
@@ -607,7 +612,7 @@
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
         void 0) : new GLRenderer(el);
     }
-    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size * 4.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n");
+    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size + 1.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main() {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), EDGE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "}" ].join("\n"), EDGE_FS = [ "void main() {", "gl_FragColor = vec4(0.0, 0.66, 1.0, 0.75);", "}" ].join("\n");
     GLRenderer.MAX_PARTICLES = 1e4, GLRenderer.prototype = {
         initShaders: function() {
             var gl = this.gl;
@@ -616,14 +621,20 @@
             }, this.particleShader.attributes = {
                 position: gl.getAttribLocation(this.particleShader, "position"),
                 size: gl.getAttribLocation(this.particleShader, "size")
-            };
+            }, this.edgeShader = createShaderProgram(gl, EDGE_VS, EDGE_FS), this.edgeShader.uniforms = {
+                viewport: gl.getUniformLocation(this.edgeShader, "viewport")
+            }, this.edgeShader.attributes = {
+                position: gl.getAttribLocation(this.edgeShader, "position")
+            }, gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
+            gl.useProgram(this.edgeShader), gl.uniform2fv(this.edgeShader.uniforms.viewport, this.viewportArray);
         },
         initBuffers: function() {
             var gl = this.gl;
-            this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer();
+            this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer(), 
+            this.edgePositionBuffer = gl.createBuffer();
         },
         callback: function(time, sim) {
-            this.clear(time), this.drawParticles(sim.particles);
+            this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges);
         },
         clear: function() {
             var gl = this.gl;
@@ -638,17 +649,16 @@
             }
             ctx.restore();
         },
-        drawParticles: function() {
+        drawParticles: function(particles) {
             var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
             vertices.length = 0, sizes.length = 0;
-            for (var particle, i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
-            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
+            for (var particle, i = 0, ilen = particles.length; ilen > i; i++) particle = particles[i], 
+            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(particle.size);
             if (vertices.length > this.vArray.length) throw new Error("vArray too small to hold vertices");
             if (this.vArray.set(vertices, 0), sizes.length > this.sArray.length) throw new Error("sArray too small to hold sizes");
             this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
-            gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), 
-            gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
@@ -664,11 +674,12 @@
             ctx.closePath(), ctx.stroke());
             ctx.restore();
         },
-        drawEdges: function(ctx, edges) {
-            ctx.save(), ctx.strokeStyle = "rgba(255, 255, 255, 0.2)", ctx.lineWidth = 1;
-            for (var edge, i = edges.length; i--; ) edge = edges[i].getCoords(), ctx.beginPath(), 
-            ctx.moveTo(edge.x1, edge.y1), ctx.lineTo(edge.x2, edge.y2), ctx.closePath(), ctx.stroke();
-            return ctx.restore(), edges.length;
+        drawEdges: function(edges) {
+            for (var edge, gl = this.gl, vertices = [], i = 0, ilen = edges.length; ilen > i; i++) edge = edges[i].getCoords(), 
+            vertices.push(edge.x1, edge.y1, 0), vertices.push(edge.x2, edge.y2, 0);
+            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.drawArrays(gl.LINES, 0, vertices.length / 3);
         },
         drawCounts: function(ctx, counts) {
             ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + counts.particles, 10, 20), 

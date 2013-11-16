@@ -7,9 +7,16 @@
 <body>
 
 <div class='wrap'>
+  <ul class='stats'>
+    <li>fps:<span id='fps'></span></li>
+    <li>particles:<span id='particles'></span></li>
+    <li>edges:<span id='edges'></span></li>
+    <li>constraints:<span id='constraints'></span></li>
+    <li>forces:<span id='forces'></span></li>
+  </ul>
   <canvas id="display" width='1280' height='450'></canvas>
   <p class='caption'>
-    Create particles by drawing with your mouse. Newton can maintain high framerates with hundreds of objects.
+    Create particles by drawing with your mouse. Newton can maintain high framerates with thousands of objects.
   </p>
   <form class='controls'>
     <label>Gravity
@@ -82,12 +89,20 @@
 
   function startSimulation() {
     sim.start();
+    setInterval(showStats, 250);
   }
 
   function simulate(time) {
     if (mouseDown) addParticles(radial.x, radial.y, ~~(time * 0.5));
   }
 
+  function showStats(time) {
+    $('#fps').text(sim.fps);
+    $('#particles').text(sim.particles.length);
+    $('#edges').text(sim.edges.length);
+    $('#constraints').text(sim.constraints.length);
+    $('#forces').text(sim.forces.length);
+  }
 
   // Utilities
 
@@ -100,10 +115,10 @@
   }
 
   function createRandom(x, y, spread) {
-    var mass = Math.random() * 4 + 1;
+    var size = Math.random() * 4 + 1;
     var x = Math.random() * spread * 2 + x - spread;
     var y = Math.random() * spread * 2 + y - spread;
-    return Newton.Particle(x, y, mass, particleMaterial);
+    return Newton.Particle(x, y, size, particleMaterial);
   }
 
   function createWalls() {

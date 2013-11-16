@@ -20,7 +20,7 @@ a:hover {
 }
 
 .wrap {
-  margin-top: 50px;
+  margin-top: 20px;
   margin-left: auto;
   margin-right: auto;
   display: block;
@@ -53,4 +53,21 @@ a:hover {
 
 label > input {
   margin-left: 10px;
+}
+
+.stats {
+  margin: 0;
+  padding: 5px;
+}
+
+.stats li {
+  list-style-type: none;
+  margin: 0;
+  padding: 0 20px 0 0;
+  display: inline-block;
+}
+
+.stats span {
+  display: inline-block;
+  width: 30px;
 }
