@@ -30,6 +30,9 @@
     for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
       this.particles[i].layer = layer;
     }
+    for (var i = 0, ilen = this.edges.length; i < ilen; i++) {
+      this.edges[i].layer = layer;
+    }
   };
 
   Body.prototype.addParticle = function(particle) {
@@ -47,6 +50,7 @@
 
   Body.prototype.addEdge = function(edge) {
     this.edges.push(edge);
+    edge.layer = this.layer;
     if (this.simulator) this.simulator.addEdges([edge]);
   };
 

@@ -56,6 +56,7 @@
     this.preSimulator(time, this);
     this.integrate(time);
     this.constrain(time);
+    this.updateEdges();   // TODO: fix this hack, edges should be more dynamic than they are
     this.collide(time);
   };
 
@@ -77,7 +78,6 @@
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
-      if (!layers[particle.layer]) console.log(particle);
       linked = layers[particle.layer].linked;
       if (!particle.pinned) {
         for (var j = 0, jlen = forces.length; j < jlen; j++) {
@@ -102,6 +102,12 @@
     }
   };
 
+  Simulator.prototype.updateEdges = function() {
+    for (var i = 0, ilen = this.edges.length; i < ilen; i++) {
+      this.edges[i].compute();
+    }
+  };
+
   Simulator.prototype.collide = function(time) {
     var particles = this.particles;
     var edges = this.edges;
@@ -109,17 +115,23 @@
     var particle, edge;
     var nearest;
 
+    var layers = this.layers;
+    var linked;
+
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
+      linked = layers[particle.layer].linked;
       intersect = undefined;
       nearest = undefined;
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
         edge = edges[j];
-        if (particle !== edge.p1 && particle !== edge.p2) {
-          intersect = edge.findIntersection(particle.lastPosition, particle.position);
+        if (linked.indexOf(edge.layer) !== -1) {
+          if (particle !== edge.p1 && particle !== edge.p2) {
+            intersect = edge.findIntersection(particle.lastPosition, particle.position);
 
-          if (intersect && (!nearest || intersect.distance < nearest.distance)) {
-            nearest = intersect;
+            if (intersect && (!nearest || intersect.distance < nearest.distance)) {
+              nearest = intersect;
+            }
           }
         }
       }

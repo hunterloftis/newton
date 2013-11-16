@@ -9,13 +9,14 @@
         simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
         this.simulator = simulator, this.layer = layer;
         for (var i = 0, ilen = this.particles.length; ilen > i; i++) this.particles[i].layer = layer;
+        for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].layer = layer;
     }, Body.prototype.addParticle = function(particle) {
         this.particles.push(particle), particle.layer = this.layer, this.simulator && this.simulator.addParticles([ particle ]);
     }, Body.prototype.Particle = function() {
         var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
     }, Body.prototype.addEdge = function(edge) {
-        this.edges.push(edge), this.simulator && this.simulator.addEdges([ edge ]);
+        this.edges.push(edge), edge.layer = this.layer, this.simulator && this.simulator.addEdges([ edge ]);
     }, Body.prototype.Edge = function() {
         var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
         return this.addEdge(edge), edge;
@@ -28,6 +29,16 @@
         var constraint = Newton.RigidConstraint.apply(Newton.RigidConstraint, Array.prototype.slice.call(arguments));
         return this.addConstraint(constraint), constraint;
     }, Newton.Body = Body;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Box(x, y, size) {
+        if (!(this instanceof Box)) return new Box(x, y, size);
+        var body = this.body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
+        body.DistanceConstraint(ul, ur), body.DistanceConstraint(ur, lr), body.DistanceConstraint(lr, ll), 
+        body.DistanceConstraint(ll, ul), body.DistanceConstraint(ul, lr), body.DistanceConstraint(ur, ll), 
+        body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul);
+    }
+    Newton.Box = Box;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function BoxConstraint(left, top, right, bottom, particles) {
@@ -66,8 +77,9 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Edge(p1, p2, material) {
-        return this instanceof Edge ? (this.p1 = p1, this.p2 = p2, this.material = material || Material.simple, 
-        this.compute(), this._rect = new Newton.Rectangle(0, 0, 0, 0), void 0) : new Edge(p1, p2, material);
+        return this instanceof Edge ? (this.p1 = p1, this.p2 = p2, this.material = material || Newton.Material.simple, 
+        this.compute(), this._rect = new Newton.Rectangle(0, 0, 0, 0), this.layer = void 0, 
+        void 0) : new Edge(p1, p2, material);
     }
     Edge.COLLISION_TOLERANCE = .5, Edge.getAbc = function(x1, y1, x2, y2) {
         var a = y2 - y1, b = x1 - x2, c = a * x1 + b * y1;
@@ -408,7 +420,7 @@
             ctx.restore();
         },
         drawEdges: function(ctx, edges) {
-            ctx.save(), ctx.strokeStyle = "rgba(255, 255, 255, 0.2)", ctx.lineWidth = 1;
+            ctx.save(), ctx.strokeStyle = "rgba(255, 255, 255, 0.4)", ctx.lineWidth = 1;
             for (var edge, i = edges.length; i--; ) edge = edges[i].getCoords(), ctx.beginPath(), 
             ctx.moveTo(edge.x1, edge.y1), ctx.lineTo(edge.x2, edge.y2), ctx.closePath(), ctx.stroke();
             return ctx.restore(), edges.length;
@@ -468,22 +480,24 @@
         this.running = !1;
     }, Simulator.prototype.simulate = function(time) {
         this.cull(this.particles), this.cull(this.constraints), this.preSimulator(time, this), 
-        this.integrate(time), this.constrain(time), this.collide(time);
+        this.integrate(time), this.constrain(time), this.updateEdges(), this.collide(time);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
         for (var particle, force, linked, particles = this.particles, forces = this.forces, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
-            if (particle = particles[i], layers[particle.layer] || console.log(particle), linked = layers[particle.layer].linked, 
-            !particle.pinned) for (var j = 0, jlen = forces.length; jlen > j; j++) force = forces[j], 
+            if (particle = particles[i], linked = layers[particle.layer].linked, !particle.pinned) for (var j = 0, jlen = forces.length; jlen > j; j++) force = forces[j], 
             -1 !== linked.indexOf(force.layer) && force.applyTo(particle);
             particle.integrate(time);
         }
     }, Simulator.prototype.constrain = function(time) {
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
+    }, Simulator.prototype.updateEdges = function() {
+        for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].compute();
     }, Simulator.prototype.collide = function() {
-        for (var intersect, particle, edge, nearest, particles = this.particles, edges = this.edges, i = 0, ilen = particles.length; ilen > i; i++) {
-            particle = particles[i], intersect = void 0, nearest = void 0;
-            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
+        for (var intersect, particle, edge, nearest, linked, particles = this.particles, edges = this.edges, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
+            particle = particles[i], linked = layers[particle.layer].linked, intersect = void 0, 
+            nearest = void 0;
+            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], -1 !== linked.indexOf(edge.layer) && particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
         }

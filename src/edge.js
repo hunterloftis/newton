@@ -4,13 +4,15 @@
 
   function Edge(p1, p2, material) {
     if (!(this instanceof Edge)) return new Edge(p1, p2, material);
+
     this.p1 = p1;
     this.p2 = p2;
-    this.material = material || Material.simple;
+    this.material = material || Newton.Material.simple;
 
     this.compute();
 
     this._rect = new Newton.Rectangle(0, 0, 0, 0);
+    this.layer = undefined;
   };
 
   Edge.COLLISION_TOLERANCE = 0.5;

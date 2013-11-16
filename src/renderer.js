@@ -118,7 +118,7 @@
     },
     drawEdges: function(ctx, edges) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
       ctx.lineWidth = 1;
       var edge, i = edges.length;
       while (i--) {
