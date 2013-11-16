@@ -2,39 +2,35 @@
 
 An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.
 
-[API Reference](https://github.com/hunterloftis/newton/blob/master/docs.md)
-
 ```js
-var renderer = Newton.Renderer(document.getElementById('display'));
-var sim = Newton.Simulator(simulate, renderer.callback, 60);
-var particles = Newton.Body();
-var blackhole = Newton.RadialGravity(640, 225, 10, 2);
-var accumulator = 0;
+var $display = $('#display'),
+    width = $display.width(),
+    height = $display.height();
 
-var particleLayer = sim.Layer();
+var renderer = Newton.GLRenderer($display[0]),
+    sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
 
-particleLayer
-  .addBody(particles)
-  .addForce(Newton.LinearGravity(0, 0.001, 0))
-  .addForce(blackhole)
-  .wrapIn(Newton.Rectangle(0, 0, 1280, 450));
+var particleMaterial = Newton.Material(),
+    particles = Newton.Body(particleMaterial),
+    gravity = Newton.LinearGravity(0, 0.001, 0),
+    radial = Newton.RadialGravity(0, 0, -4, 2),
+    container = Newton.BoxConstraint(0, 0, width, height);
 
-sim.start();
+sim
+  .add(gravity)
+  .add(particles)
+  .add(radial)
+  .add(container)
+  .start();
 
 function simulate(time) {
-  accumulator += time;
-  blackhole.x = (blackhole.x + time * 0.5) % 1280;
-  blackhole.y = 225 + Math.sin(blackhole.x / 100) * 120;
-  while (accumulator > 250) {
-    particles.addParticle(Newton.Particle(Math.random() * 1280, 10, Math.random() * 5 + 1));
-    accumulator -= 250;
-  }
+  // Custom behavior
 }
+
 ```
 
-See this
-[simple demo](http://hunterloftis.github.io/newton/examples/simple) in action or check out
-[more examples](#examples).
+Check out [examples](#examples)
+or the [API Reference](https://github.com/hunterloftis/newton/blob/master/docs.md).
 
 ## Installation
 
