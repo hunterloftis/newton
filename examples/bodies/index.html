@@ -7,6 +7,13 @@
 <body>
 
 <div class='wrap'>
+  <ul class='stats'>
+    <li>fps:<span id='fps'></span></li>
+    <li>particles:<span id='particles'></span></li>
+    <li>edges:<span id='edges'></span></li>
+    <li>constraints:<span id='constraints'></span></li>
+    <li>forces:<span id='forces'></span></li>
+  </ul>
   <canvas id="display" width="1280" height="450"></canvas>
 </div>
 
@@ -15,23 +22,26 @@
 
 <script>
 
-  var renderer = Newton.Renderer(document.getElementById('display')),
+  var renderer = Newton.GLRenderer(document.getElementById('display')),
       sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
-      squishy = createSquishy(600, 250, 70, 20),
-      boxes = createBoxes(300, 100, 25, 3);
-
-  var anchor;
+      squishy = Newton.Squishy(600, 250, 70, 20),
+      anchor = squishy.particles[0],
+      boxes = createBoxes(300, 100, 25, 3),
+      fabric = Newton.Fabric(700, 50, 1200, 50, 40, 20);
 
   sim
     .add(gravity)
     .add(squishy, 'squishy')
-    .link('squishy', 'boxes')
+    .link('squishy', 'boxes fabric')
     .add(boxes, 'boxes')
-    .link('boxes', 'boxes squishy')
+    .link('boxes', 'boxes squishy fabric')
+    .add(fabric, 'fabric')
+    .link('fabric', 'boxes squishy')
     .add(container)
     .start();
+
 
   $('#display').on('mousemove', function(e) {
     var offset = $(this).offset();
@@ -41,41 +51,23 @@
     anchor.pin(x, y);
   });
 
+  setInterval(showStats, 250);
+
+
+  function showStats(time) {
+    $('#fps').text(sim.fps);
+    $('#particles').text(sim.particles.length);
+    $('#edges').text(sim.edges.length);
+    $('#constraints').text(sim.constraints.length);
+    $('#forces').text(sim.forces.length);
+  }
+
   function createBoxes(x, y, size, amount) {
     var boxes = [];
     while (amount--) {
-      boxes.push(Newton.Box(x - amount * size, y + amount * size * 3, size).body);
+      boxes.push(Newton.Box(x - amount * size, y + amount * size * 3, size));
     }
     return boxes;
-  }
-
-  function createSquishy(ox, oy, r, points) {
-    var spacing = (Math.PI * 2) / points;
-
-    var body = Newton.Body();
-    var current, last;
-
-    for (var i = 0; i < points; i++) {
-      var x = ox + r * Math.cos(i * spacing);
-      var y = oy + r * Math.sin(i * spacing);
-      current = body.Particle(x, y);
-      if (last) body.Edge(last, current);
-      last = current;
-    }
-    body.Edge(last, body.particles[0]);
-
-    for (var i = 0; i < points; i++) {
-      for (var j = 0; j < points; j++) {
-        if (i !== j) {
-          if (i === 0) body.DistanceConstraint(body.particles[i], body.particles[j], 0.001);
-          else body.DistanceConstraint(body.particles[i], body.particles[j], 0.001);
-        }
-      }
-    }
-
-    anchor = body.particles[0];
-
-    return body;
   }
 
 </script>

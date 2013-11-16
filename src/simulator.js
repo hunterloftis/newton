@@ -30,6 +30,7 @@
     this.accumulator = 0;
     this.simulationStep = 1000 / (integrationFps || 60);
     this.iterations = iterations || 3;
+    this.startTime = 0;
 
     this.layers = {};
 
@@ -43,6 +44,7 @@
   Simulator.prototype.start = function() {
     this.running = true;
     this.countTime = Date.now() + 1000;
+    this.startTime = Date.now();
     Newton.frame(this.step);
   };
 
@@ -50,10 +52,10 @@
     this.running = false;
   };
 
-  Simulator.prototype.simulate = function(time) {
+  Simulator.prototype.simulate = function(time, totalTime) {
     this.cull(this.particles);
     this.cull(this.constraints);
-    this.preSimulator(time, this);
+    this.preSimulator(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
     this.updateEdges();   // TODO: fix this hack, edges should be more dynamic than they are
@@ -214,7 +216,7 @@
     this.accumulator += step;
 
     while (this.accumulator >= this.simulationStep) {
-      this.simulate(this.simulationStep);
+      this.simulate(this.simulationStep, time - this.startTime);
       this.accumulator -= this.simulationStep;
     }
 

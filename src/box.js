@@ -3,9 +3,7 @@
   'use strict'
 
   function Box(x, y, size) {
-    if (!(this instanceof Box)) return new Box(x, y, size);
-
-    var body = this.body = Newton.Body();
+    var body = Newton.Body();
 
     var ul = body.Particle(x - size, y - size);
     var ur = body.Particle(x + size, y - size);
@@ -24,6 +22,8 @@
     body.Edge(ur, lr);
     body.Edge(lr, ll);
     body.Edge(ll, ul);
+
+    return body;
   }
 
   Newton.Box = Box;

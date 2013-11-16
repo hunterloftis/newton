@@ -32,11 +32,10 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Box(x, y, size) {
-        if (!(this instanceof Box)) return new Box(x, y, size);
-        var body = this.body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
-        body.DistanceConstraint(ul, ur), body.DistanceConstraint(ur, lr), body.DistanceConstraint(lr, ll), 
+        var body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
+        return body.DistanceConstraint(ul, ur), body.DistanceConstraint(ur, lr), body.DistanceConstraint(lr, ll), 
         body.DistanceConstraint(ll, ul), body.DistanceConstraint(ul, lr), body.DistanceConstraint(ur, ll), 
-        body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul);
+        body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul), body;
     }
     Newton.Box = Box;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -130,6 +129,19 @@
         var dir = this.normal.clone(), friction = this.material.friction, velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution), velT = velocity.clone().sub(velN).multScalar(1 - friction), reflectedVel = velT.sub(velN);
         return reflectedVel;
     }, Newton.Edge = Edge;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Fabric(x1, y1, x2, y2, width, height) {
+        for (var particle, spacing = (x2 - x1) / width, body = Newton.Body(), w = 0; width > w; w++) for (var h = 0; height > h; h++) particle = body.Particle(x1 + w * spacing, y1 + h * spacing), 
+        0 === h && particle.pin();
+        for (var w = 0; width > w; w++) for (var h = 0; height > h; h++) h > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - 1], .2), 
+        w > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - height], .2), 
+        0 === w && h > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - 1]), 
+        h === height - 1 && w > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - height]), 
+        w === width - 1 && h > 0 && body.Edge(body.particles[w * height + h - 1], body.particles[w * height + h]);
+        return body;
+    }
+    Newton.Fabric = Fabric;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function timeoutFrame(simulator) {
@@ -469,17 +481,18 @@
         Array.isArray(this.renderers) || (this.renderers = [ this.renderers ]), this.step = this._step.bind(this), 
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
-        this.iterations = iterations || 3, this.layers = {}, this.particles = [], this.edges = [], 
-        this.forces = [], this.constraints = [], void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
+        this.iterations = iterations || 3, this.startTime = 0, this.layers = {}, this.particles = [], 
+        this.edges = [], this.forces = [], this.constraints = [], void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
     }), Simulator.prototype.start = function() {
-        this.running = !0, this.countTime = Date.now() + 1e3, Newton.frame(this.step);
+        this.running = !0, this.countTime = Date.now() + 1e3, this.startTime = Date.now(), 
+        Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
-    }, Simulator.prototype.simulate = function(time) {
-        this.cull(this.particles), this.cull(this.constraints), this.preSimulator(time, this), 
+    }, Simulator.prototype.simulate = function(time, totalTime) {
+        this.cull(this.particles), this.cull(this.constraints), this.preSimulator(time, this, totalTime), 
         this.integrate(time), this.constrain(time), this.updateEdges(), this.collide(time);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
@@ -531,7 +544,7 @@
     }, Simulator.prototype._step = function() {
         if (this.running) {
             var time = Date.now(), step = time - this.lastTime;
-            for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep), 
+            for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep, time - this.startTime), 
             this.accumulator -= this.simulationStep;
             for (var i = 0; i < this.renderers.length; i++) this.renderers[i](step, this);
             this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
@@ -539,6 +552,18 @@
             Newton.frame(this.step);
         }
     }, Newton.Simulator = Simulator;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Squishy(ox, oy, r, points) {
+        for (var current, last, spacing = 2 * Math.PI / points, body = Newton.Body(), i = 0; points > i; i++) {
+            var x = ox + r * Math.cos(i * spacing), y = oy + r * Math.sin(i * spacing);
+            current = body.Particle(x, y), last && i > 1 && body.Edge(last, current), last = current;
+        }
+        body.Edge(last, body.particles[1]);
+        for (var i = 0; points > i; i++) for (var j = i + 1; points > j; j++) body.DistanceConstraint(body.particles[i], body.particles[j], .001);
+        return body;
+    }
+    Newton.Squishy = Squishy;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Vector(x, y) {
@@ -636,21 +661,26 @@
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
         void 0) : new GLRenderer(el);
     }
-    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size + 1.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main() {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), EDGE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "}" ].join("\n"), EDGE_FS = [ "void main() {", "gl_FragColor = vec4(0.0, 0.66, 1.0, 0.75);", "}" ].join("\n");
+    var POINT_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size + 1.0;", "}" ].join("\n"), LINE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main() {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), CONSTRAINT_FS = [ "void main() {", "gl_FragColor = vec4(0.0, 0.5, 1.0, 1.0);", "}" ].join("\n"), EDGE_FS = [ "void main() {", "gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);", "}" ].join("\n");
     GLRenderer.MAX_PARTICLES = 1e4, GLRenderer.prototype = {
         initShaders: function() {
             var gl = this.gl;
-            this.particleShader = createShaderProgram(gl, PARTICLE_VS, PARTICLE_FS), this.particleShader.uniforms = {
+            this.particleShader = createShaderProgram(gl, POINT_VS, PARTICLE_FS), this.particleShader.uniforms = {
                 viewport: gl.getUniformLocation(this.particleShader, "viewport")
             }, this.particleShader.attributes = {
                 position: gl.getAttribLocation(this.particleShader, "position"),
                 size: gl.getAttribLocation(this.particleShader, "size")
-            }, this.edgeShader = createShaderProgram(gl, EDGE_VS, EDGE_FS), this.edgeShader.uniforms = {
+            }, gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
+            this.edgeShader = createShaderProgram(gl, LINE_VS, EDGE_FS), this.edgeShader.uniforms = {
                 viewport: gl.getUniformLocation(this.edgeShader, "viewport")
             }, this.edgeShader.attributes = {
                 position: gl.getAttribLocation(this.edgeShader, "position")
-            }, gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
-            gl.useProgram(this.edgeShader), gl.uniform2fv(this.edgeShader.uniforms.viewport, this.viewportArray);
+            }, gl.useProgram(this.edgeShader), gl.uniform2fv(this.edgeShader.uniforms.viewport, this.viewportArray), 
+            this.constraintShader = createShaderProgram(gl, LINE_VS, CONSTRAINT_FS), this.constraintShader.uniforms = {
+                viewport: gl.getUniformLocation(this.constraintShader, "viewport")
+            }, this.constraintShader.attributes = {
+                position: gl.getAttribLocation(this.constraintShader, "position")
+            }, gl.useProgram(this.constraintShader), gl.uniform2fv(this.constraintShader.uniforms.viewport, this.viewportArray);
         },
         initBuffers: function() {
             var gl = this.gl;
@@ -658,7 +688,8 @@
             this.edgePositionBuffer = gl.createBuffer();
         },
         callback: function(time, sim) {
-            this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges);
+            this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges), 
+            this.drawConstraints(sim.constraints);
         },
         clear: function() {
             var gl = this.gl;
@@ -677,7 +708,7 @@
             var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
             vertices.length = 0, sizes.length = 0;
             for (var particle, i = 0, ilen = particles.length; ilen > i; i++) particle = particles[i], 
-            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(particle.size);
+            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(particle.size < 8 ? particle.size : 8);
             if (vertices.length > this.vArray.length) throw new Error("vArray too small to hold vertices");
             if (this.vArray.set(vertices, 0), sizes.length > this.sArray.length) throw new Error("sArray too small to hold sizes");
             this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
@@ -687,23 +718,22 @@
             gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
         },
-        drawConstraints: function(ctx, constraints) {
-            var coords, constraint;
-            ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 1)", ctx.lineWidth = 1;
-            for (var i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
-            "linear" === constraint.category ? (coords = constraint.getCoords(), ctx.beginPath(), 
-            ctx.moveTo(coords.x1, coords.y1), ctx.lineTo(coords.x2, coords.y2), ctx.closePath(), 
-            ctx.stroke()) : "rigid" === constraint.category && (coords = constraint.centerMass, 
-            ctx.beginPath(), ctx.moveTo(coords.x - 3, coords.y - 3), ctx.lineTo(coords.x + 3, coords.y + 3), 
-            ctx.closePath(), ctx.stroke());
-            ctx.restore();
+        drawConstraints: function(constraints) {
+            for (var constraint, coords, gl = this.gl, vertices = [], i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
+            "linear" === constraint.category && (coords = constraint.getCoords(), vertices.push(coords.x1, coords.y1, 0), 
+            vertices.push(coords.x2, coords.y2, 0));
+            gl.useProgram(this.constraintShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.constraintShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.constraintShader.attributes.position), gl.lineWidth(1), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
         },
         drawEdges: function(edges) {
             for (var edge, gl = this.gl, vertices = [], i = 0, ilen = edges.length; ilen > i; i++) edge = edges[i].getCoords(), 
             vertices.push(edge.x1, edge.y1, 0), vertices.push(edge.x2, edge.y2, 0);
             gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
         },
         drawCounts: function(ctx, counts) {
             ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + counts.particles, 10, 20), 
