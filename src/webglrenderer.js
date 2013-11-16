@@ -20,10 +20,10 @@
 
       'vec2 clipSpace = zeroToTwo - 1.0;',
 
-      'vec2 test = vec2(100, 100);',
+      'vec2 test = vec2((position.x / 1280.0 - 0.5) * 2.0, (-position.y / 450.0 + 0.5) * 2.0);',
 
-      'gl_Position = vec4(clipSpace, 0, 1);',
-      'gl_PointSize = 128.0;',  // size * 2.0
+      'gl_Position = vec4(test, 0, 1);',
+      'gl_PointSize = size * 4.0;',  // size * 2.0
     '}'
   ].join('\n');
 
@@ -124,6 +124,8 @@
     this.width = el.width;
     this.height = el.height;
     this.gl = getGLContext(el);
+    this.vertices = [];
+    this.sizes = [];
 
     this.callback = this.callback.bind(this); // TODO: shim for Function.bind
 
@@ -163,8 +165,12 @@
 
       //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      var vertices = [];
-      var sizes = [];
+      var vertices = this.vertices;
+      var sizes = this.sizes;
+
+      vertices.length = 0;
+      sizes.length = 0;
+
       var particle;
 
       for (var i = 0, ilen = sim.particles.length; i < ilen; i++) {

@@ -615,12 +615,13 @@
     }
     function GLRenderer(el) {
         return this instanceof GLRenderer ? (this.el = el, this.width = el.width, this.height = el.height, 
-        this.gl = getGLContext(el), this.callback = this.callback.bind(this), this.gl.viewport(0, 0, this.width, this.height), 
-        console.log("width, height:", this.width, this.height), this.initShaders(), this.initBuffers(), 
-        this.particleTexture = createCircleTexture(this.gl), this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), 
-        this.gl.enable(this.gl.BLEND), void 0) : new GLRenderer(el);
+        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.callback = this.callback.bind(this), 
+        this.gl.viewport(0, 0, this.width, this.height), console.log("width, height:", this.width, this.height), 
+        this.initShaders(), this.initBuffers(), this.particleTexture = createCircleTexture(this.gl), 
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
+        void 0) : new GLRenderer(el);
     }
-    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec3 p = position;", "float s = size;", "vec2 zeroToOne = position.xy / viewport;", "zeroToOne.y = 1.0 - zeroToOne.y;", "vec2 zeroToTwo = zeroToOne * 2.0;", "vec2 clipSpace = zeroToTwo - 1.0;", "vec2 test = vec2(100, 100);", "gl_Position = vec4(clipSpace, 0, 1);", "gl_PointSize = 128.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), last = 0;
+    var PARTICLE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec3 p = position;", "float s = size;", "vec2 zeroToOne = position.xy / viewport;", "zeroToOne.y = 1.0 - zeroToOne.y;", "vec2 zeroToTwo = zeroToOne * 2.0;", "vec2 clipSpace = zeroToTwo - 1.0;", "vec2 test = vec2((position.x / 1280.0 - 0.5) * 2.0, (-position.y / 450.0 + 0.5) * 2.0);", "gl_Position = vec4(test, 0, 1);", "gl_PointSize = size * 4.0;", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main(void) {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), last = 0;
     GLRenderer.prototype = {
         initShaders: function() {
             var gl = this.gl;
@@ -636,7 +637,9 @@
             this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer();
         },
         callback: function(time, sim) {
-            for (var particle, gl = this.gl, vertices = [], sizes = [], i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
+            var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
+            vertices.length = 0, sizes.length = 0;
+            for (var particle, i = 0, ilen = sim.particles.length; ilen > i; i++) particle = sim.particles[i], 
             vertices.push(particle.position.x, particle.position.y, 0), sizes.push(1);
             gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
             gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
