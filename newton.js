@@ -1,49 +1,5 @@
 !function(Newton) {
     "use strict";
-    function Body(material) {
-        return this instanceof Body ? (this.particles = [], this.edges = [], this.constraints = [], 
-        this.material = material, this.simulator = void 0, this.layer = void 0, this.isFree = !1, 
-        void 0) : new Body(material);
-    }
-    Body.prototype.addTo = function(simulator, layer) {
-        if (this.simulator) throw new Error("Not implemented: reparenting a body");
-        simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
-        this.simulator = simulator, this.layer = layer;
-        for (var i = 0, ilen = this.particles.length; ilen > i; i++) this.particles[i].layer = layer;
-        for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].layer = layer;
-    }, Body.prototype.free = function() {
-        this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles);
-    }, Body.prototype.addParticle = function(particle) {
-        this.particles.push(particle), particle.layer = this.layer, this.simulator && (this.simulator.addParticles([ particle ]), 
-        this.isFree && this.simulator.addCollisionParticles([ particle ]));
-    }, Body.prototype.Particle = function() {
-        var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
-        return this.addParticle(particle), particle;
-    }, Body.prototype.addEdge = function(edge) {
-        this.edges.push(edge), edge.layer = this.layer, this.simulator && this.simulator.addEdges([ edge ]);
-    }, Body.prototype.Edge = function() {
-        var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
-        return this.addEdge(edge), edge;
-    }, Body.prototype.addConstraint = function(constraint) {
-        this.constraints.push(constraint), this.simulator && this.simulator.addConstraints([ constraint ]);
-    }, Body.prototype.DistanceConstraint = function() {
-        var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint, Array.prototype.slice.call(arguments));
-        return this.addConstraint(constraint), constraint;
-    }, Body.prototype.RigidConstraint = function() {
-        var constraint = Newton.RigidConstraint.apply(Newton.RigidConstraint, Array.prototype.slice.call(arguments));
-        return this.addConstraint(constraint), constraint;
-    }, Newton.Body = Body;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function Box(x, y, size) {
-        var body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
-        return body.DistanceConstraint(ul, ur), body.DistanceConstraint(ur, lr), body.DistanceConstraint(lr, ll), 
-        body.DistanceConstraint(ll, ul), body.DistanceConstraint(ul, lr), body.DistanceConstraint(ur, ll), 
-        body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul), body;
-    }
-    Newton.Box = Box;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
     function BoxConstraint(left, top, right, bottom, particles) {
         return this instanceof BoxConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
         this.particles = particles, void 0) : new BoxConstraint(left, top, right, bottom, particles);
@@ -77,6 +33,83 @@
             y2: this.p2.position.y
         };
     }, Newton.DistanceConstraint = DistanceConstraint;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function RigidConstraint(particles, iterations) {
+        return this instanceof RigidConstraint ? (this.particles = particles, this.deltas = this.getDeltas(), 
+        void 0) : new RigidConstraint(particles, iterations);
+    }
+    RigidConstraint.prototype.category = "", RigidConstraint.prototype.priority = 2, 
+    RigidConstraint.prototype.getCenterMass = function() {
+        for (var i = -1, len = this.particles.length, center = Newton.Vector(0, 0); ++i < len; ) center.add(this.particles[i].position);
+        return center.scale(1 / len), center;
+    }, RigidConstraint.prototype.getDeltas = function() {
+        for (var center = this.getCenterMass(), i = -1, len = this.particles.length, deltas = Array(len); ++i < len; ) deltas[i] = this.particles[i].position.clone().sub(center);
+        return deltas;
+    }, RigidConstraint.prototype.getAngleAbout = function(center) {
+        for (var angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) angleDelta += this.particles[i].position.clone().sub(center).getAngleFrom(this.deltas[i]);
+        return angleDelta / len;
+    }, RigidConstraint.prototype.resolve = function() {
+        for (var center = this.getCenterMass(), angleDelta = 0, cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), i = -1, len = this.particles.length; ++i < len; ) {
+            var q = this.deltas[i], correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
+            correction.add(center).sub(this.particles[i].position).scale(1), this.particles[i].position.add(correction);
+        }
+    }, Newton.RigidConstraint = RigidConstraint;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function mod(a, b) {
+        return (a % b + b) % b;
+    }
+    function WrapConstraint(left, top, right, bottom, particles) {
+        return this instanceof WrapConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
+        this.particles = particles, this.layer = void 0, void 0) : new WrapConstraint(left, top, right, bottom, particles);
+    }
+    WrapConstraint.prototype.category = "WrapConstraint", WrapConstraint.prototype.priority = 0, 
+    WrapConstraint.prototype.addTo = function(simulator, layer) {
+        simulator.addConstraints([ this ]), this.layer = layer;
+    }, WrapConstraint.prototype.resolve = function(time, allParticles) {
+        for (var particle, pos, particles = this.particles || allParticles, i = -1, len = particles.length, rect = this.rect; ++i < len; ) if (pos = particles[i].position, 
+        pos.x < rect.left || pos.x > rect.right || pos.y < rect.top || pos.y > rect.bottom) {
+            particle = particles[i];
+            var newX = mod(particle.position.x, this.rect.width) + this.rect.left, newY = mod(particle.position.y, this.rect.height) + this.rect.top;
+            particle.shiftTo(newX, newY);
+        }
+    }, Newton.WrapConstraint = WrapConstraint;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Body(material) {
+        return this instanceof Body ? (this.particles = [], this.edges = [], this.constraints = [], 
+        this.material = material, this.simulator = void 0, this.layer = void 0, this.isFree = !1, 
+        void 0) : new Body(material);
+    }
+    Body.prototype.addTo = function(simulator, layer) {
+        if (this.simulator) throw new Error("Not implemented: reparenting a body");
+        simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
+        this.simulator = simulator, this.layer = layer;
+        for (var i = 0, ilen = this.particles.length; ilen > i; i++) this.particles[i].layer = layer;
+        for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].layer = layer;
+    }, Body.prototype.free = function() {
+        this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles);
+    }, Body.prototype.addParticle = function(particle) {
+        this.particles.push(particle), particle.layer = this.layer, this.simulator && (this.simulator.addParticles([ particle ]), 
+        this.isFree && this.simulator.addCollisionParticles([ particle ]));
+    }, Body.prototype.Particle = function() {
+        var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
+        return this.addParticle(particle), particle;
+    }, Body.prototype.addEdge = function(edge) {
+        this.edges.push(edge), edge.layer = this.layer, this.simulator && this.simulator.addEdges([ edge ]);
+    }, Body.prototype.Edge = function() {
+        var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
+        return this.addEdge(edge), edge;
+    }, Body.prototype.addConstraint = function(constraint) {
+        this.constraints.push(constraint), this.simulator && this.simulator.addConstraints([ constraint ]);
+    }, Body.prototype.DistanceConstraint = function() {
+        var constraint = Newton.DistanceConstraint.apply(Newton.DistanceConstraint, Array.prototype.slice.call(arguments));
+        return this.addConstraint(constraint), constraint;
+    }, Body.prototype.RigidConstraint = function() {
+        var constraint = Newton.RigidConstraint.apply(Newton.RigidConstraint, Array.prototype.slice.call(arguments));
+        return this.addConstraint(constraint), constraint;
+    }, Newton.Body = Body;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Edge(p1, p2, material) {
@@ -135,19 +168,6 @@
     }, Newton.Edge = Edge;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
-    function Fabric(x1, y1, x2, y2, width, height) {
-        for (var particle, spacing = (x2 - x1) / width, body = Newton.Body(), w = 0; width > w; w++) for (var h = 0; height > h; h++) particle = body.Particle(x1 + w * spacing, y1 + h * spacing), 
-        0 === h && particle.pin();
-        for (var w = 0; width > w; w++) for (var h = 0; height > h; h++) h > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - 1], .2), 
-        w > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - height], .2), 
-        0 === w && h > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - 1]), 
-        h === height - 1 && w > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - height]), 
-        w === width - 1 && h > 0 && body.Edge(body.particles[w * height + h - 1], body.particles[w * height + h]);
-        return body;
-    }
-    Newton.Fabric = Fabric;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
     function timeoutFrame(simulator) {
         var currTime = new Date().getTime(), timeToCall = Math.max(0, 16 - (currTime - lastTime)), id = setTimeout(function() {
             simulator(currTime + timeToCall);
@@ -166,71 +186,6 @@
         window.requestAnimationFrame || (window.requestAnimationFrame = timeoutFrame, window.cancelAnimationFrame = cancelTimeoutFrame), 
         Newton.frame = window.requestAnimationFrame.bind(window), Newton.cancelFrame = window.cancelAnimationFrame.bind(window);
     } else Newton.frame = timeoutFrame, Newton.cancelFrame = cancelTimeoutFrame;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function Lattice(x, y, segmentLength, segments, pinLeft, pinRight) {
-        var body = Newton.Body(), top = body.Particle(x, y), bottom = body.Particle(x, y + segmentLength);
-        pinLeft && (top.pin(), bottom.pin());
-        for (var i = 1; segments >= i; i++) {
-            var nextTop = body.Particle(x + i * segmentLength, y), nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
-            body.DistanceConstraint(top, nextTop), body.DistanceConstraint(bottom, nextBottom), 
-            body.DistanceConstraint(top, nextBottom), body.DistanceConstraint(nextTop, bottom), 
-            body.DistanceConstraint(nextTop, nextBottom), body.Edge(top, nextTop), body.Edge(bottom, nextBottom), 
-            i === segments && body.Edge(nextTop, nextBottom), top = nextTop, bottom = nextBottom;
-        }
-        return pinRight && (top.pin(), bottom.pin()), body;
-    }
-    Newton.Lattice = Lattice;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function Layer() {
-        return this instanceof Layer ? (this.bodies = [], this.forces = [], this.watchedLayers = [ this ], 
-        this.wrapper = void 0, this.container = void 0, this.cachedParticles = [], this.cachedForces = [], 
-        this.cachedEdges = [], void 0) : new Layer();
-    }
-    Layer.prototype.respondTo = function(layers) {
-        return this.watchedLayers = layers || [], this;
-    }, Layer.prototype.addForce = function(force) {
-        return this.forces.push(force), this;
-    }, Layer.prototype.wrapIn = function(rect) {
-        return this.wrapper = rect, this;
-    }, Layer.prototype.containBy = function(rect) {
-        return this.container = rect, this;
-    }, Layer.prototype.addBody = function(body) {
-        return this.bodies.push(body), this;
-    }, Layer.prototype.collect = function() {
-        var i, ilen, j, jlen, particles = this.cachedParticles, forces = this.cachedForces, edges = this.cachedEdges, bodies = this.bodies, watched = this.watchedLayers;
-        for (particles.length = 0, forces.length = 0, edges.length = 0, i = 0, ilen = bodies.length; ilen > i; i++) particles.push.apply(particles, bodies[i].particles);
-        for (i = 0, ilen = this.watchedLayers.length; ilen > i; i++) for (forces.push.apply(forces, watched[i].forces), 
-        j = 0, jlen = watched[i].bodies.length; jlen > j; j++) edges.push.apply(edges, watched[i].bodies[j].edges);
-    }, Layer.prototype.integrate = function(time) {
-        for (var particle, particles = this.cachedParticles, forces = this.cachedForces, i = 0, ilen = particles.length; ilen > i; i++) {
-            particle = particles[i];
-            for (var j = 0, jlen = forces.length; jlen > j; j++) forces[j].applyTo(particle);
-            particle.integrate(time);
-        }
-    }, Layer.prototype.constrain = function() {
-        for (var particles = this.cachedParticles, i = 0, ilen = particles.length; ilen > i; i++) this.wrapper && particles[i].wrap(this.wrapper), 
-        this.container && particles[i].contain(this.container);
-    }, Layer.prototype.collide = function() {
-        for (var particles = this.cachedParticles, edges = this.cachedEdges, i = 0, ilen = particles.length; ilen > i; i++) particles[i].collide(edges);
-    }, Newton.Layer = Layer;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function LinearGravity(angle, strength, falloff) {
-        return this instanceof LinearGravity ? (this.angle = angle, this.strength = strength, 
-        this.vector = new Newton.Vector(0, strength).rotate(angle), this.simulator = void 0, 
-        this.layer = void 0, void 0) : new LinearGravity(angle, strength, falloff);
-    }
-    LinearGravity.prototype.addTo = function(simulator, layer) {
-        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
-    }, LinearGravity.prototype.setAngle = function(angle) {
-        this.angle = angle, this.vector.set(0, this.strength).rotate(this.angle);
-    }, LinearGravity.prototype.setStrength = function(strength) {
-        this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
-    }, LinearGravity.prototype.applyTo = function(particle) {
-        particle.accelerateVector(this.vector);
-    }, Newton.LinearGravity = LinearGravity;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Material(options) {
@@ -308,187 +263,6 @@
         this.position.copy(bouncePoint), this.setVelocity(reflectedVelocity.x, reflectedVelocity.y), 
         this.lastValidPosition = bouncePoint, this.colliding = !0;
     }, Newton.Particle = Particle;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function rgbToHex(r, g, b) {
-        return (1 << 24) + (r << 16) + (g << 8) + b;
-    }
-    function PixiRenderer(el, width, height) {
-        return this instanceof PixiRenderer ? (this.stage = new PIXI.Stage(0, !0), this.stage.setInteractive(!0), 
-        this.width = width, this.height = height, this.renderer = PIXI.autoDetectRenderer(this.width, this.height, null, !1, !0), 
-        this.renderer.view.style.display = "block", el.appendChild(this.renderer.view), 
-        this.infoText = new PIXI.Text("FPS: ??", {
-            fill: "#ffffff",
-            font: "10pt Helvetica"
-        }), this.stage.addChild(this.infoText), this.graphics = new PIXI.Graphics(), this.stage.addChild(this.graphics), 
-        this.callback = this.callback.bind(this), void 0) : new PixiRenderer(el, width, height);
-    }
-    PixiRenderer.prototype = {
-        callback: function(time, sim) {
-            var particles = 0, edges = 0;
-            this.graphics.clear();
-            for (var i = 0, ilen = sim.layers.length; ilen > i; i++) {
-                for (var j = 0, jlen = sim.layers[i].bodies.length; jlen > j; j++) particles += this.drawParticles(sim.layers[i].bodies[j].particles), 
-                edges += this.drawEdges(sim.layers[i].bodies[j].edges);
-                this.drawForces(sim.layers[i].forces);
-            }
-            this.infoText.setText("FPS: " + sim.fps + "\nparticles: " + particles + "\nedges: " + edges), 
-            this.renderer.render(this.stage);
-        },
-        drawForces: function(forces) {
-            this.graphics.lineStyle(2, 16777215, .3);
-            for (var i = 0, ilen = forces.length; ilen > i; i++) {
-                var force = forces[i];
-                force instanceof Newton.RadialGravity && (this.graphics.beginFill(16777215, .2), 
-                this.graphics.drawCircle(force.x, force.y, .5 * force.strength * force.strength), 
-                this.graphics.endFill());
-            }
-        },
-        drawParticles: function(particles) {
-            for (var particle, pos, last, mass, brightness, j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
-            pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
-            brightness = ~~(128 * ((mass - 1) / 5)), particle.colliding ? this.graphics.lineStyle(mass, rgbToHex(255, 255, 100), 1) : this.graphics.lineStyle(mass, rgbToHex(255, 28 + brightness, 108 + brightness), 1), 
-            this.graphics.moveTo(last.x - 1, last.y), this.graphics.lineTo(pos.x + 1, pos.y);
-            return particles.length;
-        },
-        drawEdges: function(edges) {
-            this.graphics.lineStyle(1, 16777215, .5);
-            for (var edge, i = edges.length; i--; ) edge = edges[i].getCoords(), this.graphics.moveTo(edge.x1, edge.y1), 
-            this.graphics.lineTo(edge.x2, edge.y2);
-            return edges.length;
-        }
-    }, Newton.PixiRenderer = PixiRenderer;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function RadialGravity(x, y, strength, falloff) {
-        return this instanceof RadialGravity ? (this.x = x, this.y = y, this.strength = strength, 
-        this.simulator = void 0, this.layer = void 0, void 0) : new RadialGravity(x, y, strength, falloff);
-    }
-    RadialGravity.prototype.addTo = function(simulator, layer) {
-        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
-    }, RadialGravity.prototype.setLocation = function(x, y) {
-        this.x = x, this.y = y;
-    }, RadialGravity.prototype.setStrength = function(strength) {
-        this.strength = strength;
-    }, RadialGravity.prototype.applyTo = function(particle) {
-        particle.attractSquare(this.x, this.y, this.strength, 20);
-    }, Newton.RadialGravity = RadialGravity;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function Rectangle(left, top, right, bottom) {
-        return this instanceof Rectangle ? (this.set.apply(this, arguments), void 0) : new Rectangle(left, top, right, bottom);
-    }
-    Rectangle.fromVectors = function(v1, v2) {
-        return new Rectangle(v1.x, v1.y, v2.x, v2.y);
-    }, Rectangle.prototype = {
-        set: function(left, top, right, bottom) {
-            return this.left = Math.min(left, right), this.top = Math.min(top, bottom), this.right = Math.max(right, left), 
-            this.bottom = Math.max(bottom, top), this.width = this.right - this.left, this.height = this.bottom - this.top, 
-            this;
-        },
-        contains: function(x, y) {
-            return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
-        },
-        overlaps: function(rect) {
-            return !(rect.left > this.right || rect.right < this.left || rect.top > this.bottom || rect.bottom < this.top);
-        },
-        expand: function(amount) {
-            return this.left -= amount, this.right += amount, this.top -= amount, this.bottom += amount, 
-            this;
-        }
-    }, Newton.Rectangle = Rectangle;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function Renderer(el) {
-        return this instanceof Renderer ? (this.ctx = el.getContext("2d"), this.width = el.width, 
-        this.height = el.height, this.callback = this.callback.bind(this), void 0) : new Renderer(el);
-    }
-    Renderer.prototype = {
-        callback: function(time, sim) {
-            var ctx = this.ctx;
-            this.clear(ctx, time), this.drawConstraints(ctx, sim.constraints), this.drawEdges(ctx, sim.edges), 
-            this.drawParticles(ctx, sim.particles), this.drawForces(ctx, sim.forces), this.drawCounts(ctx, {
-                particles: sim.particles.length,
-                edges: sim.edges.length,
-                forces: sim.forces.length,
-                constraints: sim.constraints.length
-            }), this.drawFPS(ctx, sim);
-        },
-        clear: function(ctx) {
-            ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
-            ctx.restore();
-        },
-        drawForces: function(ctx, forces) {
-            ctx.save(), ctx.lineWidth = 2, ctx.strokeStyle = "rgba(255, 255, 255, 0.25)", ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-            for (var i = 0, ilen = forces.length; ilen > i; i++) {
-                var force = forces[i];
-                force instanceof Newton.RadialGravity && (ctx.beginPath(), ctx.arc(force.x, force.y, .5 * force.strength * force.strength, 0, 2 * Math.PI, !1), 
-                ctx.fill());
-            }
-            ctx.restore();
-        },
-        drawParticles: function(ctx, particles) {
-            var particle, pos, last, mass;
-            ctx.save(), ctx.lineCap = "round", ctx.lineJoin = "round";
-            for (var j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
-            pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
-            ctx.beginPath(), particle.pinned ? (ctx.strokeStyle = "rgba(255, 255, 255, 1)", 
-            ctx.lineWidth = 1, ctx.moveTo(last.x - 3, last.y - 3), ctx.lineTo(last.x + 3, last.y + 3), 
-            ctx.moveTo(last.x + 3, last.y - 3), ctx.lineTo(last.x - 3, last.y + 3)) : (ctx.lineWidth = ~~(mass / 3) + 2, 
-            ctx.strokeStyle = particle.colliding ? "rgba(255, 255, 100, 1)" : "rgba(255, 28, 108, 1)", 
-            ctx.moveTo(last.x, last.y), ctx.lineTo(pos.x + 1, pos.y)), ctx.stroke();
-            ctx.restore();
-        },
-        drawConstraints: function(ctx, constraints) {
-            var coords, constraint;
-            ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 1)", ctx.lineWidth = 1;
-            for (var i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
-            "linear" === constraint.category ? (coords = constraint.getCoords(), ctx.beginPath(), 
-            ctx.moveTo(coords.x1, coords.y1), ctx.lineTo(coords.x2, coords.y2), ctx.closePath(), 
-            ctx.stroke()) : "rigid" === constraint.category && (coords = constraint.centerMass, 
-            ctx.beginPath(), ctx.moveTo(coords.x - 3, coords.y - 3), ctx.lineTo(coords.x + 3, coords.y + 3), 
-            ctx.closePath(), ctx.stroke());
-            ctx.restore();
-        },
-        drawEdges: function(ctx, edges) {
-            ctx.save(), ctx.strokeStyle = "rgba(255, 255, 255, 0.4)", ctx.lineWidth = 1;
-            for (var edge, i = edges.length; i--; ) edge = edges[i].getCoords(), ctx.beginPath(), 
-            ctx.moveTo(edge.x1, edge.y1), ctx.lineTo(edge.x2, edge.y2), ctx.closePath(), ctx.stroke();
-            return ctx.restore(), edges.length;
-        },
-        drawCounts: function(ctx, counts) {
-            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + counts.particles, 10, 20), 
-            ctx.fillText("Edges: " + counts.edges, 10, 40), ctx.fillText("Forces: " + counts.forces, 10, 60), 
-            ctx.fillText("Constraints: " + counts.constraints, 10, 80), ctx.restore();
-        },
-        drawFPS: function(ctx, sim) {
-            var text = "FPS: " + sim.fps;
-            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText(text, 10, 120), 
-            ctx.restore();
-        }
-    }, Newton.Renderer = Renderer;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function RigidConstraint(particles, iterations) {
-        return this instanceof RigidConstraint ? (this.particles = particles, this.deltas = this.getDeltas(), 
-        void 0) : new RigidConstraint(particles, iterations);
-    }
-    RigidConstraint.prototype.category = "", RigidConstraint.prototype.priority = 2, 
-    RigidConstraint.prototype.getCenterMass = function() {
-        for (var i = -1, len = this.particles.length, center = Newton.Vector(0, 0); ++i < len; ) center.add(this.particles[i].position);
-        return center.scale(1 / len), center;
-    }, RigidConstraint.prototype.getDeltas = function() {
-        for (var center = this.getCenterMass(), i = -1, len = this.particles.length, deltas = Array(len); ++i < len; ) deltas[i] = this.particles[i].position.clone().sub(center);
-        return deltas;
-    }, RigidConstraint.prototype.getAngleAbout = function(center) {
-        for (var angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) angleDelta += this.particles[i].position.clone().sub(center).getAngleFrom(this.deltas[i]);
-        return angleDelta / len;
-    }, RigidConstraint.prototype.resolve = function() {
-        for (var center = this.getCenterMass(), angleDelta = 0, cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), i = -1, len = this.particles.length; ++i < len; ) {
-            var q = this.deltas[i], correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
-            correction.add(center).sub(this.particles[i].position).scale(1), this.particles[i].position.add(correction);
-        }
-    }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function noop() {}
@@ -577,6 +351,43 @@
     }, Newton.Simulator = Simulator;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function Box(x, y, size) {
+        var body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
+        return body.DistanceConstraint(ul, ur), body.DistanceConstraint(ur, lr), body.DistanceConstraint(lr, ll), 
+        body.DistanceConstraint(ll, ul), body.DistanceConstraint(ul, lr), body.DistanceConstraint(ur, ll), 
+        body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul), body;
+    }
+    Newton.Box = Box;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Fabric(x1, y1, x2, y2, width, height) {
+        for (var particle, spacing = (x2 - x1) / width, body = Newton.Body(), w = 0; width > w; w++) for (var h = 0; height > h; h++) particle = body.Particle(x1 + w * spacing, y1 + h * spacing), 
+        0 === h && particle.pin();
+        for (var w = 0; width > w; w++) for (var h = 0; height > h; h++) h > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - 1], .2), 
+        w > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - height], .2), 
+        0 === w && h > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - 1]), 
+        h === height - 1 && w > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - height]), 
+        w === width - 1 && h > 0 && body.Edge(body.particles[w * height + h - 1], body.particles[w * height + h]);
+        return body;
+    }
+    Newton.Fabric = Fabric;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Lattice(x, y, segmentLength, segments, pinLeft, pinRight) {
+        var body = Newton.Body(), top = body.Particle(x, y), bottom = body.Particle(x, y + segmentLength);
+        pinLeft && (top.pin(), bottom.pin());
+        for (var i = 1; segments >= i; i++) {
+            var nextTop = body.Particle(x + i * segmentLength, y), nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
+            body.DistanceConstraint(top, nextTop), body.DistanceConstraint(bottom, nextBottom), 
+            body.DistanceConstraint(top, nextBottom), body.DistanceConstraint(nextTop, bottom), 
+            body.DistanceConstraint(nextTop, nextBottom), body.Edge(top, nextTop), body.Edge(bottom, nextBottom), 
+            i === segments && body.Edge(nextTop, nextBottom), top = nextTop, bottom = nextBottom;
+        }
+        return pinRight && (top.pin(), bottom.pin()), body;
+    }
+    Newton.Lattice = Lattice;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
     function Squishy(ox, oy, r, points) {
         for (var current, last, spacing = 2 * Math.PI / points, body = Newton.Body(), i = 0; points > i; i++) {
             var x = ox + r * Math.cos(i * spacing), y = oy + r * Math.sin(i * spacing);
@@ -587,6 +398,61 @@
         return body;
     }
     Newton.Squishy = Squishy;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function LinearGravity(angle, strength, falloff) {
+        return this instanceof LinearGravity ? (this.angle = angle, this.strength = strength, 
+        this.vector = new Newton.Vector(0, strength).rotate(angle), this.simulator = void 0, 
+        this.layer = void 0, void 0) : new LinearGravity(angle, strength, falloff);
+    }
+    LinearGravity.prototype.addTo = function(simulator, layer) {
+        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
+    }, LinearGravity.prototype.setAngle = function(angle) {
+        this.angle = angle, this.vector.set(0, this.strength).rotate(this.angle);
+    }, LinearGravity.prototype.setStrength = function(strength) {
+        this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
+    }, LinearGravity.prototype.applyTo = function(particle) {
+        particle.accelerateVector(this.vector);
+    }, Newton.LinearGravity = LinearGravity;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function RadialGravity(x, y, strength, falloff) {
+        return this instanceof RadialGravity ? (this.x = x, this.y = y, this.strength = strength, 
+        this.simulator = void 0, this.layer = void 0, void 0) : new RadialGravity(x, y, strength, falloff);
+    }
+    RadialGravity.prototype.addTo = function(simulator, layer) {
+        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
+    }, RadialGravity.prototype.setLocation = function(x, y) {
+        this.x = x, this.y = y;
+    }, RadialGravity.prototype.setStrength = function(strength) {
+        this.strength = strength;
+    }, RadialGravity.prototype.applyTo = function(particle) {
+        particle.attractSquare(this.x, this.y, this.strength, 20);
+    }, Newton.RadialGravity = RadialGravity;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Rectangle(left, top, right, bottom) {
+        return this instanceof Rectangle ? (this.set.apply(this, arguments), void 0) : new Rectangle(left, top, right, bottom);
+    }
+    Rectangle.fromVectors = function(v1, v2) {
+        return new Rectangle(v1.x, v1.y, v2.x, v2.y);
+    }, Rectangle.prototype = {
+        set: function(left, top, right, bottom) {
+            return this.left = Math.min(left, right), this.top = Math.min(top, bottom), this.right = Math.max(right, left), 
+            this.bottom = Math.max(bottom, top), this.width = this.right - this.left, this.height = this.bottom - this.top, 
+            this;
+        },
+        contains: function(x, y) {
+            return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
+        },
+        overlaps: function(rect) {
+            return !(rect.left > this.right || rect.right < this.left || rect.top > this.bottom || rect.bottom < this.top);
+        },
+        expand: function(amount) {
+            return this.left -= amount, this.right += amount, this.top -= amount, this.bottom += amount, 
+            this;
+        }
+    }, Newton.Rectangle = Rectangle;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Vector(x, y) {
@@ -641,6 +507,126 @@
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
     }, Newton.Vector = Vector;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function rgbToHex(r, g, b) {
+        return (1 << 24) + (r << 16) + (g << 8) + b;
+    }
+    function PixiRenderer(el, width, height) {
+        return this instanceof PixiRenderer ? (this.stage = new PIXI.Stage(0, !0), this.stage.setInteractive(!0), 
+        this.width = width, this.height = height, this.renderer = PIXI.autoDetectRenderer(this.width, this.height, null, !1, !0), 
+        this.renderer.view.style.display = "block", el.appendChild(this.renderer.view), 
+        this.infoText = new PIXI.Text("FPS: ??", {
+            fill: "#ffffff",
+            font: "10pt Helvetica"
+        }), this.stage.addChild(this.infoText), this.graphics = new PIXI.Graphics(), this.stage.addChild(this.graphics), 
+        this.callback = this.callback.bind(this), void 0) : new PixiRenderer(el, width, height);
+    }
+    PixiRenderer.prototype = {
+        callback: function(time, sim) {
+            var particles = 0, edges = 0;
+            this.graphics.clear();
+            for (var i = 0, ilen = sim.layers.length; ilen > i; i++) {
+                for (var j = 0, jlen = sim.layers[i].bodies.length; jlen > j; j++) particles += this.drawParticles(sim.layers[i].bodies[j].particles), 
+                edges += this.drawEdges(sim.layers[i].bodies[j].edges);
+                this.drawForces(sim.layers[i].forces);
+            }
+            this.infoText.setText("FPS: " + sim.fps + "\nparticles: " + particles + "\nedges: " + edges), 
+            this.renderer.render(this.stage);
+        },
+        drawForces: function(forces) {
+            this.graphics.lineStyle(2, 16777215, .3);
+            for (var i = 0, ilen = forces.length; ilen > i; i++) {
+                var force = forces[i];
+                force instanceof Newton.RadialGravity && (this.graphics.beginFill(16777215, .2), 
+                this.graphics.drawCircle(force.x, force.y, .5 * force.strength * force.strength), 
+                this.graphics.endFill());
+            }
+        },
+        drawParticles: function(particles) {
+            for (var particle, pos, last, mass, brightness, j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
+            pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
+            brightness = ~~(128 * ((mass - 1) / 5)), particle.colliding ? this.graphics.lineStyle(mass, rgbToHex(255, 255, 100), 1) : this.graphics.lineStyle(mass, rgbToHex(255, 28 + brightness, 108 + brightness), 1), 
+            this.graphics.moveTo(last.x - 1, last.y), this.graphics.lineTo(pos.x + 1, pos.y);
+            return particles.length;
+        },
+        drawEdges: function(edges) {
+            this.graphics.lineStyle(1, 16777215, .5);
+            for (var edge, i = edges.length; i--; ) edge = edges[i].getCoords(), this.graphics.moveTo(edge.x1, edge.y1), 
+            this.graphics.lineTo(edge.x2, edge.y2);
+            return edges.length;
+        }
+    }, Newton.PixiRenderer = PixiRenderer;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Renderer(el) {
+        return this instanceof Renderer ? (this.ctx = el.getContext("2d"), this.width = el.width, 
+        this.height = el.height, this.callback = this.callback.bind(this), void 0) : new Renderer(el);
+    }
+    Renderer.prototype = {
+        callback: function(time, sim) {
+            var ctx = this.ctx;
+            this.clear(ctx, time), this.drawConstraints(ctx, sim.constraints), this.drawEdges(ctx, sim.edges), 
+            this.drawParticles(ctx, sim.particles), this.drawForces(ctx, sim.forces), this.drawCounts(ctx, {
+                particles: sim.particles.length,
+                edges: sim.edges.length,
+                forces: sim.forces.length,
+                constraints: sim.constraints.length
+            }), this.drawFPS(ctx, sim);
+        },
+        clear: function(ctx) {
+            ctx.save(), ctx.fillStyle = "#000000", ctx.fillRect(0, 0, this.width, this.height), 
+            ctx.restore();
+        },
+        drawForces: function(ctx, forces) {
+            ctx.save(), ctx.lineWidth = 2, ctx.strokeStyle = "rgba(255, 255, 255, 0.25)", ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            for (var i = 0, ilen = forces.length; ilen > i; i++) {
+                var force = forces[i];
+                force instanceof Newton.RadialGravity && (ctx.beginPath(), ctx.arc(force.x, force.y, .5 * force.strength * force.strength, 0, 2 * Math.PI, !1), 
+                ctx.fill());
+            }
+            ctx.restore();
+        },
+        drawParticles: function(ctx, particles) {
+            var particle, pos, last, mass;
+            ctx.save(), ctx.lineCap = "round", ctx.lineJoin = "round";
+            for (var j = 0, jlen = particles.length; jlen > j; j++) particle = particles[j], 
+            pos = particle.position, last = particle.lastValidPosition, mass = particle.getMass(), 
+            ctx.beginPath(), particle.pinned ? (ctx.strokeStyle = "rgba(255, 255, 255, 1)", 
+            ctx.lineWidth = 1, ctx.moveTo(last.x - 3, last.y - 3), ctx.lineTo(last.x + 3, last.y + 3), 
+            ctx.moveTo(last.x + 3, last.y - 3), ctx.lineTo(last.x - 3, last.y + 3)) : (ctx.lineWidth = ~~(mass / 3) + 2, 
+            ctx.strokeStyle = particle.colliding ? "rgba(255, 255, 100, 1)" : "rgba(255, 28, 108, 1)", 
+            ctx.moveTo(last.x, last.y), ctx.lineTo(pos.x + 1, pos.y)), ctx.stroke();
+            ctx.restore();
+        },
+        drawConstraints: function(ctx, constraints) {
+            var coords, constraint;
+            ctx.save(), ctx.strokeStyle = "rgba(100, 100, 255, 1)", ctx.lineWidth = 1;
+            for (var i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
+            "linear" === constraint.category ? (coords = constraint.getCoords(), ctx.beginPath(), 
+            ctx.moveTo(coords.x1, coords.y1), ctx.lineTo(coords.x2, coords.y2), ctx.closePath(), 
+            ctx.stroke()) : "rigid" === constraint.category && (coords = constraint.centerMass, 
+            ctx.beginPath(), ctx.moveTo(coords.x - 3, coords.y - 3), ctx.lineTo(coords.x + 3, coords.y + 3), 
+            ctx.closePath(), ctx.stroke());
+            ctx.restore();
+        },
+        drawEdges: function(ctx, edges) {
+            ctx.save(), ctx.strokeStyle = "rgba(255, 255, 255, 0.4)", ctx.lineWidth = 1;
+            for (var edge, i = edges.length; i--; ) edge = edges[i].getCoords(), ctx.beginPath(), 
+            ctx.moveTo(edge.x1, edge.y1), ctx.lineTo(edge.x2, edge.y2), ctx.closePath(), ctx.stroke();
+            return ctx.restore(), edges.length;
+        },
+        drawCounts: function(ctx, counts) {
+            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + counts.particles, 10, 20), 
+            ctx.fillText("Edges: " + counts.edges, 10, 40), ctx.fillText("Forces: " + counts.forces, 10, 60), 
+            ctx.fillText("Constraints: " + counts.constraints, 10, 80), ctx.restore();
+        },
+        drawFPS: function(ctx, sim) {
+            var text = "FPS: " + sim.fps;
+            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText(text, 10, 120), 
+            ctx.restore();
+        }
+    }, Newton.Renderer = Renderer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function getGLContext(canvas) {
@@ -769,25 +755,5 @@
             ctx.restore();
         }
     }, Newton.GLRenderer = GLRenderer;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function mod(a, b) {
-        return (a % b + b) % b;
-    }
-    function WrapConstraint(left, top, right, bottom, particles) {
-        return this instanceof WrapConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
-        this.particles = particles, this.layer = void 0, void 0) : new WrapConstraint(left, top, right, bottom, particles);
-    }
-    WrapConstraint.prototype.category = "WrapConstraint", WrapConstraint.prototype.priority = 0, 
-    WrapConstraint.prototype.addTo = function(simulator, layer) {
-        simulator.addConstraints([ this ]), this.layer = layer;
-    }, WrapConstraint.prototype.resolve = function(time, allParticles) {
-        for (var particle, pos, particles = this.particles || allParticles, i = -1, len = particles.length, rect = this.rect; ++i < len; ) if (pos = particles[i].position, 
-        pos.x < rect.left || pos.x > rect.right || pos.y < rect.top || pos.y > rect.bottom) {
-            particle = particles[i];
-            var newX = mod(particle.position.x, this.rect.width) + this.rect.left, newY = mod(particle.position.y, this.rect.height) + this.rect.top;
-            particle.shiftTo(newX, newY);
-        }
-    }, Newton.WrapConstraint = WrapConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);
 //# sourceMappingURL=newton-map.js
