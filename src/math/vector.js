@@ -139,7 +139,12 @@
     var sin = this.y * v.x - this.x * v.y;
 
     return Math.atan2(sin, cos);
-  }
+  };
+
+  Vector.prototype.rotateAbout = function(pivot, angle) {
+    this.sub(pivot).rotate(angle).add(pivot);
+    return this;
+  };
 
   Newton.Vector = Vector;
 

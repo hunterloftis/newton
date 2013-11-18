@@ -90,6 +90,13 @@
     return constraint;
   };
 
+  Body.prototype.AngleConstraint = function() {
+    var constraint = Newton.AngleConstraint.apply(
+      Newton.AngleConstraint, Array.prototype.slice.call(arguments));
+    this.addConstraint(constraint);
+    return constraint;
+  }
+
   Newton.Body = Body;
 
 })(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
