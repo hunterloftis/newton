@@ -14,10 +14,10 @@
     };
   }
 
-  function Simulator(preSimulator, renderers, integrationFps, iterations) {
-    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderers, integrationFps, iterations);
+  function Simulator(callback, renderers, integrationFps, iterations) {
+    if (!(this instanceof Simulator)) return new Simulator(callback, renderers, integrationFps, iterations);
 
-    this.preSimulator = preSimulator || noop;
+    this.callback = callback || noop;
     this.renderers = renderers || noop;
     if (!Array.isArray(this.renderers)) this.renderers = [this.renderers];
     this.step = this._step.bind(this);
@@ -55,10 +55,39 @@
     this.running = false;
   };
 
+  Simulator.prototype._step = function() {
+    if (!this.running) return;
+
+    // slice of time
+    var time = Date.now();
+    var step = time - this.lastTime;
+    this.lastTime = time;
+    if (step > 100) step = 0;         // in case the page becomes inactive
+    this.accumulator += step;
+
+    while (this.accumulator >= this.simulationStep) {
+      this.simulate(this.simulationStep, time - this.startTime);
+      this.accumulator -= this.simulationStep;
+    }
+
+    for (var i = 0; i < this.renderers.length; i++) {
+      this.renderers[i](step, this);
+    }
+
+    this.frames++;
+    if (time >= this.countTime) {
+      this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1000).toFixed(0);
+      this.frames = 0;
+      this.countTime = time + this.countInterval;
+    }
+
+    Newton.frame(this.step);
+  };
+
   Simulator.prototype.simulate = function(time, totalTime) {
     this.cull(this.particles);
     this.cull(this.constraints);
-    this.preSimulator(time, this, totalTime);
+    this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
     this.updateEdges();   // TODO: fix this hack, edges should be more dynamic than they are
@@ -218,35 +247,6 @@
     var newLayer = Newton.Layer();
     this.layers.push(newLayer);
     return newLayer;
-  };
-
-  Simulator.prototype._step = function() {
-    if (!this.running) return;
-
-    var time = Date.now();
-    var step = time - this.lastTime;
-    if (step > 100) step = 0;         // in case you leave / return
-
-    this.accumulator += step;
-
-    while (this.accumulator >= this.simulationStep) {
-      this.simulate(this.simulationStep, time - this.startTime);
-      this.accumulator -= this.simulationStep;
-    }
-
-    for (var i = 0; i < this.renderers.length; i++) {
-      this.renderers[i](step, this);
-    }
-
-    this.frames++;
-    if (time >= this.countTime) {
-      this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1000).toFixed(0);
-      this.frames = 0;
-      this.countTime = time + this.countInterval;
-    }
-
-    this.lastTime = time;
-    Newton.frame(this.step);
   };
 
   Newton.Simulator = Simulator;

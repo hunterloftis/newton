@@ -495,14 +495,14 @@
     function prioritySort(a, b) {
         return b.priority - a.priority;
     }
-    function Simulator(preSimulator, renderers, integrationFps, iterations) {
-        return this instanceof Simulator ? (this.preSimulator = preSimulator || noop, this.renderers = renderers || noop, 
+    function Simulator(callback, renderers, integrationFps, iterations) {
+        return this instanceof Simulator ? (this.callback = callback || noop, this.renderers = renderers || noop, 
         Array.isArray(this.renderers) || (this.renderers = [ this.renderers ]), this.step = this._step.bind(this), 
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
         this.iterations = iterations || 3, this.startTime = 0, this.layers = {}, this.particles = [], 
         this.edges = [], this.forces = [], this.constraints = [], this.collisionParticles = [], 
-        void 0) : new Simulator(preSimulator, renderers, integrationFps, iterations);
+        void 0) : new Simulator(callback, renderers, integrationFps, iterations);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
@@ -511,8 +511,17 @@
         Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
+    }, Simulator.prototype._step = function() {
+        if (this.running) {
+            var time = Date.now(), step = time - this.lastTime;
+            for (this.lastTime = time, step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep, time - this.startTime), 
+            this.accumulator -= this.simulationStep;
+            for (var i = 0; i < this.renderers.length; i++) this.renderers[i](step, this);
+            this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
+            this.frames = 0, this.countTime = time + this.countInterval), Newton.frame(this.step);
+        }
     }, Simulator.prototype.simulate = function(time, totalTime) {
-        this.cull(this.particles), this.cull(this.constraints), this.preSimulator(time, this, totalTime), 
+        this.cull(this.particles), this.cull(this.constraints), this.callback(time, this, totalTime), 
         this.integrate(time), this.constrain(time), this.updateEdges(), this.collide(time);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
@@ -565,16 +574,6 @@
     }, Simulator.prototype.Layer = function() {
         var newLayer = Newton.Layer();
         return this.layers.push(newLayer), newLayer;
-    }, Simulator.prototype._step = function() {
-        if (this.running) {
-            var time = Date.now(), step = time - this.lastTime;
-            for (step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep, time - this.startTime), 
-            this.accumulator -= this.simulationStep;
-            for (var i = 0; i < this.renderers.length; i++) this.renderers[i](step, this);
-            this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
-            this.frames = 0, this.countTime = time + this.countInterval), this.lastTime = time, 
-            Newton.frame(this.step);
-        }
     }, Newton.Simulator = Simulator;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
