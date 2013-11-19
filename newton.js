@@ -12,6 +12,7 @@
     }, AngleConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var diff = this.angle - this.getAngle();
+        diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
         diff *= -.25 * this.stiffness, this.p1.pinned || this.p1.position.rotateAbout(this.axis.position, diff), 
         this.p2.pinned || this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.pinned || (this.axis.position.rotateAbout(this.p1.position, diff), 
         this.axis.position.rotateAbout(this.p2.position, -diff));
@@ -333,7 +334,7 @@
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].compute();
     }, Simulator.prototype.collide = function() {
         for (var intersect, particle, edge, nearest, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], i = 0, ilen = particles.length; ilen > i; i++) {
-            particle = particles[i], linked = particle.player ? layers[particle.layer].linked : emptyLink, 
+            particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             intersect = void 0, nearest = void 0;
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
@@ -415,12 +416,13 @@
         body.Particle(ox, oy);
         for (var current, last, i = 1; points >= i; i++) {
             var x = ox + r * Math.cos(i * spacing + .5 * Math.PI), y = oy + r * Math.sin(i * spacing + .5 * Math.PI);
-            current = body.Particle(x, y), last && (body.Edge(last, current), body.DistanceConstraint(last, current)), 
+            current = body.Particle(x, y), last && (body.Edge(last, current), body.DistanceConstraint(last, current), 
+            i >= 3 && body.AngleConstraint(body.particles[i - 2], body.particles[i - 1], body.particles[i], .1)), 
             last = current;
         }
         return body.Edge(last, body.particles[1]), body.DistanceConstraint(last, body.particles[1]), 
-        body.DistanceConstraint(body.particles[0], body.particles[1], .05), body.DistanceConstraint(body.particles[0], body.particles[points], .05), 
-        body;
+        body.AngleConstraint(last, body.particles[1], body.particles[2], .1), body.DistanceConstraint(body.particles[0], body.particles[1], .05), 
+        body.DistanceConstraint(body.particles[0], body.particles[points], .05), body;
     }
     Newton.Squishy = Squishy;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {

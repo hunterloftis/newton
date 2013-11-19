@@ -156,7 +156,7 @@
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
-      linked = particle.player ? layers[particle.layer].linked : emptyLink;
+      linked = particle.layer ? layers[particle.layer].linked : emptyLink;
       intersect = undefined;
       nearest = undefined;
       for (var j = 0, jlen = edges.length; j < jlen; j++) {

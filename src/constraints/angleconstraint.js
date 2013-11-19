@@ -40,6 +40,9 @@
 
     var diff = this.angle - this.getAngle();
 
+    if (diff <= -Math.PI) diff += 2*Math.PI;
+    else if (diff >= Math.PI) diff -= 2*Math.PI;
+
     diff *= -0.25 * this.stiffness;
 
     if (!this.p1.pinned)
