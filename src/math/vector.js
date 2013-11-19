@@ -141,6 +141,11 @@
     return Math.atan2(sin, cos);
   };
 
+  Vector.prototype.getAngle2 = function(vLeft, vRight) {
+    return vLeft.clone().sub(this).getAngleFrom(vRight.clone().sub(this));
+  };
+
+
   Vector.prototype.rotateAbout = function(pivot, angle) {
     this.sub(pivot).rotate(angle).add(pivot);
     return this;

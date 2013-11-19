@@ -21,12 +21,7 @@
   AngleConstraint.prototype.priority = 6;
 
   AngleConstraint.prototype.getAngle = function() {
-    var axis = this.axis.position;
-    var angle1 = this.p1.position.getAngleFrom(axis);
-    var angle2 = this.p2.position.getAngleFrom(axis);
-    var diff = (angle2 - angle1 + HALF_CIRCLE) % CIRCLE + HALF_CIRCLE;
-
-    return diff;
+    return this.axis.position.getAngle2(this.p1.position, this.p2.position);
   };
 
   AngleConstraint.prototype.resolve = function(time) {
@@ -35,11 +30,18 @@
       return;
     }
 
-    var currentAngle = this.getAngle();
-    var angleDelta = this.angle - currentAngle;
+    var diff = this.getAngle() - this.angle;
 
-    this.p1.position.rotateAbout(this.axis.position, angleDelta * 0.5);
-    this.p2.position.rotateAbout(this.axis.position, angleDelta * -0.5);
+    if (diff <= -Math.PI) diff += 2 * Math.PI;
+    else if (diff >= Math.PI) diff -= 2 * Math.PI;
+
+    diff *= 0.002;
+
+    this.p1.position.rotateAbout(this.axis.position, diff);
+    this.axis.position.rotateAbout(this.p1.position, -diff);
+
+    this.p2.position.rotateAbout(this.axis.position, -diff);
+    this.axis.position.rotateAbout(this.p2.position, diff);
   };
 
   Newton.AngleConstraint = AngleConstraint;

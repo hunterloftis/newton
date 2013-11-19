@@ -17,7 +17,7 @@
       if (last) {
         body.Edge(last, current);
         body.DistanceConstraint(last, current);
-        if (i > 2) {
+        if (i > 3) {
           body.AngleConstraint(body.particles[i - 1], body.particles[i - 2], body.particles[i]);
         }
       }
@@ -26,8 +26,8 @@
     body.Edge(last, body.particles[1]);
     body.DistanceConstraint(last, body.particles[1]);
 
-    body.DistanceConstraint(body.particles[0], body.particles[1], 0.1);
-    body.DistanceConstraint(body.particles[0], body.particles[points], 0.1);
+    body.DistanceConstraint(body.particles[0], body.particles[1], 0.05);
+    body.DistanceConstraint(body.particles[0], body.particles[points], 0.05);
 
     return body;
   }

@@ -5,15 +5,15 @@
         this.angle = "undefined" == typeof angle ? this.getAngle() : angle, this.stiffness = stiffness || 1, 
         this.isDestroyed = !1, void 0) : new AngleConstraint(axis, p1, p2, stiffness, angle);
     }
-    var HALF_CIRCLE = Math.PI, CIRCLE = 2 * Math.PI;
-    AngleConstraint.prototype.category = "angular", AngleConstraint.prototype.priority = 6, 
+    Math.PI, 2 * Math.PI, AngleConstraint.prototype.category = "angular", AngleConstraint.prototype.priority = 6, 
     AngleConstraint.prototype.getAngle = function() {
-        var axis = this.axis.position, angle1 = this.p1.position.getAngleFrom(axis), angle2 = this.p2.position.getAngleFrom(axis), diff = (angle2 - angle1 + HALF_CIRCLE) % CIRCLE + HALF_CIRCLE;
-        return diff;
+        return this.axis.position.getAngle2(this.p1.position, this.p2.position);
     }, AngleConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
-        var currentAngle = this.getAngle(), angleDelta = this.angle - currentAngle;
-        this.p1.position.rotateAbout(this.axis.position, .5 * angleDelta), this.p2.position.rotateAbout(this.axis.position, angleDelta * -.5);
+        var diff = this.getAngle() - this.angle;
+        diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
+        diff *= .002, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
+        this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.position.rotateAbout(this.p2.position, diff);
     }, Newton.AngleConstraint = AngleConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -414,11 +414,11 @@
         for (var current, last, i = 1; points >= i; i++) {
             var x = ox + r * Math.cos(i * spacing + .5 * Math.PI), y = oy + r * Math.sin(i * spacing + .5 * Math.PI);
             current = body.Particle(x, y), last && (body.Edge(last, current), body.DistanceConstraint(last, current), 
-            i > 2 && body.AngleConstraint(body.particles[i - 1], body.particles[i - 2], body.particles[i])), 
+            i > 3 && body.AngleConstraint(body.particles[i - 1], body.particles[i - 2], body.particles[i])), 
             last = current;
         }
         return body.Edge(last, body.particles[1]), body.DistanceConstraint(last, body.particles[1]), 
-        body.DistanceConstraint(body.particles[0], body.particles[1], .1), body.DistanceConstraint(body.particles[0], body.particles[points], .1), 
+        body.DistanceConstraint(body.particles[0], body.particles[1], .05), body.DistanceConstraint(body.particles[0], body.particles[points], .05), 
         body;
     }
     Newton.Squishy = Squishy;
@@ -530,6 +530,8 @@
     }, Vector.prototype.getAngleFrom = function(v) {
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
+    }, Vector.prototype.getAngle2 = function(vLeft, vRight) {
+        return vLeft.clone().sub(this).getAngleFrom(vRight.clone().sub(this));
     }, Vector.prototype.rotateAbout = function(pivot, angle) {
         return this.sub(pivot).rotate(angle).add(pivot), this;
     }, Newton.Vector = Vector;
