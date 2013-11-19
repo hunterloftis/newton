@@ -526,7 +526,7 @@
         var x = this.x, y = this.y, sin = Math.sin(angle), cos = Math.cos(angle);
         return this.x = x * cos - y * sin, this.y = x * sin + y * cos, this;
     }, Vector.prototype.rotateAbout = function(pivot, angle) {
-        return this.sub(pivot).rotateBy(angle).add(pivot), this;
+        return this.sub(pivot).reverse().rotateBy(angle).add(pivot), this;
     }, Vector.prototype.getDot = function(v) {
         return this.x * v.x + this.y * v.y;
     }, Vector.prototype.getCross = function(v) {

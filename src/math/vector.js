@@ -148,7 +148,7 @@
   };
 
   Vector.prototype.rotateAbout = function(pivot, angle) {
-    this.sub(pivot).rotateBy(angle).add(pivot);
+    this.sub(pivot).reverse().rotateBy(angle).add(pivot);
     return this;
   };
 

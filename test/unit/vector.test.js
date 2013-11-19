@@ -310,9 +310,10 @@ describe('Vector', function() {
 
     it('should be able to rotate about an offset pivot', function() {
       var pivot = Newton.Vector(5, -5);
-      var v = Newton.Vector(0, 0).rotateAbout(pivot, Math.PI);
+      var v = Newton.Vector(0, 0).rotateAbout(pivot, Math.PI * 0.5);
       assert.closeTo(v.x, 10, 0.0001);
-      assert.closeTo(v.y, -10, 0.0001);
+      assert.closeTo(v.y, 0, 0.0001);
     });
+
   });
 });
