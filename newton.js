@@ -72,13 +72,11 @@
     }), RigidConstraint.prototype.resolve = function() {
         for (var center = this.getCenterMass(), angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) {
             var currentDelta = this.particles[i].position.clone().sub(center), targetDelta = this.deltas[i], diff = targetDelta.getAngleTo(currentDelta);
-            diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
             angleDelta += diff;
         }
-        for (angleDelta /= len, angleDelta <= -Math.PI ? angleDelta += 2 * Math.PI : angleDelta >= Math.PI && (angleDelta -= 2 * Math.PI), 
-        i = -1; ++i < len; ) {
+        for (angleDelta /= len, i = -1; ++i < len; ) {
             var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center), diff = goal.sub(this.particles[i].position);
-            this.particles[i].pinned || this.particles[i].position.add(diff.scale(1));
+            this.particles[i].pinned || this.particles[i].position.add(diff.scale(.001));
         }
     }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {

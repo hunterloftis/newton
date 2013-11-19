@@ -74,16 +74,16 @@
       // console.log('currentDelta.getAngleTo:', currentDelta.getAngleTo(targetDelta));
 
       var diff = targetDelta.getAngleTo(currentDelta);
-      if (diff <= -Math.PI) diff += 2*Math.PI;
-      else if (diff >= Math.PI) diff -= 2*Math.PI;
+      // if (diff <= -Math.PI) diff += 2*Math.PI;
+      // else if (diff >= Math.PI) diff -= 2*Math.PI;
 
       angleDelta += diff;
     }
 
     angleDelta /= len;
 
-    if (angleDelta <= -Math.PI) angleDelta += 2*Math.PI;
-    else if (angleDelta >= Math.PI) angleDelta -= 2*Math.PI;
+    // if (angleDelta <= -Math.PI) angleDelta += 2*Math.PI;
+    // else if (angleDelta >= Math.PI) angleDelta -= 2*Math.PI;
 
     // if (angleDelta !== 0) console.log('angleDelta:', angleDelta);
 
@@ -97,7 +97,7 @@
 
       var diff = goal.sub(this.particles[i].position);
 
-      if (!this.particles[i].pinned) this.particles[i].position.add(diff.scale(1));
+      if (!this.particles[i].pinned) this.particles[i].position.add(diff.scale(0.001));
     }
   };
 
