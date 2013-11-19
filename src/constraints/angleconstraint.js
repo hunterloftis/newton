@@ -21,7 +21,7 @@
   AngleConstraint.prototype.priority = 6;
 
   AngleConstraint.prototype.getAngle = function() {
-    return this.axis.position.getAngle2(this.p1.position, this.p2.position);
+    return this.axis.position.getAngleBetween(this.p1.position, this.p2.position);
   };
 
   AngleConstraint.prototype.resolve = function(time) {

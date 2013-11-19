@@ -7,7 +7,7 @@
     }
     Math.PI, 2 * Math.PI, AngleConstraint.prototype.category = "angular", AngleConstraint.prototype.priority = 6, 
     AngleConstraint.prototype.getAngle = function() {
-        return this.axis.position.getAngle2(this.p1.position, this.p2.position);
+        return this.axis.position.getAngleBetween(this.p1.position, this.p2.position);
     }, AngleConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var diff = this.getAngle() - this.angle;
@@ -183,7 +183,7 @@
             wall: this
         };
     }, Edge.prototype.getReflection = function(velocity, restitution) {
-        var dir = this.normal.clone(), friction = this.material.friction, velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution), velT = velocity.clone().sub(velN).multScalar(1 - friction), reflectedVel = velT.sub(velN);
+        var dir = this.normal.clone(), friction = this.material.friction, velN = dir.scale(velocity.getDot(dir)).scale(restitution), velT = velocity.clone().sub(velN).scale(1 - friction), reflectedVel = velT.sub(velN);
         return reflectedVel;
     }, Newton.Edge = Edge;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -229,7 +229,7 @@
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
         if (!this.pinned) {
             this.velocity.copy(this.position).sub(this.lastPosition);
-            var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
+            var drag = Math.min(1, this.velocity.getLength2() / (this.material.maxVelocitySquared + this.randomDrag));
             this.velocity.scale(1 - drag), this.acceleration.scale(1 - drag).scale(time * time), 
             this.lastPosition.copy(this.position), this.position.add(this.velocity).add(this.acceleration), 
             this.acceleration.zero(), this.lastValidPosition.copy(this.lastPosition), this.colliding = !1;
@@ -426,15 +426,15 @@
     "use strict";
     function LinearGravity(angle, strength, falloff) {
         return this instanceof LinearGravity ? (this.angle = angle, this.strength = strength, 
-        this.vector = new Newton.Vector(0, strength).rotate(angle), this.simulator = void 0, 
+        this.vector = new Newton.Vector(0, strength).rotateBy(angle), this.simulator = void 0, 
         this.layer = void 0, void 0) : new LinearGravity(angle, strength, falloff);
     }
     LinearGravity.prototype.addTo = function(simulator, layer) {
         simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
     }, LinearGravity.prototype.setAngle = function(angle) {
-        this.angle = angle, this.vector.set(0, this.strength).rotate(this.angle);
+        this.angle = angle, this.vector.set(0, this.strength).rotateBy(this.angle);
     }, LinearGravity.prototype.setStrength = function(strength) {
-        this.strength = strength, this.vector.set(0, this.strength).rotate(this.angle);
+        this.strength = strength, this.vector.set(0, this.strength).rotateBy(this.angle);
     }, LinearGravity.prototype.applyTo = function(particle) {
         particle.accelerateVector(this.vector);
     }, Newton.LinearGravity = LinearGravity;

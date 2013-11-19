@@ -112,8 +112,8 @@
   Edge.prototype.getReflection = function(velocity, restitution) {
     var dir = this.normal.clone();
     var friction = this.material.friction;
-    var velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution);
-    var velT = velocity.clone().sub(velN).multScalar(1 - friction);
+    var velN = dir.scale(velocity.getDot(dir)).scale(restitution);
+    var velT = velocity.clone().sub(velN).scale(1 - friction);
     var reflectedVel = velT.sub(velN);
     return reflectedVel;
   };
