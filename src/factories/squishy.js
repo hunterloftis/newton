@@ -4,31 +4,18 @@
 
   function Squishy(ox, oy, r, points) {
     var spacing = (Math.PI * 2) / points;
-
     var body = Newton.Body();
-    var anchor = body.Particle(ox, oy);
 
-    var current, last;
-
-    for (var i = 1; i <= points; i++) {
-      var x = ox + r * Math.cos(i * spacing + Math.PI * 0.5);
-      var y = oy + r * Math.sin(i * spacing + Math.PI * 0.5);
-      current = body.Particle(x, y);
-      if (last) {
-        body.Edge(last, current);
-        body.DistanceConstraint(last, current);
-        if (i >= 3) {
-          body.AngleConstraint(body.particles[i - 2], body.particles[i - 1], body.particles[i], 0.1);
-        }
+    for (var i = 0; i < points; i++) {
+      var x = ox + r * Math.cos(i * spacing - Math.PI * 0.5);
+      var y = oy + r * Math.sin(i * spacing - Math.PI * 0.5);
+      body.Particle(x, y);
+      for (var j = 0; j < i; j++) {
+        body.DistanceConstraint(body.particles[i], body.particles[j], 0.002);
       }
-      last = current;
+      if (i > 0) body.Edge(body.particles[i - 1], body.particles[i]);
     }
-    body.Edge(last, body.particles[1]);
-    body.DistanceConstraint(last, body.particles[1]);
-    body.AngleConstraint(last, body.particles[1], body.particles[2], 0.1);
-
-    body.DistanceConstraint(body.particles[0], body.particles[1], 0.05);
-    body.DistanceConstraint(body.particles[0], body.particles[points], 0.05);
+    body.Edge(body.particles[points - 1], body.particles[0]);
 
     return body;
   }

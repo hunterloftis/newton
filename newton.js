@@ -412,17 +412,13 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Squishy(ox, oy, r, points) {
-        var spacing = 2 * Math.PI / points, body = Newton.Body();
-        body.Particle(ox, oy);
-        for (var current, last, i = 1; points >= i; i++) {
-            var x = ox + r * Math.cos(i * spacing + .5 * Math.PI), y = oy + r * Math.sin(i * spacing + .5 * Math.PI);
-            current = body.Particle(x, y), last && (body.Edge(last, current), body.DistanceConstraint(last, current), 
-            i >= 3 && body.AngleConstraint(body.particles[i - 2], body.particles[i - 1], body.particles[i], .1)), 
-            last = current;
+        for (var spacing = 2 * Math.PI / points, body = Newton.Body(), i = 0; points > i; i++) {
+            var x = ox + r * Math.cos(i * spacing - .5 * Math.PI), y = oy + r * Math.sin(i * spacing - .5 * Math.PI);
+            body.Particle(x, y);
+            for (var j = 0; i > j; j++) body.DistanceConstraint(body.particles[i], body.particles[j], .002);
+            i > 0 && body.Edge(body.particles[i - 1], body.particles[i]);
         }
-        return body.Edge(last, body.particles[1]), body.DistanceConstraint(last, body.particles[1]), 
-        body.AngleConstraint(last, body.particles[1], body.particles[2], .1), body.DistanceConstraint(body.particles[0], body.particles[1], .05), 
-        body.DistanceConstraint(body.particles[0], body.particles[points], .05), body;
+        return body.Edge(body.particles[points - 1], body.particles[0]), body;
     }
     Newton.Squishy = Squishy;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
