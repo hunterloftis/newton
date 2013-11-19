@@ -166,8 +166,8 @@
     return Math.sqrt(this.x * this.x + this.y * this.y);
   };
 
-  // Squared length
   Vector.prototype.getLength2 = function() {
+    // Squared length
     return this.x * this.x + this.y * this.y;
   };
 

@@ -201,4 +201,118 @@ describe('Vector', function() {
       assert.equal(v1, v);
     });
   });
+
+  describe('div()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.div(Newton.Vector(2, 8));
+
+    it('should divide components', function() {
+      assert.equal(v1.x, 0.5);
+      assert.equal(v1.y, 0.25);
+    });
+
+    it('should divide in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('reverse()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.reverse();
+
+    it('should reverse components', function() {
+      assert.equal(v1.x, -1);
+      assert.equal(v1.y, -2);
+    });
+
+    it('should reverse in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('unit()', function() {
+    var v = Newton.Vector(3, 4);
+    var v1 = v.unit();
+
+    it('should convert to a unit vector', function() {
+      assert.closeTo(v1.x, 0.6, 0.001);
+      assert.closeTo(v1.y, 0.8, 0.001);
+    });
+
+    it('should modify in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('turnRight()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.turnRight();
+
+    it('should turn right', function() {
+      assert.equal(v1.x, -2);
+      assert.equal(v1.y, 1);
+    });
+
+    it('should modify in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('turnLeft()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.turnLeft();
+
+    it('should turn left', function() {
+      assert.equal(v1.x, 2);
+      assert.equal(v1.y, -1);
+    });
+
+    it('should modify in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('rotateBy()', function() {
+
+    it('should return the same values with a zero rotation', function() {
+      var v = Newton.Vector(1, 2).rotateBy(0);
+      assert.equal(v.x, 1);
+      assert.equal(v.y, 2);
+    });
+
+    it('should be able to rotate counter-clockwise', function() {
+      var v = Newton.Vector(0, 10).rotateBy(Math.PI * 0.25);
+      assert.closeTo(v.x, -7.071067811865475, 0.0001);
+      assert.closeTo(v.y, 7.071067811865475, 0.0001);
+    });
+
+    it('should be able to rotate across the 0-boundary', function() {
+      var v = Newton.Vector(10, 1).rotateBy(-Math.PI * 0.25);
+      assert.closeTo(v.x, 7.778174593052023, 0.0001);
+      assert.closeTo(v.y, -6.363961030678927, 0.0001);
+    });
+
+    it('should modify in-place', function() {
+      var v1 = Newton.Vector(1, 2);
+      var v2 = v1.rotateBy(Math.PI);
+      assert.equal(v1, v2);
+    });
+  });
+
+  describe('rotateAbout()', function() {
+
+    it('should be able to rotate about the origin', function() {
+      var pivot = Newton.Vector(0, 0);
+      var v = Newton.Vector(10, 7).rotateAbout(pivot, Math.PI);
+      assert.closeTo(v.x, -10, 0.0001);
+      assert.closeTo(v.y, -7, 0.0001);
+    });
+
+    it('should be able to rotate about an offset pivot', function() {
+      var pivot = Newton.Vector(5, -5);
+      var v = Newton.Vector(0, 0).rotateAbout(pivot, Math.PI);
+      assert.closeTo(v.x, 10, 0.0001);
+      assert.closeTo(v.y, -10, 0.0001);
+    });
+  });
 });
