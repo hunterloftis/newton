@@ -403,7 +403,27 @@ describe('Vector', function() {
     });
   });
 
-  describe('getAngleFrom()', function() {
+  describe('getAngleTo()', function() {
 
+    it('should compute angles between two vectors (0,0 = axis)', function() {
+      var v1 = Newton.Vector(10, 0);
+      var v2 = Newton.Vector(10, -10);
+
+      assert.equal(v1.getAngleTo(Newton.Vector(10, -10)), Math.PI * 0.25,
+        '10, 0 should be 45 degrees to 10, -10');
+
+      assert.equal(v1.getAngleTo(Newton.Vector(0, -10)), Math.PI * 0.5,
+        '10, 0 should be 90 degrees to 0, -10');
+
+      assert.equal(v1.getAngleTo(Newton.Vector(10, 10)), Math.PI * -0.25,
+        '10, 0 should be -45 degrees to 10, 10');
+
+      // Weird that it has to be negative
+      assert.equal(v1.getAngleTo(Newton.Vector(-10, 0)), -Math.PI,
+        '10, 0 should be 180 degrees to -10, 0');
+
+      assert.equal(v2.getAngleTo(Newton.Vector(0, 10)), -Math.PI * 0.75,
+        '10, -10 should be -135 degrees to 0, 10');
+    });
   });
 });

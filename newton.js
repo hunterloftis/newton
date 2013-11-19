@@ -537,7 +537,7 @@
         return this.x * this.x + this.y * this.y;
     }, Vector.prototype.getAngle = function() {
         return Math.atan2(-this.y, this.x);
-    }, Vector.prototype.getAngleFrom = function(v) {
+    }, Vector.prototype.getAngleTo = function(v) {
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
     }, Vector.prototype.getAngleBetween = function(vLeft, vRight) {

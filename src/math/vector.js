@@ -175,7 +175,7 @@
     return Math.atan2(-this.y, this.x);
   };
 
-  Vector.prototype.getAngleFrom = function(v) {
+  Vector.prototype.getAngleTo = function(v) {
     // The nearest angle between two vectors
     // (origin of 0,0 for both)
     var cos = this.x * v.x + this.y * v.y;
