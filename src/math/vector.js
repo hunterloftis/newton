@@ -40,6 +40,14 @@
 
   Vector.scratch = new Vector();
 
+  // Static methods
+
+  Vector.getDistance = function(a, b) {
+    var dx = a.x - b.x;
+    var dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
   // New instances
 
   Vector.prototype.clone = function() {

@@ -2,6 +2,7 @@
 
   'use strict'
 
+  // TODO: implement check & correction with square of distance
   function DistanceConstraint(p1, p2, stiffness, distance) {
     if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2, stiffness, distance);
 
@@ -17,10 +18,7 @@
   DistanceConstraint.prototype.priority = 4;
 
   DistanceConstraint.prototype.getDistance = function() {
-    var pos1 = this.p1.position;
-    var pos2 = this.p2.position;
-    var diff = pos2.clone().sub(pos1);
-    return diff.getLength();
+    return Newton.Vector.getDistance(this.p1.position, this.p2.position);
   };
 
   DistanceConstraint.prototype.resolve = function(time) {

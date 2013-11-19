@@ -38,8 +38,7 @@
     }
     DistanceConstraint.prototype.category = "linear", DistanceConstraint.prototype.priority = 4, 
     DistanceConstraint.prototype.getDistance = function() {
-        var pos1 = this.p1.position, pos2 = this.p2.position, diff = pos2.clone().sub(pos1);
-        return diff.getLength();
+        return Newton.Vector.getDistance(this.p1.position, this.p2.position);
     }, DistanceConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var pos1 = this.p1.position, pos2 = this.p2.position, delta = pos2.clone().sub(pos1), length = delta.getLength(), invmass1 = 1 / this.p1.getMass(), invmass2 = 1 / this.p2.getMass(), factor = (length - this.distance) / (length * (invmass1 + invmass2)) * this.stiffness, correction1 = delta.clone().scale(factor * invmass1), correction2 = delta.clone().scale(-factor * invmass2);
@@ -489,7 +488,10 @@
         Vector._pool.push(this);
     }, Vector.prototype.pool = function() {
         return Vector.claim().copy(this);
-    }, Vector.scratch = new Vector(), Vector.prototype.clone = function() {
+    }, Vector.scratch = new Vector(), Vector.getDistance = function(a, b) {
+        var dx = a.x - b.x, dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }, Vector.prototype.clone = function() {
         return Newton.Vector(this.x, this.y);
     }, Vector.prototype.copy = function(v) {
         return this.x = v.x, this.y = v.y, this;
