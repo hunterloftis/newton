@@ -172,7 +172,7 @@
   };
 
   Vector.prototype.getAngle = function() {
-    return Math.atan2(this.y, this.x);
+    return Math.atan2(-this.y, this.x);
   };
 
   Vector.prototype.getAngleFrom = function(v) {

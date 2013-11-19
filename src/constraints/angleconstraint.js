@@ -35,7 +35,7 @@
     if (diff <= -Math.PI) diff += 2 * Math.PI;
     else if (diff >= Math.PI) diff -= 2 * Math.PI;
 
-    diff *= 1;
+    diff *= 0.25;
 
     this.p1.position.rotateAbout(this.axis.position, diff);
     this.axis.position.rotateAbout(this.p1.position, -diff);

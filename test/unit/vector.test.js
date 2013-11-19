@@ -329,4 +329,75 @@ describe('Vector', function() {
     });
 
   });
+
+  describe('getDot()', function() {
+
+    it('should return the dot product', function() {
+      var v1 = Newton.Vector(-6, 8);
+      var v2 = Newton.Vector(5, 12);
+      assert.equal(v1.getDot(v2), 66);
+    });
+  });
+
+  describe('getCross()', function() {
+
+    it('should return the cross product', function() {
+      var v1 = Newton.Vector(1, 2);
+      var v2 = Newton.Vector(3, 4);
+      assert.equal(v1.getCross(v2), 10);
+    });
+  });
+
+  describe('getLength()', function() {
+
+    it('should give total length', function() {
+      var len = Newton.Vector(3, 4).getLength();
+      assert.equal(len, 5);
+    });
+  });
+
+  describe('getLength2()', function() {
+
+    it('should give squared length', function() {
+      var len = Newton.Vector(3, 4).getLength2();
+      assert.equal(len, 25);
+    });
+  });
+
+  describe('getAngle()', function() {
+
+    it('should be zero for 10, 0', function() {
+      assert.equal(Newton.Vector(10, 0).getAngle(), 0);
+    });
+
+    it ('should be 45 degrees for 10, -10', function() {
+      assert.equal(Newton.Vector(10, -10).getAngle(), Math.PI * 0.25);
+    });
+
+    it('should be 90 degrees for 0, -10', function() {
+      assert.equal(Newton.Vector(0, -10).getAngle(), Math.PI * 0.5);
+    });
+
+    it('should be 135 degrees for -10, -10', function() {
+      assert.equal(Newton.Vector(-10, -10).getAngle(), Math.PI * 0.75);
+    });
+
+    it('should be 180 degrees for -10, 0', function() {
+      // Weird
+      assert.equal(Newton.Vector(-10, 0).getAngle(), -Math.PI);
+      assert.equal(Newton.Vector(-10, -0).getAngle(), Math.PI);
+    });
+
+    it('should be -45 degrees for 10, 10', function() {
+      assert.equal(Newton.Vector(10, 10).getAngle(), Math.PI * -0.25);
+    });
+
+    it('should be -90 degrees for 0, 10', function() {
+      assert.equal(Newton.Vector(0, 10).getAngle(), Math.PI * -0.5);
+    });
+
+    it('should be -135 degrees for -10, 10', function() {
+      assert.equal(Newton.Vector(-10, 10).getAngle(), Math.PI * -0.75);
+    });
+  });
 });

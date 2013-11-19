@@ -12,7 +12,7 @@
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var diff = this.getAngle() - this.angle;
         diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
-        diff *= 1, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
+        diff *= .25, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
         this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.position.rotateAbout(this.p2.position, diff);
     }, Newton.AngleConstraint = AngleConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -536,7 +536,7 @@
     }, Vector.prototype.getLength2 = function() {
         return this.x * this.x + this.y * this.y;
     }, Vector.prototype.getAngle = function() {
-        return Math.atan2(this.y, this.x);
+        return Math.atan2(-this.y, this.x);
     }, Vector.prototype.getAngleFrom = function(v) {
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
