@@ -41,8 +41,8 @@
         return Newton.Vector.getDistance(this.p1.position, this.p2.position);
     }, DistanceConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
-        var pos1 = this.p1.position, pos2 = this.p2.position, delta = pos2.clone().sub(pos1), length = delta.getLength(), invmass1 = 1 / this.p1.getMass(), invmass2 = 1 / this.p2.getMass(), factor = (length - this.distance) / (length * (invmass1 + invmass2)) * this.stiffness, correction1 = delta.clone().scale(factor * invmass1), correction2 = delta.clone().scale(-factor * invmass2);
-        this.p1.correct(correction1), this.p2.correct(correction2);
+        var pos1 = this.p1.position, pos2 = this.p2.position, delta = pos2.pool().sub(pos1), length = delta.getLength(), invmass1 = 1 / this.p1.getMass(), invmass2 = 1 / this.p2.getMass(), factor = (length - this.distance) / (length * (invmass1 + invmass2)) * this.stiffness, correction1 = delta.pool().scale(factor * invmass1), correction2 = delta.scale(-factor * invmass2);
+        this.p1.correct(correction1), this.p2.correct(correction2), delta.free(), correction1.free();
     }, DistanceConstraint.prototype.getCoords = function() {
         return {
             x1: this.p1.position.x,
