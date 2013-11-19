@@ -482,8 +482,16 @@
     function Vector(x, y) {
         return this instanceof Vector ? (this.x = x, this.y = y, void 0) : new Vector(x, y);
     }
-    Vector.scratch = new Vector(), Vector.prototype.clone = function() {
-        return new Newton.Vector(this.x, this.y);
+    Vector._pool = [], Vector.pool = function(size) {
+        if (!size) return Vector._pool.length;
+        Vector._pool.length = 0;
+        for (var i = 0; size > i; i++) Vector._pool.push(Newton.Vector());
+    }, Vector.acquire = function() {
+        return Vector._pool.pop();
+    }, Vector.prototype.release = function() {
+        Vector._pool.push(this);
+    }, Vector.scratch = new Vector(), Vector.prototype.clone = function() {
+        return Newton.Vector(this.x, this.y);
     }, Vector.prototype.copy = function(v) {
         return this.x = v.x, this.y = v.y, this;
     }, Vector.prototype.zero = function() {
@@ -498,14 +506,14 @@
         return this.x -= v.x, this.y -= v.y, this;
     }, Vector.prototype.subXY = function(x, y) {
         return this.x -= x, this.y -= y, this;
-    }, Vector.prototype.mult = Vector.prototype.multVector = function(v) {
+    }, Vector.prototype.mult = function(v) {
         return this.x *= v.x, this.y *= v.y, this;
-    }, Vector.prototype.reverse = function() {
-        return this.x = -this.x, this.y = -this.y, this;
-    }, Vector.prototype.div = function(v) {
-        return this.x /= v.x, this.y /= v.y, this;
     }, Vector.prototype.multScalar = Vector.prototype.scale = function(scalar) {
         return this.x *= scalar, this.y *= scalar, this;
+    }, Vector.prototype.div = function(v) {
+        return this.x /= v.x, this.y /= v.y, this;
+    }, Vector.prototype.reverse = function() {
+        return this.x = -this.x, this.y = -this.y, this;
     }, Vector.prototype.unit = function() {
         return this.scale(1 / this.getLength()), this;
     }, Vector.prototype.turnRight = function() {
@@ -514,26 +522,27 @@
     }, Vector.prototype.turnLeft = function() {
         var x = this.x, y = this.y;
         return this.x = y, this.y = -x, this;
-    }, Vector.prototype.rotate = function(angle) {
+    }, Vector.prototype.rotateBy = function(angle) {
         var x = this.x, y = this.y, sin = Math.sin(angle), cos = Math.cos(angle);
         return this.x = x * cos - y * sin, this.y = x * sin + y * cos, this;
+    }, Vector.prototype.rotateAbout = function(pivot, angle) {
+        return this.sub(pivot).rotateBy(angle).add(pivot), this;
     }, Vector.prototype.getDot = function(v) {
         return this.x * v.x + this.y * v.y;
     }, Vector.prototype.getCross = function(v) {
         return this.x * v.y + this.y * v.x;
     }, Vector.prototype.getLength = function() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
-    }, Vector.prototype.getSquaredLength = function() {
+    }, Vector.prototype.getLength2 = function() {
         return this.x * this.x + this.y * this.y;
     }, Vector.prototype.getAngle = function() {
         return Math.atan2(this.y, this.x);
     }, Vector.prototype.getAngleFrom = function(v) {
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
-    }, Vector.prototype.getAngle2 = function(vLeft, vRight) {
-        return vLeft.clone().sub(this).getAngleFrom(vRight.clone().sub(this));
-    }, Vector.prototype.rotateAbout = function(pivot, angle) {
-        return this.sub(pivot).rotate(angle).add(pivot), this;
+    }, Vector.prototype.getAngleBetween = function(vLeft, vRight) {
+        var left = vLeft.clone().sub(this), right = vRight.clone().sub(this);
+        return left.getAngleFrom(right);
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";

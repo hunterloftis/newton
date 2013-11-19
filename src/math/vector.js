@@ -8,11 +8,41 @@
     this.y = y;
   }
 
+  // Vector object pooling (avoid GC)
+
+  Vector._pool = [];
+
+  Vector.pool = function(size) {
+    if (size) {
+      Vector._pool.length = 0;
+      for (var i = 0; i < size; i++) {
+        Vector._pool.push(Newton.Vector());
+      }
+    }
+    else {
+      return Vector._pool.length;
+    }
+  };
+
+  Vector.acquire = function() {
+    return Vector._pool.pop();
+  };
+
+  Vector.prototype.release = function() {
+    Vector._pool.push(this);
+  };
+
+  // One-off vector for single computes
+
   Vector.scratch = new Vector();
 
+  // New instances
+
   Vector.prototype.clone = function() {
-    return new Newton.Vector(this.x, this.y);
+    return Newton.Vector(this.x, this.y);
   };
+
+  // Setters
 
   Vector.prototype.copy = function(v) {
     this.x = v.x;
@@ -31,6 +61,8 @@
     this.y = y;
     return this;
   };
+
+  // Add
 
   Vector.prototype.add = function(v) {
     this.x += v.x;
@@ -56,21 +88,11 @@
     return this;
   };
 
-  Vector.prototype.mult = Vector.prototype.multVector = function(v) {
+  // Scale
+
+  Vector.prototype.mult = function(v) {
     this.x *= v.x;
     this.y *= v.y;
-    return this;
-  };
-
-  Vector.prototype.reverse = function() {
-    this.x = -this.x;
-    this.y = -this.y;
-    return this;
-  };
-
-  Vector.prototype.div = function(v) {
-    this.x /= v.x;
-    this.y /= v.y;
     return this;
   };
 
@@ -80,10 +102,24 @@
     return this;
   };
 
+  Vector.prototype.div = function(v) {
+    this.x /= v.x;
+    this.y /= v.y;
+    return this;
+  };
+
+  Vector.prototype.reverse = function() {
+    this.x = -this.x;
+    this.y = -this.y;
+    return this;
+  };
+
   Vector.prototype.unit = function() {
     this.scale(1 / this.getLength());
     return this;
   };
+
+  // Rotate
 
   Vector.prototype.turnRight = function() {
     var x = this.x;
@@ -101,8 +137,7 @@
     return this;
   };
 
-  // TODO: rename to 'rotateBy'
-  Vector.prototype.rotate = function(angle) {
+  Vector.prototype.rotateBy = function(angle) {
     var x = this.x;
     var y = this.y;
     var sin = Math.sin(angle);
@@ -111,6 +146,13 @@
     this.y = x * sin + y * cos;
     return this;
   };
+
+  Vector.prototype.rotateAbout = function(pivot, angle) {
+    this.sub(pivot).rotateBy(angle).add(pivot);
+    return this;
+  };
+
+  // Get
 
   Vector.prototype.getDot = function(v) {
     return this.x * v.x + this.y * v.y;
@@ -124,7 +166,8 @@
     return Math.sqrt(this.x * this.x + this.y * this.y);
   };
 
-  Vector.prototype.getSquaredLength = function() {
+  // Squared length
+  Vector.prototype.getLength2 = function() {
     return this.x * this.x + this.y * this.y;
   };
 
@@ -139,14 +182,10 @@
     return Math.atan2(sin, cos);
   };
 
-  Vector.prototype.getAngle2 = function(vLeft, vRight) {
-    return vLeft.clone().sub(this).getAngleFrom(vRight.clone().sub(this));
-  };
-
-
-  Vector.prototype.rotateAbout = function(pivot, angle) {
-    this.sub(pivot).rotate(angle).add(pivot);
-    return this;
+  Vector.prototype.getAngleBetween = function(vLeft, vRight) {
+    var left = vLeft.clone().sub(this);
+    var right = vRight.clone().sub(this);
+    return left.getAngleFrom(right);
   };
 
   Newton.Vector = Vector;
