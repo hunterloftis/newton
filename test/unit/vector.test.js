@@ -68,6 +68,10 @@ describe('Vector', function() {
     var v1 = Newton.Vector(2, 3);
     var v2 = v1.clone();
 
+    it('should return a Vector', function() {
+      assert.instanceOf(v2, Newton.Vector);
+    });
+
     it('should copy the data from the cloned Vector', function() {
       assert.equal(v1.x, v2.x);
       assert.equal(v1.y, v2.y);
