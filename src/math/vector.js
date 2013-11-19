@@ -1,7 +1,5 @@
 ;(function(Newton) {
 
-  'use strict';
-
   'use strict'
 
   function Vector(x, y) {
