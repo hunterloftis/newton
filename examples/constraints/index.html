@@ -24,9 +24,9 @@
   var lattice = buildLattice(250, 50, 100, 7);
 
   sim
-    .add(lattice)
-    .add(gravity)
-    .add(container)
+    .add(lattice, 'global')
+    .add(gravity, 'global')
+    .add(container, 'global')
     .start();
 
   $('#display').click(function(e) {
