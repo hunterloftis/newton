@@ -65,15 +65,18 @@
     if (step > 100) step = 0;         // in case the page becomes inactive
     this.accumulator += step;
 
+    // fixed-timestep physics simulation
     while (this.accumulator >= this.simulationStep) {
       this.simulate(this.simulationStep, time - this.startTime);
       this.accumulator -= this.simulationStep;
     }
 
+    // arbitrary-timestep rendering
     for (var i = 0; i < this.renderers.length; i++) {
       this.renderers[i](step, this);
     }
 
+    // framerate monitoring
     this.frames++;
     if (time >= this.countTime) {
       this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1000).toFixed(0);
@@ -81,17 +84,20 @@
       this.countTime = time + this.countInterval;
     }
 
+    // requestAnimationFrame
     Newton.frame(this.step);
   };
 
   Simulator.prototype.simulate = function(time, totalTime) {
     this.cull(this.particles);
     this.cull(this.constraints);
+    this.cull(this.edges);
     this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
     this.updateEdges();   // TODO: fix this hack, edges should be more dynamic than they are
-    this.collide(time);
+    this.detectCollisions(time);
+    this.resolveCollisions(time);
   };
 
   Simulator.prototype.cull = function(array) {
@@ -143,7 +149,7 @@
     }
   };
 
-  Simulator.prototype.collide = function(time) {
+  Simulator.prototype.detectCollisions = function(time) {
     var particles = this.collisionParticles;
     var edges = this.edges;
     var intersect;
@@ -173,6 +179,10 @@
       }
       if (nearest) particle.collide(nearest);
     }
+  };
+
+  Simulator.prototype.resolveCollisions = function(time) {
+
   };
 
   Simulator.prototype.ensureLayer = function(name) {

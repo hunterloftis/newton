@@ -56,7 +56,7 @@
     "use strict";
     function RigidConstraint(particles, iterations) {
         return this instanceof RigidConstraint ? (this.particles = particles, this.deltas = this.getDeltas(), 
-        void 0) : new RigidConstraint(particles, iterations);
+        console.log("deltas:", this.deltas), void 0) : new RigidConstraint(particles, iterations);
     }
     RigidConstraint.prototype.category = "", RigidConstraint.prototype.priority = 2, 
     RigidConstraint.prototype.getCenterMass = function() {
@@ -65,14 +65,20 @@
     }, RigidConstraint.prototype.getDeltas = function() {
         for (var center = this.getCenterMass(), i = -1, len = this.particles.length, deltas = Array(len); ++i < len; ) deltas[i] = this.particles[i].position.clone().sub(center);
         return deltas;
-    }, RigidConstraint.prototype.resolve = function() {
+    };
+    var pause = !1;
+    $(document).click(function() {
+        pause = !0;
+    }), RigidConstraint.prototype.resolve = function() {
         for (var center = this.getCenterMass(), angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) {
-            var currentDelta = this.particles[i].position.clone().sub(center), targetDelta = this.deltas[i];
-            angleDelta += currentDelta.getAngleTo(targetDelta);
+            var currentDelta = this.particles[i].position.clone().sub(center), targetDelta = this.deltas[i], diff = targetDelta.getAngleTo(currentDelta);
+            diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
+            angleDelta += diff;
         }
-        for (angleDelta /= len, i = -1; ++i < len; ) {
-            var goal = this.deltas[i].clone().rotateBy(-angleDelta).add(center), diff = goal.sub(this.particles[i].position);
-            this.particles[i].position.add(diff.scale(.5));
+        for (angleDelta /= len, angleDelta <= -Math.PI ? angleDelta += 2 * Math.PI : angleDelta >= Math.PI && (angleDelta -= 2 * Math.PI), 
+        i = -1; ++i < len; ) {
+            var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center), diff = goal.sub(this.particles[i].position);
+            this.particles[i].pinned || this.particles[i].position.add(diff.scale(1));
         }
     }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -314,8 +320,9 @@
             this.frames = 0, this.countTime = time + this.countInterval), Newton.frame(this.step);
         }
     }, Simulator.prototype.simulate = function(time, totalTime) {
-        this.cull(this.particles), this.cull(this.constraints), this.callback(time, this, totalTime), 
-        this.integrate(time), this.constrain(time), this.updateEdges(), this.collide(time);
+        this.cull(this.particles), this.cull(this.constraints), this.cull(this.edges), this.callback(time, this, totalTime), 
+        this.integrate(time), this.constrain(time), this.updateEdges(), this.detectCollisions(time), 
+        this.resolveCollisions(time);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
@@ -329,7 +336,7 @@
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
     }, Simulator.prototype.updateEdges = function() {
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].compute();
-    }, Simulator.prototype.collide = function() {
+    }, Simulator.prototype.detectCollisions = function() {
         for (var intersect, particle, edge, nearest, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             intersect = void 0, nearest = void 0;
@@ -337,7 +344,7 @@
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
         }
-    }, Simulator.prototype.ensureLayer = function(name) {
+    }, Simulator.prototype.resolveCollisions = function() {}, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
             linked: [ name ]
         }));

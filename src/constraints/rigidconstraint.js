@@ -7,6 +7,8 @@
 
     this.particles = particles;
     this.deltas = this.getDeltas();
+
+    console.log('deltas:', this.deltas);
   }
 
   RigidConstraint.prototype.category = '';
@@ -54,6 +56,11 @@
   //   return angleDelta / len;
   // };
 
+  var pause = false;
+  $(document).click(function() {
+        pause = true;
+    })
+
   RigidConstraint.prototype.resolve = function(time) {
     var center = this.getCenterMass();
     var angleDelta = 0;
@@ -66,22 +73,31 @@
 
       // console.log('currentDelta.getAngleTo:', currentDelta.getAngleTo(targetDelta));
 
-      angleDelta += currentDelta.getAngleTo(targetDelta);
+      var diff = targetDelta.getAngleTo(currentDelta);
+      if (diff <= -Math.PI) diff += 2*Math.PI;
+      else if (diff >= Math.PI) diff -= 2*Math.PI;
+
+      angleDelta += diff;
     }
 
     angleDelta /= len;
+
+    if (angleDelta <= -Math.PI) angleDelta += 2*Math.PI;
+    else if (angleDelta >= Math.PI) angleDelta -= 2*Math.PI;
 
     // if (angleDelta !== 0) console.log('angleDelta:', angleDelta);
 
     // console.log('angleDelta:', angleDelta);
 
+    //angleDelta *= 29;
+
     for (i = -1; ++i < len;) {
-      var goal = this.deltas[i].clone().rotateBy(-angleDelta).add(center);
+      var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center);
       // console.log('goal:', goal);
 
       var diff = goal.sub(this.particles[i].position);
 
-      this.particles[i].position.add(diff.scale(0.5));
+      if (!this.particles[i].pinned) this.particles[i].position.add(diff.scale(1));
     }
   };
 
