@@ -43,20 +43,23 @@
   function buildBox(x, y, size) {
     var body = Newton.Body();
 
-    var ul = body.Particle(x, y);
-    var ur = body.Particle(x + size, y);
-    var lr = body.Particle(x + size, y + size);
-    var ll = body.Particle(x, y + size);
+    var a = body.Particle(x, y);
 
-    body.DistanceConstraint(ul, ur);
-    body.DistanceConstraint(ur, lr);
-    body.DistanceConstraint(lr, ll);
-    body.DistanceConstraint(ll, ul);
+    a.pin();
 
-    body.AngleConstraint(ul, ur, lr);
-    body.AngleConstraint(ur, lr, ll);
-    body.AngleConstraint(lr, ll, ul);
-    body.AngleConstraint(ll, ul, ur);
+    var b = body.Particle(x + size, y);
+    var c = body.Particle(x + size, y + size);
+    var d = body.Particle(x, y + size);
+
+    body.DistanceConstraint(a, b);
+    body.DistanceConstraint(b, c);
+    body.DistanceConstraint(c, d);
+    body.DistanceConstraint(d, a);
+
+    body.AngleConstraint(a, b, c);
+    body.AngleConstraint(b, c, d);
+    body.AngleConstraint(c, d, a);
+    body.AngleConstraint(d, a, b);
 
     return body;
   }

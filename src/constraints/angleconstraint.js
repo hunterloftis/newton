@@ -6,7 +6,7 @@
   var CIRCLE = Math.PI * 2;
 
   function AngleConstraint(p1, axis, p2, stiffness, angle) {
-    if (!(this instanceof AngleConstraint)) return new AngleConstraint(axis, p1, p2, stiffness, angle);
+    if (!(this instanceof AngleConstraint)) return new AngleConstraint(p1, axis, p2, stiffness, angle);
 
     this.axis = axis;
     this.p1 = p1;
@@ -40,16 +40,16 @@
 
     var diff = this.angle - this.getAngle();
 
-    // if (diff <= -Math.PI) diff += 2 * Math.PI;
-    // else if (diff >= Math.PI) diff -= 2 * Math.PI;
+    diff *= -0.25 * this.stiffness;
 
-    diff *= 0.0025;
-
-    this.p1.position.rotateAbout(this.axis.position, diff);
-    this.axis.position.rotateAbout(this.p1.position, -diff);
-
-    this.p2.position.rotateAbout(this.axis.position, -diff);
-    this.axis.position.rotateAbout(this.p2.position, diff);
+    if (!this.p1.pinned)
+      this.p1.position.rotateAbout(this.axis.position, diff);   // rotate left about axis
+    if (!this.p2.pinned)
+      this.p2.position.rotateAbout(this.axis.position, -diff);  // rotate right in reverse about axis
+    if (!this.axis.pinned) {
+      this.axis.position.rotateAbout(this.p1.position, diff);  // rotate axis about left
+      this.axis.position.rotateAbout(this.p2.position, -diff);   // rotate axis about right
+    }
   };
 
   Newton.AngleConstraint = AngleConstraint;

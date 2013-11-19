@@ -3,7 +3,7 @@
     function AngleConstraint(p1, axis, p2, stiffness, angle) {
         return this instanceof AngleConstraint ? (this.axis = axis, this.p1 = p1, this.p2 = p2, 
         this.angle = "undefined" == typeof angle ? this.getAngle() : angle, this.stiffness = stiffness || 1, 
-        this.isDestroyed = !1, void 0) : new AngleConstraint(axis, p1, p2, stiffness, angle);
+        this.isDestroyed = !1, void 0) : new AngleConstraint(p1, axis, p2, stiffness, angle);
     }
     Math.PI, 2 * Math.PI, AngleConstraint.prototype.category = "angular", AngleConstraint.prototype.priority = 6, 
     AngleConstraint.prototype.getAngle = function() {
@@ -12,8 +12,9 @@
     }, AngleConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var diff = this.angle - this.getAngle();
-        diff *= .0025, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
-        this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.position.rotateAbout(this.p2.position, diff);
+        diff *= -.25 * this.stiffness, this.p1.pinned || this.p1.position.rotateAbout(this.axis.position, diff), 
+        this.p2.pinned || this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.pinned || (this.axis.position.rotateAbout(this.p1.position, diff), 
+        this.axis.position.rotateAbout(this.p2.position, -diff));
     }, Newton.AngleConstraint = AngleConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
