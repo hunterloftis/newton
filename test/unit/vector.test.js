@@ -56,6 +56,18 @@ describe('Vector', function() {
       v2.free();
     });
 
+    it('should claim and copy with pool()', function() {
+      Newton.Vector.pool(0);
+      assert.equal(Newton.Vector.pool(), 0, 'pool should start empty');
+      var v1 = Newton.Vector(3, 4);
+      var v2 = v1.pool();
+      assert.notEqual(v1, v2, 'pool() instance should be separate');
+      assert.equal(v2.x, v1.x, 'pool()d values should be copied');
+      assert.equal(Newton.Vector.pool(), 0, 'pool should be empty');
+      v2.free();
+      assert.equal(Newton.Vector.pool(), 1, 'free() should add one to pool');
+    });
+
   });
 
   describe('scratch', function() {
@@ -425,5 +437,9 @@ describe('Vector', function() {
       assert.equal(v2.getAngleTo(Newton.Vector(0, 10)), -Math.PI * 0.75,
         '10, -10 should be -135 degrees to 0, 10');
     });
+  });
+
+  describe('getAngleBetween()', function() {
+
   });
 });

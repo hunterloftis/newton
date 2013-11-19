@@ -7,7 +7,8 @@
     }
     Math.PI, 2 * Math.PI, AngleConstraint.prototype.category = "angular", AngleConstraint.prototype.priority = 6, 
     AngleConstraint.prototype.getAngle = function() {
-        return this.axis.position.getAngleBetween(this.p1.position, this.p2.position);
+        var p1 = this.p1.position.pool().sub(this.axis.position), p2 = this.p2.position.pool().sub(this.axis.position), angle = p1.getAngleTo(p2);
+        return p1.free(), p2.free(), angle;
     }, AngleConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var diff = this.getAngle() - this.angle;
@@ -483,13 +484,15 @@
         return this instanceof Vector ? (this.x = x, this.y = y, void 0) : new Vector(x, y);
     }
     Vector._pool = [], Vector.pool = function(size) {
-        if (!size) return Vector._pool.length;
+        if ("undefined" == typeof size) return Vector._pool.length;
         Vector._pool.length = 0;
         for (var i = 0; size > i; i++) Vector._pool.push(Newton.Vector());
     }, Vector.claim = function() {
         return Vector._pool.pop() || Newton.Vector();
     }, Vector.prototype.free = function() {
         Vector._pool.push(this);
+    }, Vector.prototype.pool = function() {
+        return Vector.claim().copy(this);
     }, Vector.scratch = new Vector(), Vector.prototype.clone = function() {
         return Newton.Vector(this.x, this.y);
     }, Vector.prototype.copy = function(v) {
@@ -540,9 +543,6 @@
     }, Vector.prototype.getAngleTo = function(v) {
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
-    }, Vector.prototype.getAngleBetween = function(vLeft, vRight) {
-        var left = vLeft.clone().sub(this), right = vRight.clone().sub(this);
-        return left.getAngleFrom(right);
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";

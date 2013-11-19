@@ -13,7 +13,7 @@
   Vector._pool = [];
 
   Vector.pool = function(size) {
-    if (size) {
+    if (typeof size !== 'undefined') {
       Vector._pool.length = 0;
       for (var i = 0; i < size; i++) {
         Vector._pool.push(Newton.Vector());
@@ -30,6 +30,10 @@
 
   Vector.prototype.free = function() {
     Vector._pool.push(this);
+  };
+
+  Vector.prototype.pool = function() {
+    return Vector.claim().copy(this);
   };
 
   // One-off vector for single computes
@@ -182,12 +186,6 @@
     var sin = this.y * v.x - this.x * v.y;
 
     return Math.atan2(sin, cos);
-  };
-
-  Vector.prototype.getAngleBetween = function(vLeft, vRight) {
-    var left = vLeft.clone().sub(this);
-    var right = vRight.clone().sub(this);
-    return left.getAngleFrom(right);
   };
 
   Newton.Vector = Vector;
