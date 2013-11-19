@@ -24,11 +24,11 @@
     }
   };
 
-  Vector.acquire = function() {
+  Vector.claim = function() {
     return Vector._pool.pop() || Newton.Vector();
   };
 
-  Vector.prototype.release = function() {
+  Vector.prototype.free = function() {
     Vector._pool.push(this);
   };
 
@@ -176,6 +176,8 @@
   };
 
   Vector.prototype.getAngleFrom = function(v) {
+    // The nearest angle between two vectors
+    // (origin of 0,0 for both)
     var cos = this.x * v.x + this.y * v.y;
     var sin = this.y * v.x - this.x * v.y;
 

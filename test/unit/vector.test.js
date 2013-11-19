@@ -23,35 +23,37 @@ describe('Vector', function() {
 
     it('should be able to acquire and release', function() {
       assert.equal(Newton.Vector.pool(), 0);
-      var v = Newton.Vector.acquire();
+      var v = Newton.Vector.claim();
       assert.instanceOf(v, Newton.Vector);
       assert.equal(Newton.Vector.pool(), 0);
-      v.release();
+      v.free();
       assert.equal(Newton.Vector.pool(), 1);
     });
 
     it('should provide different vectors', function() {
-      var v1 = Newton.Vector.acquire();
-      var v2 = Newton.Vector.acquire();
+      var v1 = Newton.Vector.claim();
+      var v2 = Newton.Vector.claim();
       assert.notEqual(v1, v2);
-      v1.release();
-      v2.release();
+      v1.free();
+      v2.free();
     });
 
     it('should reuse objects', function() {
-      var v1 = Newton.Vector.acquire();
-      v1.release();
-      var v2 = Newton.Vector.acquire();
+      var v1 = Newton.Vector.claim();
+      v1.free();
+      var v2 = Newton.Vector.claim();
       assert.strictEqual(v1, v2);
-      v2.release();
+      v2.free();
     });
 
-    it('should expand when pool is empty', function() {
+    it('should automatically expand when pool is empty', function() {
       Newton.Vector.pool(1);
-      var v1 = Newton.Vector.acquire();
-      var v2 = Newton.Vector.acquire();
+      var v1 = Newton.Vector.claim();
+      var v2 = Newton.Vector.claim();
       assert.instanceOf(v1, Newton.Vector);
       assert.instanceOf(v2, Newton.Vector);
+      v1.free();
+      v2.free();
     });
 
   });
@@ -399,5 +401,9 @@ describe('Vector', function() {
     it('should be -135 degrees for -10, 10', function() {
       assert.equal(Newton.Vector(-10, 10).getAngle(), Math.PI * -0.75);
     });
+  });
+
+  describe('getAngleFrom()', function() {
+
   });
 });

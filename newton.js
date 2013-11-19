@@ -486,9 +486,9 @@
         if (!size) return Vector._pool.length;
         Vector._pool.length = 0;
         for (var i = 0; size > i; i++) Vector._pool.push(Newton.Vector());
-    }, Vector.acquire = function() {
+    }, Vector.claim = function() {
         return Vector._pool.pop() || Newton.Vector();
-    }, Vector.prototype.release = function() {
+    }, Vector.prototype.free = function() {
         Vector._pool.push(this);
     }, Vector.scratch = new Vector(), Vector.prototype.clone = function() {
         return Newton.Vector(this.x, this.y);
