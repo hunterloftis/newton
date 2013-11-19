@@ -38,12 +38,12 @@
       return;
     }
 
-    var diff = this.getAngle() - this.angle;
+    var diff = this.angle - this.getAngle();
 
-    if (diff <= -Math.PI) diff += 2 * Math.PI;
-    else if (diff >= Math.PI) diff -= 2 * Math.PI;
+    // if (diff <= -Math.PI) diff += 2 * Math.PI;
+    // else if (diff >= Math.PI) diff -= 2 * Math.PI;
 
-    diff *= 0.25;
+    diff *= 0.0025;
 
     this.p1.position.rotateAbout(this.axis.position, diff);
     this.axis.position.rotateAbout(this.p1.position, -diff);

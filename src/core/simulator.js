@@ -109,10 +109,11 @@
 
     var layers = this.layers;
     var linked;
+    var emptyLink = [];
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
-      linked = layers[particle.layer].linked;
+      linked = particle.layer ? layers[particle.layer].linked : emptyLink;
       if (!particle.pinned) {
         for (var j = 0, jlen = forces.length; j < jlen; j++) {
           force = forces[j];

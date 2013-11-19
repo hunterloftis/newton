@@ -11,9 +11,8 @@
         return p1.free(), p2.free(), angle;
     }, AngleConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
-        var diff = this.getAngle() - this.angle;
-        diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
-        diff *= .25, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
+        var diff = this.angle - this.getAngle();
+        diff *= .0025, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
         this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.position.rotateAbout(this.p2.position, diff);
     }, Newton.AngleConstraint = AngleConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -321,8 +320,9 @@
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
-        for (var particle, force, linked, particles = this.particles, forces = this.forces, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
-            if (particle = particles[i], linked = layers[particle.layer].linked, !particle.pinned) for (var j = 0, jlen = forces.length; jlen > j; j++) force = forces[j], 
+        for (var particle, force, linked, particles = this.particles, forces = this.forces, layers = this.layers, emptyLink = [], i = 0, ilen = particles.length; ilen > i; i++) {
+            if (particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
+            !particle.pinned) for (var j = 0, jlen = forces.length; jlen > j; j++) force = forces[j], 
             force.layer && -1 === linked.indexOf(force.layer) || force.applyTo(particle);
             particle.integrate(time);
         }
@@ -414,8 +414,7 @@
         body.Particle(ox, oy);
         for (var current, last, i = 1; points >= i; i++) {
             var x = ox + r * Math.cos(i * spacing + .5 * Math.PI), y = oy + r * Math.sin(i * spacing + .5 * Math.PI);
-            current = body.Particle(x, y), last && (body.Edge(last, current), body.DistanceConstraint(last, current), 
-            i > 3 && body.AngleConstraint(body.particles[i - 1], body.particles[i - 2], body.particles[i])), 
+            current = body.Particle(x, y), last && (body.Edge(last, current), body.DistanceConstraint(last, current)), 
             last = current;
         }
         return body.Edge(last, body.particles[1]), body.DistanceConstraint(last, body.particles[1]), 

@@ -438,8 +438,4 @@ describe('Vector', function() {
         '10, -10 should be -135 degrees to 0, 10');
     });
   });
-
-  describe('getAngleBetween()', function() {
-
-  });
 });
