@@ -20,15 +20,14 @@ describe('Vector', function() {
   });
 
   describe('pooling', function() {
-    Newton.Vector.pool(10);
 
     it('should be able to acquire and release', function() {
-      assert.equal(Newton.Vector.pool(), 10);
+      assert.equal(Newton.Vector.pool(), 0);
       var v = Newton.Vector.acquire();
       assert.instanceOf(v, Newton.Vector);
-      assert.equal(Newton.Vector.pool(), 9);
+      assert.equal(Newton.Vector.pool(), 0);
       v.release();
-      assert.equal(Newton.Vector.pool(), 10);
+      assert.equal(Newton.Vector.pool(), 1);
     });
 
     it('should provide different vectors', function() {
@@ -47,12 +46,12 @@ describe('Vector', function() {
       v2.release();
     });
 
-    it('should return undefined when pool is empty', function() {
+    it('should expand when pool is empty', function() {
       Newton.Vector.pool(1);
       var v1 = Newton.Vector.acquire();
       var v2 = Newton.Vector.acquire();
       assert.instanceOf(v1, Newton.Vector);
-      assert.isUndefined(v2);
+      assert.instanceOf(v2, Newton.Vector);
     });
 
   });

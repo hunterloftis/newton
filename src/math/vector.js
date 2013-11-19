@@ -25,7 +25,7 @@
   };
 
   Vector.acquire = function() {
-    return Vector._pool.pop();
+    return Vector._pool.pop() || Newton.Vector();
   };
 
   Vector.prototype.release = function() {

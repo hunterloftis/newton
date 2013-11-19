@@ -487,7 +487,7 @@
         Vector._pool.length = 0;
         for (var i = 0; size > i; i++) Vector._pool.push(Newton.Vector());
     }, Vector.acquire = function() {
-        return Vector._pool.pop();
+        return Vector._pool.pop() || Newton.Vector();
     }, Vector.prototype.release = function() {
         Vector._pool.push(this);
     }, Vector.scratch = new Vector(), Vector.prototype.clone = function() {
