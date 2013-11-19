@@ -246,10 +246,8 @@
         this.lastPosition.addXY(deltaX, deltaY);
     }, Particle.prototype.destroy = function() {
         this.isDestroyed = !0;
-    }, Particle.prototype.moveBy = function(dx, dy) {
-        return this.lastPosition = this.position.clone(), this.position.add(dx, dy), this;
     }, Particle.prototype.getDistance = function(x, y) {
-        return this.position.clone().subXY(x, y).getLength();
+        return this.position.pool().subXY(x, y).getLength();
     }, Particle.prototype.pin = function(x, y) {
         x = "undefined" != typeof x ? x : this.position.x, y = "undefined" != typeof y ? y : this.position.y, 
         this.placeAt(x, y), this.pinned = !0, this.size = 1/0;
@@ -278,9 +276,9 @@
             y: -f * (delta.y / r) * ratio
         }), delta.free();
     }, Particle.prototype.collide = function(intersection) {
-        var velocity = this.position.clone().sub(this.lastPosition), bouncePoint = Newton.Vector.claim().set(intersection.x, intersection.y).add(intersection.wall.normal), reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
+        var velocity = this.position.pool().sub(this.lastPosition), bouncePoint = Newton.Vector.claim().set(intersection.x, intersection.y).add(intersection.wall.normal), reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
         this.position.copy(bouncePoint), this.setVelocity(reflectedVelocity.x, reflectedVelocity.y), 
-        this.lastValidPosition = bouncePoint, this.colliding = !0, bouncePoint.free();
+        this.lastValidPosition = bouncePoint, this.colliding = !0, velocity.free(), bouncePoint.free();
     }, Newton.Particle = Particle;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -485,7 +483,7 @@
     }, Vector.claim = function() {
         return Vector._pool.pop() || Newton.Vector();
     }, Vector.prototype.free = function() {
-        Vector._pool.push(this);
+        return Vector._pool.push(this), this;
     }, Vector.prototype.pool = function() {
         return Vector.claim().copy(this);
     }, Vector.scratch = new Vector(), Vector.getDistance = function(a, b) {

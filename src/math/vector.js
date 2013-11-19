@@ -30,6 +30,7 @@
 
   Vector.prototype.free = function() {
     Vector._pool.push(this);
+    return this;
   };
 
   Vector.prototype.pool = function() {

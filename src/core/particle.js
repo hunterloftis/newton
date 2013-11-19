@@ -88,14 +88,8 @@
     this.isDestroyed = true;
   };
 
-  Particle.prototype.moveBy = function(dx, dy) {
-    this.lastPosition = this.position.clone();
-    this.position.add(dx, dy);
-    return this;
-  };
-
   Particle.prototype.getDistance = function(x, y) {
-    return this.position.clone().subXY(x, y).getLength();
+    return this.position.pool().subXY(x, y).getLength();
   };
 
   Particle.prototype.pin = function(x, y) {
@@ -170,7 +164,7 @@
   Particle.prototype.collide = function(intersection) {
     // intersection contains: dx, dy, x, y, wall, distance (squared)
 
-    var velocity = this.position.clone().sub(this.lastPosition);
+    var velocity = this.position.pool().sub(this.lastPosition);
     var bouncePoint = Newton.Vector.claim()
       .set(intersection.x, intersection.y)
       .add(intersection.wall.normal);
@@ -182,6 +176,7 @@
 
     this.colliding = true;
 
+    velocity.free();
     bouncePoint.free();
   };
 
