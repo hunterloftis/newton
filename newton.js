@@ -157,8 +157,6 @@
             x2: this.p2.position.x,
             y2: this.p2.position.y
         };
-    }, Edge.prototype.getRepelled = function(x, y) {
-        return new Newton.Vector(x, y).add(this.normal);
     }, Edge.prototype.getProjection = function(vector) {
         var dot = this.vector.getDot(vector);
         return this.unit.clone().scale(dot);
@@ -275,15 +273,15 @@
     }, Particle.prototype.getSquaredSpeed = function() {
         return this.velocity.getSquaredLength();
     }, Particle.prototype.attractSquare = function(x, y, m, minDist) {
-        var mass = this.getMass(), delta = new Newton.Vector(x, y).sub(this.position), r = Math.max(delta.getLength(), minDist || 1), f = m * mass / (r * r), ratio = m / (m + mass);
+        var mass = this.getMass(), delta = new Newton.Vector.claim().set(x, y).sub(this.position), r = Math.max(delta.getLength(), minDist || 1), f = m * mass / (r * r), ratio = m / (m + mass);
         this.acceleration.add({
             x: -f * (delta.x / r) * ratio,
             y: -f * (delta.y / r) * ratio
-        });
+        }), delta.free();
     }, Particle.prototype.collide = function(intersection) {
-        var velocity = this.position.clone().sub(this.lastPosition), bouncePoint = intersection.wall.getRepelled(intersection.x, intersection.y), reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
+        var velocity = this.position.clone().sub(this.lastPosition), bouncePoint = Newton.Vector.claim().set(intersection.x, intersection.y).add(intersection.wall.normal), reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
         this.position.copy(bouncePoint), this.setVelocity(reflectedVelocity.x, reflectedVelocity.y), 
-        this.lastValidPosition = bouncePoint, this.colliding = !0;
+        this.lastValidPosition = bouncePoint, this.colliding = !0, bouncePoint.free();
     }, Newton.Particle = Particle;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";

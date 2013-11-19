@@ -154,7 +154,7 @@
 
   Particle.prototype.attractSquare = function(x, y, m, minDist) {
     var mass = this.getMass();
-    var delta = new Newton.Vector(x, y).sub(this.position);
+    var delta = new Newton.Vector.claim().set(x, y).sub(this.position);
     var r = Math.max(delta.getLength(), minDist || 1);
     var f = (m * mass) / (r * r);
     var ratio = m / (m + mass);
@@ -163,13 +163,17 @@
       x: -f * (delta.x / r) * ratio,
       y: -f * (delta.y / r) * ratio
     });
+
+    delta.free();
   };
 
   Particle.prototype.collide = function(intersection) {
     // intersection contains: dx, dy, x, y, wall, distance (squared)
 
     var velocity = this.position.clone().sub(this.lastPosition);
-    var bouncePoint = intersection.wall.getRepelled(intersection.x, intersection.y);
+    var bouncePoint = Newton.Vector.claim()
+      .set(intersection.x, intersection.y)
+      .add(intersection.wall.normal);
     var reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
 
     this.position.copy(bouncePoint);
@@ -177,6 +181,8 @@
     this.lastValidPosition = bouncePoint;
 
     this.colliding = true;
+
+    bouncePoint.free();
   };
 
   Newton.Particle = Particle;
