@@ -5,7 +5,7 @@
   var HALF_CIRCLE = Math.PI;
   var CIRCLE = Math.PI * 2;
 
-  function AngleConstraint(axis, p1, p2, stiffness, angle) {
+  function AngleConstraint(p1, axis, p2, stiffness, angle) {
     if (!(this instanceof AngleConstraint)) return new AngleConstraint(axis, p1, p2, stiffness, angle);
 
     this.axis = axis;

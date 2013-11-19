@@ -1,6 +1,6 @@
 !function(Newton) {
     "use strict";
-    function AngleConstraint(axis, p1, p2, stiffness, angle) {
+    function AngleConstraint(p1, axis, p2, stiffness, angle) {
         return this instanceof AngleConstraint ? (this.axis = axis, this.p1 = p1, this.p2 = p2, 
         this.angle = "undefined" == typeof angle ? this.getAngle() : angle, this.stiffness = stiffness || 1, 
         this.isDestroyed = !1, void 0) : new AngleConstraint(axis, p1, p2, stiffness, angle);
@@ -331,9 +331,9 @@
     }, Simulator.prototype.updateEdges = function() {
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].compute();
     }, Simulator.prototype.collide = function() {
-        for (var intersect, particle, edge, nearest, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, i = 0, ilen = particles.length; ilen > i; i++) {
-            particle = particles[i], linked = layers[particle.layer].linked, intersect = void 0, 
-            nearest = void 0;
+        for (var intersect, particle, edge, nearest, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], i = 0, ilen = particles.length; ilen > i; i++) {
+            particle = particles[i], linked = particle.player ? layers[particle.layer].linked : emptyLink, 
+            intersect = void 0, nearest = void 0;
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
