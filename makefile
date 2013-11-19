@@ -11,8 +11,12 @@ dev:
 build:
 	grunt build
 
+# Unit tests
+test-unit:
+	node_modules/.bin/mocha test/unit/*.test.js
 
-
+# All tests
+test: test-unit
 
 # Publish to github, npm, & bower
 publish:
