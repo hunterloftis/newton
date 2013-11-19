@@ -15,7 +15,7 @@
 
 <script>
 
-  var renderer = Newton.Renderer(document.getElementById('display'));
+  var renderer = Newton.GLRenderer(document.getElementById('display'));
   var sim = Newton.Simulator(undefined, renderer.callback, 60, 10);
 
   var gravity = Newton.LinearGravity(0, 0.001, 0);
@@ -23,10 +23,12 @@
 
   var lattice = buildLattice(250, 50, 100, 7);
   var box = buildBox(300, 300, 100);
+  var poly = buildPoly(600, 300, 50);
 
   sim
     .add(lattice)
     .add(box)
+    .add(poly)
     .add(gravity)
     .add(container)
     .start();
@@ -39,6 +41,21 @@
 
     if (particle) particle.destroy();
   });
+
+  function buildPoly(x, y, size) {
+    var body = Newton.Body();
+
+    var a = body.Particle(x, y);
+    var b = body.Particle(x + size, y + size);
+    var c = body.Particle(x + size, y + size * 2);
+    var d = body.Particle(x, y + size);
+    var e = body.Particle(x - size, y + size * 2);
+    var f = body.Particle(x - size, y + size);
+
+    body.RigidConstraint(body.particles);
+
+    return body;
+  }
 
   function buildBox(x, y, size) {
     var body = Newton.Body();

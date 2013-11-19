@@ -17,11 +17,15 @@
     var i = -1, len = this.particles.length;
     var center = Newton.Vector(0, 0);
 
+    // console.log('starting with 0, 0');
     while (++i < len) {
       center.add(this.particles[i].position);
+      // console.log(this.particles[i].position);
     }
 
     center.scale(1 / len);
+
+    // console.log('center:', center);
     return center;
   };
 
@@ -37,33 +41,45 @@
     return deltas;
   };
 
-  RigidConstraint.prototype.getAngleAbout = function(center) {
-    var angleDelta = 0;
-    var i = -1, len = this.particles.length;
+  // RigidConstraint.prototype.getAngleAbout = function(center) {
+  //   var angleDelta = 0;
+  //   var i = -1, len = this.particles.length;
 
-    while (++i < len) {
-      angleDelta += this.particles[i].position.clone()
-        .sub(center)
-        .getAngleFrom(this.deltas[i]);
-    }
+  //   while (++i < len) {
+  //     angleDelta += this.particles[i].position.clone()
+  //       .sub(center)
+  //       .getAngleFrom(this.deltas[i]);
+  //   }
 
-    return angleDelta / len;
-  };
+  //   return angleDelta / len;
+  // };
 
   RigidConstraint.prototype.resolve = function(time) {
     var center = this.getCenterMass();
-    var angleDelta = 0; //this.getAngleAbout(center);
-
-    var cos = Math.cos(angleDelta);
-    var sin = Math.sin(angleDelta);
+    var angleDelta = 0;
 
     var i = -1, len = this.particles.length;
 
     while (++i < len) {
-      var q = this.deltas[i];
-      var correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
-      correction.add(center).sub(this.particles[i].position).scale(1);              // TODO: replace 1 with some spring constant
-      this.particles[i].position.add(correction)
+      var currentDelta = this.particles[i].position.clone().sub(center);
+      var targetDelta = this.deltas[i];
+
+      // console.log('currentDelta.getAngleTo:', currentDelta.getAngleTo(targetDelta));
+
+      angleDelta += currentDelta.getAngleTo(targetDelta);
+    }
+
+    angleDelta /= len;
+
+    // console.log('angleDelta:', angleDelta);
+
+    for (i = -1; ++i < len;) {
+      var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center);
+      // console.log('goal:', goal);
+
+      var diff = goal.sub(this.particles[i].position);
+
+      this.particles[i].position.add(diff.scale(0.1));
     }
   };
 

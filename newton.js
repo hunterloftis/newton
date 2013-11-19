@@ -65,13 +65,14 @@
     }, RigidConstraint.prototype.getDeltas = function() {
         for (var center = this.getCenterMass(), i = -1, len = this.particles.length, deltas = Array(len); ++i < len; ) deltas[i] = this.particles[i].position.clone().sub(center);
         return deltas;
-    }, RigidConstraint.prototype.getAngleAbout = function(center) {
-        for (var angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) angleDelta += this.particles[i].position.clone().sub(center).getAngleFrom(this.deltas[i]);
-        return angleDelta / len;
     }, RigidConstraint.prototype.resolve = function() {
-        for (var center = this.getCenterMass(), angleDelta = 0, cos = Math.cos(angleDelta), sin = Math.sin(angleDelta), i = -1, len = this.particles.length; ++i < len; ) {
-            var q = this.deltas[i], correction = Newton.Vector(cos * q.x - sin * q.y, sin * q.x + cos * q.y);
-            correction.add(center).sub(this.particles[i].position).scale(1), this.particles[i].position.add(correction);
+        for (var center = this.getCenterMass(), angleDelta = 0, i = -1, len = this.particles.length; ++i < len; ) {
+            var currentDelta = this.particles[i].position.clone().sub(center), targetDelta = this.deltas[i];
+            angleDelta += currentDelta.getAngleTo(targetDelta);
+        }
+        for (angleDelta /= len, i = -1; ++i < len; ) {
+            var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center), diff = goal.sub(this.particles[i].position);
+            this.particles[i].position.add(diff.scale(.1));
         }
     }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
