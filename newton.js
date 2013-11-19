@@ -71,8 +71,8 @@
             angleDelta += currentDelta.getAngleTo(targetDelta);
         }
         for (angleDelta /= len, i = -1; ++i < len; ) {
-            var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center), diff = goal.sub(this.particles[i].position);
-            this.particles[i].position.add(diff.scale(.1));
+            var goal = this.deltas[i].clone().rotateBy(-angleDelta).add(center), diff = goal.sub(this.particles[i].position);
+            this.particles[i].position.add(diff.scale(.5));
         }
     }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {

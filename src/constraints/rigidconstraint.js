@@ -71,15 +71,17 @@
 
     angleDelta /= len;
 
+    // if (angleDelta !== 0) console.log('angleDelta:', angleDelta);
+
     // console.log('angleDelta:', angleDelta);
 
     for (i = -1; ++i < len;) {
-      var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center);
+      var goal = this.deltas[i].clone().rotateBy(-angleDelta).add(center);
       // console.log('goal:', goal);
 
       var diff = goal.sub(this.particles[i].position);
 
-      this.particles[i].position.add(diff.scale(0.1));
+      this.particles[i].position.add(diff.scale(0.5));
     }
   };
 
