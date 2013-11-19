@@ -22,9 +22,11 @@
   var container = Newton.BoxConstraint(0, 0, 1280, 450);
 
   var lattice = buildLattice(250, 50, 100, 7);
+  var box = buildBox(300, 300, 100);
 
   sim
     .add(lattice)
+    .add(box)
     .add(gravity)
     .add(container)
     .start();
@@ -37,6 +39,30 @@
 
     if (particle) particle.destroy();
   });
+
+  function buildBox(x, y, size) {
+    var body = Newton.Body();
+
+    var a = body.Particle(x, y);
+
+    a.pin();
+
+    var b = body.Particle(x + size, y);
+    var c = body.Particle(x + size, y + size);
+    var d = body.Particle(x, y + size);
+
+    body.DistanceConstraint(a, b);
+    body.DistanceConstraint(b, c);
+    body.DistanceConstraint(c, d);
+    body.DistanceConstraint(d, a);
+
+    body.AngleConstraint(a, b, c);
+    body.AngleConstraint(b, c, d);
+    body.AngleConstraint(c, d, a);
+    body.AngleConstraint(d, a, b);
+
+    return body;
+  }
 
   function buildLattice(x, y, segmentLength, segments) {
     var body = Newton.Body();

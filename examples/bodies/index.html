@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Newton.js: Bodies Example</title>
+  <link rel='stylesheet' type='text/css' href='../shared/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <ul class='stats'>
+    <li>fps:<span id='fps'></span></li>
+    <li>particles:<span id='particles'></span></li>
+    <li>edges:<span id='edges'></span></li>
+    <li>constraints:<span id='constraints'></span></li>
+    <li>forces:<span id='forces'></span></li>
+  </ul>
+  <canvas id="display" width="1280" height="450"></canvas>
+</div>
+
+<script type="text/javascript" src="../../bower_components/jquery/jquery.js"></script>
+<script type='text/javascript' src='../../newton.js'></script>
+
+<script>
+
+  var renderer = Newton.GLRenderer(document.getElementById('display')),
+      sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
+      gravity = Newton.LinearGravity(0, 0.002, 0),
+      container = Newton.BoxConstraint(0, 0, 1280, 450),
+      squishy = Newton.Squishy(525, 250, 70, 16),
+      boxes = createBoxes(60, 60, 25, 3),
+      fabric = Newton.Fabric(700, 0, 1250, 50, 40, 22),
+      lattice = Newton.Lattice(0, 200, 70, 5, true, false),
+      anchor = squishy.particles[0];
+
+  anchor.pin(525, 0);
+
+  sim
+    .add(gravity)
+    .add(squishy, 'squishy')
+    .add(boxes, 'boxes')
+    .add(fabric, 'fabric')
+    .add(lattice, 'boxes')
+    .add(container)
+    .link('squishy', 'boxes fabric')
+    .link('boxes', 'boxes squishy fabric')
+    .link('fabric', 'boxes squishy')
+    .start();
+
+  $('#display').on('mousemove', function(e) {
+    var offset = $(this).offset();
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+
+    anchor.pin(x, y);
+  });
+
+  setInterval(showStats, 250);
+
+
+  function showStats(time) {
+    $('#fps').text(sim.fps);
+    $('#particles').text(sim.particles.length);
+    $('#edges').text(sim.edges.length);
+    $('#constraints').text(sim.constraints.length);
+    $('#forces').text(sim.forces.length);
+  }
+
+  function createBoxes(x, y, size, amount) {
+    var boxes = [];
+    while (amount--) {
+      boxes.push(Newton.Box(x + amount * size * 3, y, size));
+    }
+    return boxes;
+  }
+
+</script>
+
+</body>

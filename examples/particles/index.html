@@ -77,6 +77,8 @@
     wind = Newton.LinearGravity(Math.PI * 0.5, 0.001, 0);
     container = Newton.WrapConstraint(0, 0, width, height);
 
+    particles.free();
+
     sim
       .add(gravity, 'global')
       .add(wind, 'wind')

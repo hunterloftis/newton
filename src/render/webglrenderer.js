@@ -2,7 +2,7 @@
 
   'use strict'
 
-  var PARTICLE_VS = [
+  var POINT_VS = [
     'uniform vec2 viewport;',
     'attribute vec3 position;',
     'attribute float size;',
@@ -16,16 +16,7 @@
     '}'
   ].join('\n');
 
-  var PARTICLE_FS = [
-    'precision mediump float;',
-    'uniform sampler2D texture;',
-
-    'void main() {',
-      'gl_FragColor = texture2D(texture, gl_PointCoord);',
-    '}'
-  ].join('\n');
-
-  var EDGE_VS = [
+  var LINE_VS = [
     'uniform vec2 viewport;',
     'attribute vec3 position;',
 
@@ -37,9 +28,24 @@
     '}'
   ].join('\n');
 
+  var PARTICLE_FS = [
+    'precision mediump float;',
+    'uniform sampler2D texture;',
+
+    'void main() {',
+      'gl_FragColor = texture2D(texture, gl_PointCoord);',
+    '}'
+  ].join('\n');
+
+  var CONSTRAINT_FS = [
+    'void main() {',
+      'gl_FragColor = vec4(0.0, 0.5, 1.0, 1.0);',
+    '}'
+  ].join('\n');
+
   var EDGE_FS = [
     'void main() {',
-      'gl_FragColor = vec4(0.0, 0.66, 1.0, 0.75);',
+      'gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);',
     '}'
   ].join('\n');
 
@@ -156,7 +162,8 @@
     initShaders: function() {
       var gl = this.gl;
 
-      this.particleShader = createShaderProgram(gl, PARTICLE_VS, PARTICLE_FS);
+      // particles
+      this.particleShader = createShaderProgram(gl, POINT_VS, PARTICLE_FS);
       this.particleShader.uniforms = {
         viewport: gl.getUniformLocation(this.particleShader, 'viewport')
       };
@@ -164,19 +171,30 @@
         position: gl.getAttribLocation(this.particleShader, 'position'),
         size: gl.getAttribLocation(this.particleShader, 'size')
       };
-      this.edgeShader = createShaderProgram(gl, EDGE_VS, EDGE_FS);
+      gl.useProgram(this.particleShader);
+      gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray);
+
+      // edges
+      this.edgeShader = createShaderProgram(gl, LINE_VS, EDGE_FS);
       this.edgeShader.uniforms = {
         viewport: gl.getUniformLocation(this.edgeShader, 'viewport')
       };
       this.edgeShader.attributes = {
         position: gl.getAttribLocation(this.edgeShader, 'position')
       };
-
-      gl.useProgram(this.particleShader);
-      gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray);
-
       gl.useProgram(this.edgeShader);
       gl.uniform2fv(this.edgeShader.uniforms.viewport, this.viewportArray);
+
+      // constraints
+      this.constraintShader = createShaderProgram(gl, LINE_VS, CONSTRAINT_FS);
+      this.constraintShader.uniforms = {
+        viewport: gl.getUniformLocation(this.constraintShader, 'viewport')
+      };
+      this.constraintShader.attributes = {
+        position: gl.getAttribLocation(this.constraintShader, 'position')
+      };
+      gl.useProgram(this.constraintShader);
+      gl.uniform2fv(this.constraintShader.uniforms.viewport, this.viewportArray);
     },
     initBuffers: function() {
       var gl = this.gl;
@@ -188,10 +206,10 @@
       this.clear(time);
       this.drawParticles(sim.particles);
       this.drawEdges(sim.edges);
-
+      this.drawConstraints(sim.constraints);
       return;
 
-      this.drawConstraints(ctx, sim.constraints);
+
 
 
       this.drawForces(ctx, sim.forces);
@@ -238,7 +256,7 @@
       for (var i = 0, ilen = particles.length; i < ilen; i++) {
         particle = particles[i];
         vertices.push(particle.position.x, particle.position.y, 0);
-        sizes.push(particle.size);
+        sizes.push(particle.size < 8 ? particle.size : 8);
       }
 
       if (vertices.length > this.vArray.length) throw new Error('vArray too small to hold vertices');
@@ -266,35 +284,33 @@
 
       gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
     },
-    drawConstraints: function(ctx, constraints) {
-      var coords;
-      var constraint;
+    drawConstraints: function(constraints) {
+      var gl = this.gl;
 
-      ctx.save();
-      ctx.strokeStyle = 'rgba(100, 100, 255, 1)';
-      ctx.lineWidth = 1;
+      var vertices = [];
+      var constraint, coords;
 
       for (var i = 0, ilen = constraints.length; i < ilen; i++) {
         constraint = constraints[i];
-
         if (constraint.category === 'linear') {
           coords = constraint.getCoords();
-          ctx.beginPath();
-          ctx.moveTo(coords.x1, coords.y1);
-          ctx.lineTo(coords.x2, coords.y2);
-          ctx.closePath();
-          ctx.stroke();
+          vertices.push(coords.x1, coords.y1, 0);
+          vertices.push(coords.x2, coords.y2, 0);
         }
-        else if (constraint.category === 'rigid') {
-          coords = constraint.centerMass;
-          ctx.beginPath();
-          ctx.moveTo(coords.x - 3, coords.y - 3);
-          ctx.lineTo(coords.x + 3, coords.y + 3);
-          ctx.closePath();
-          ctx.stroke();
-        }
+
       }
-      ctx.restore();
+
+      // TODO: necessary?
+      gl.useProgram(this.constraintShader);
+
+      // position buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.constraintShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.constraintShader.attributes.position);
+
+      gl.lineWidth(1);
+      gl.drawArrays(gl.LINES, 0, vertices.length / 3);
     },
     drawEdges: function(edges) {
       var gl = this.gl;
@@ -317,6 +333,7 @@
       gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(this.edgeShader.attributes.position);
 
+      gl.lineWidth(3);
       gl.drawArrays(gl.LINES, 0, vertices.length / 3);
     },
     drawCounts: function(ctx, counts) {

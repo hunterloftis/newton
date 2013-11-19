@@ -14,10 +14,10 @@
     };
   }
 
-  function Simulator(preSimulator, renderers, integrationFps, iterations) {
-    if (!(this instanceof Simulator)) return new Simulator(preSimulator, renderers, integrationFps, iterations);
+  function Simulator(callback, renderers, integrationFps, iterations) {
+    if (!(this instanceof Simulator)) return new Simulator(callback, renderers, integrationFps, iterations);
 
-    this.preSimulator = preSimulator || noop;
+    this.callback = callback || noop;
     this.renderers = renderers || noop;
     if (!Array.isArray(this.renderers)) this.renderers = [this.renderers];
     this.step = this._step.bind(this);
@@ -30,6 +30,7 @@
     this.accumulator = 0;
     this.simulationStep = 1000 / (integrationFps || 60);
     this.iterations = iterations || 3;
+    this.startTime = 0;
 
     this.layers = {};
 
@@ -38,11 +39,15 @@
     this.edges = [];
     this.forces = [];
     this.constraints = [];
+
+    // only these particles can collide with things
+    this.collisionParticles = [];
   }
 
   Simulator.prototype.start = function() {
     this.running = true;
     this.countTime = Date.now() + 1000;
+    this.startTime = Date.now();
     Newton.frame(this.step);
   };
 
@@ -50,12 +55,42 @@
     this.running = false;
   };
 
-  Simulator.prototype.simulate = function(time) {
+  Simulator.prototype._step = function() {
+    if (!this.running) return;
+
+    // slice of time
+    var time = Date.now();
+    var step = time - this.lastTime;
+    this.lastTime = time;
+    if (step > 100) step = 0;         // in case the page becomes inactive
+    this.accumulator += step;
+
+    while (this.accumulator >= this.simulationStep) {
+      this.simulate(this.simulationStep, time - this.startTime);
+      this.accumulator -= this.simulationStep;
+    }
+
+    for (var i = 0; i < this.renderers.length; i++) {
+      this.renderers[i](step, this);
+    }
+
+    this.frames++;
+    if (time >= this.countTime) {
+      this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1000).toFixed(0);
+      this.frames = 0;
+      this.countTime = time + this.countInterval;
+    }
+
+    Newton.frame(this.step);
+  };
+
+  Simulator.prototype.simulate = function(time, totalTime) {
     this.cull(this.particles);
     this.cull(this.constraints);
-    this.preSimulator(time, this);
+    this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
+    this.updateEdges();   // TODO: fix this hack, edges should be more dynamic than they are
     this.collide(time);
   };
 
@@ -74,16 +109,16 @@
 
     var layers = this.layers;
     var linked;
+    var emptyLink = [];
 
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
-      if (!layers[particle.layer]) console.log(particle);
-      linked = layers[particle.layer].linked;
+      linked = particle.layer ? layers[particle.layer].linked : emptyLink;
       if (!particle.pinned) {
         for (var j = 0, jlen = forces.length; j < jlen; j++) {
           force = forces[j];
           // TODO: optimize for speed
-          if (linked.indexOf(force.layer) !== -1) {
+          if (!force.layer || linked.indexOf(force.layer) !== -1) {
             force.applyTo(particle);
           }
         }
@@ -102,24 +137,37 @@
     }
   };
 
+  Simulator.prototype.updateEdges = function() {
+    for (var i = 0, ilen = this.edges.length; i < ilen; i++) {
+      this.edges[i].compute();
+    }
+  };
+
   Simulator.prototype.collide = function(time) {
-    var particles = this.particles;
+    var particles = this.collisionParticles;
     var edges = this.edges;
     var intersect;
     var particle, edge;
     var nearest;
 
+    var layers = this.layers;
+    var linked;
+    var emptyLink = [];
+
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
+      linked = particle.layer ? layers[particle.layer].linked : emptyLink;
       intersect = undefined;
       nearest = undefined;
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
         edge = edges[j];
-        if (particle !== edge.p1 && particle !== edge.p2) {
-          intersect = edge.findIntersection(particle.lastPosition, particle.position);
+        if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
+          if (particle !== edge.p1 && particle !== edge.p2) {
+            intersect = edge.findIntersection(particle.lastPosition, particle.position);
 
-          if (intersect && (!nearest || intersect.distance < nearest.distance)) {
-            nearest = intersect;
+            if (intersect && (!nearest || intersect.distance < nearest.distance)) {
+              nearest = intersect;
+            }
           }
         }
       }
@@ -128,14 +176,18 @@
   };
 
   Simulator.prototype.ensureLayer = function(name) {
+    if (!name) return;
     if (!this.layers[name]) this.layers[name] = {
       linked: [name]
     };
   };
 
   Simulator.prototype.add = function(entity, layer) {
-    entity.addTo(this, layer);
+    var entities = Array.isArray(entity) ? entity : [entity];
+
     this.ensureLayer(layer);
+    while (entities.length) entities.shift().addTo(this, layer);
+
     return this;
   };
 
@@ -151,6 +203,17 @@
 
   Simulator.prototype.addEdges = function(edges) {
     this.edges.push.apply(this.edges, edges);
+    for (var i = 0; i < edges.length; i++) {
+      this.addCollisionParticles([edges[i].p1, edges[i].p2]);
+    }
+  };
+
+  Simulator.prototype.addCollisionParticles = function(particles) {
+    var i = particles.length;
+    while (i--) if (this.collisionParticles.indexOf(particles[i]) === -1) {
+      this.collisionParticles.push(particles[i]);
+    }
+    return this;
   };
 
   Simulator.prototype.addConstraints = function(constraints) {
@@ -186,35 +249,6 @@
     var newLayer = Newton.Layer();
     this.layers.push(newLayer);
     return newLayer;
-  };
-
-  Simulator.prototype._step = function() {
-    if (!this.running) return;
-
-    var time = Date.now();
-    var step = time - this.lastTime;
-    if (step > 100) step = 0;         // in case you leave / return
-
-    this.accumulator += step;
-
-    while (this.accumulator >= this.simulationStep) {
-      this.simulate(this.simulationStep);
-      this.accumulator -= this.simulationStep;
-    }
-
-    for (var i = 0; i < this.renderers.length; i++) {
-      this.renderers[i](step, this);
-    }
-
-    this.frames++;
-    if (time >= this.countTime) {
-      this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1000).toFixed(0);
-      this.frames = 0;
-      this.countTime = time + this.countInterval;
-    }
-
-    this.lastTime = time;
-    Newton.frame(this.step);
   };
 
   Newton.Simulator = Simulator;

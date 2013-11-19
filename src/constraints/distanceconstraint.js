@@ -2,6 +2,7 @@
 
   'use strict'
 
+  // TODO: implement check & correction with square of distance
   function DistanceConstraint(p1, p2, stiffness, distance) {
     if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2, stiffness, distance);
 
@@ -17,10 +18,7 @@
   DistanceConstraint.prototype.priority = 4;
 
   DistanceConstraint.prototype.getDistance = function() {
-    var pos1 = this.p1.position;
-    var pos2 = this.p2.position;
-    var diff = pos2.clone().sub(pos1);
-    return diff.getLength();
+    return Newton.Vector.getDistance(this.p1.position, this.p2.position);
   };
 
   DistanceConstraint.prototype.resolve = function(time) {
@@ -31,16 +29,19 @@
 
     var pos1 = this.p1.position;
     var pos2 = this.p2.position;
-    var delta = pos2.clone().sub(pos1);
+    var delta = pos2.pool().sub(pos1);
     var length = delta.getLength();
     var invmass1 = 1 / this.p1.getMass();   // TODO: simplify the size * materialWeight thing?
     var invmass2 = 1 / this.p2.getMass();
     var factor = (length - this.distance) / (length * (invmass1 + invmass2)) * this.stiffness;
-    var correction1 = delta.clone().scale(factor * invmass1);
-    var correction2 = delta.clone().scale(-factor * invmass2);
+    var correction1 = delta.pool().scale(factor * invmass1);
+    var correction2 = delta.scale(-factor * invmass2);
 
     this.p1.correct(correction1);
     this.p2.correct(correction2);
+
+    delta.free();
+    correction1.free();
   };
 
   DistanceConstraint.prototype.getCoords = function() {

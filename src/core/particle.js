@@ -30,7 +30,7 @@
       .copy(this.position)
       .sub(this.lastPosition);
 
-    var drag = Math.min(1, this.velocity.getSquaredLength() / (this.material.maxVelocitySquared + this.randomDrag));
+    var drag = Math.min(1, this.velocity.getLength2() / (this.material.maxVelocitySquared + this.randomDrag));
 
     this.velocity.scale(1 - drag);
 
@@ -88,14 +88,8 @@
     this.isDestroyed = true;
   };
 
-  Particle.prototype.moveBy = function(dx, dy) {
-    this.lastPosition = this.position.clone();
-    this.position.add(dx, dy);
-    return this;
-  };
-
   Particle.prototype.getDistance = function(x, y) {
-    return this.position.clone().subXY(x, y).getLength();
+    return this.position.pool().subXY(x, y).getLength();
   };
 
   Particle.prototype.pin = function(x, y) {
@@ -154,7 +148,7 @@
 
   Particle.prototype.attractSquare = function(x, y, m, minDist) {
     var mass = this.getMass();
-    var delta = new Newton.Vector(x, y).sub(this.position);
+    var delta = new Newton.Vector.claim().set(x, y).sub(this.position);
     var r = Math.max(delta.getLength(), minDist || 1);
     var f = (m * mass) / (r * r);
     var ratio = m / (m + mass);
@@ -163,13 +157,17 @@
       x: -f * (delta.x / r) * ratio,
       y: -f * (delta.y / r) * ratio
     });
+
+    delta.free();
   };
 
   Particle.prototype.collide = function(intersection) {
     // intersection contains: dx, dy, x, y, wall, distance (squared)
 
-    var velocity = this.position.clone().sub(this.lastPosition);
-    var bouncePoint = intersection.wall.getRepelled(intersection.x, intersection.y);
+    var velocity = this.position.pool().sub(this.lastPosition);
+    var bouncePoint = Newton.Vector.claim()
+      .set(intersection.x, intersection.y)
+      .add(intersection.wall.normal);
     var reflectedVelocity = intersection.wall.getReflection(velocity, this.material.restitution);
 
     this.position.copy(bouncePoint);
@@ -177,6 +175,9 @@
     this.lastValidPosition = bouncePoint;
 
     this.colliding = true;
+
+    velocity.free();
+    bouncePoint.free();
   };
 
   Newton.Particle = Particle;

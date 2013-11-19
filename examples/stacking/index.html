@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Newton.js: Constraints Example</title>
+  <link rel='stylesheet' type='text/css' href='../shared/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <canvas id="display" width="1280" height="450"></canvas>
+</div>
+
+<script type="text/javascript" src="../../bower_components/jquery/jquery.js"></script>
+<script type='text/javascript' src='../../newton.js'></script>
+
+<script>
+
+  var renderer = Newton.Renderer(document.getElementById('display')),
+      sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
+      gravity = Newton.LinearGravity(0, 0.001, 0),
+      container = Newton.BoxConstraint(0, 0, 1280, 450);
+
+  sim
+    .add(gravity, 'global')
+    .add(container, 'global')
+    .start();
+
+  $('#display').click(function(e) {
+    var offset = $(this).offset();
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+
+    sim.add(Newton.Box(x, y, 25).body, 'global');
+  });
+
+</script>
+
+</body>

@@ -4,13 +4,15 @@
 
   function Edge(p1, p2, material) {
     if (!(this instanceof Edge)) return new Edge(p1, p2, material);
+
     this.p1 = p1;
     this.p2 = p2;
-    this.material = material || Material.simple;
+    this.material = material || Newton.Material.simple;
 
     this.compute();
 
     this._rect = new Newton.Rectangle(0, 0, 0, 0);
+    this.layer = undefined;
   };
 
   Edge.COLLISION_TOLERANCE = 0.5;
@@ -43,10 +45,6 @@
       x2: this.p2.position.x,
       y2: this.p2.position.y
     };
-  };
-
-  Edge.prototype.getRepelled = function(x, y) {
-    return new Newton.Vector(x, y).add(this.normal);
   };
 
   Edge.prototype.getProjection = function(vector) {
@@ -110,8 +108,8 @@
   Edge.prototype.getReflection = function(velocity, restitution) {
     var dir = this.normal.clone();
     var friction = this.material.friction;
-    var velN = dir.multScalar(velocity.getDot(dir)).multScalar(restitution);
-    var velT = velocity.clone().sub(velN).multScalar(1 - friction);
+    var velN = dir.scale(velocity.getDot(dir)).scale(restitution);
+    var velT = velocity.clone().sub(velN).scale(1 - friction);
     var reflectedVel = velT.sub(velN);
     return reflectedVel;
   };

@@ -13,6 +13,8 @@
 
     this.simulator = undefined;
     this.layer = undefined;
+
+    this.isFree = false;
   }
 
   Body.prototype.addTo = function(simulator, layer) {
@@ -30,12 +32,23 @@
     for (var i = 0, ilen = this.particles.length; i < ilen; i++) {
       this.particles[i].layer = layer;
     }
+    for (var i = 0, ilen = this.edges.length; i < ilen; i++) {
+      this.edges[i].layer = layer;
+    }
   };
+
+  Body.prototype.free = function() {
+    this.isFree = true;
+    if (this.simulator) this.simulator.addCollisionParticles(this.particles);
+  }
 
   Body.prototype.addParticle = function(particle) {
     this.particles.push(particle);
     particle.layer = this.layer;  // TODO: make sure this stays in sync
-    if (this.simulator) this.simulator.addParticles([particle]);
+    if (this.simulator) {
+      this.simulator.addParticles([particle]);
+      if (this.isFree) this.simulator.addCollisionParticles([particle]);
+    }
   };
 
   Body.prototype.Particle = function() {
@@ -47,6 +60,7 @@
 
   Body.prototype.addEdge = function(edge) {
     this.edges.push(edge);
+    edge.layer = this.layer;
     if (this.simulator) this.simulator.addEdges([edge]);
   };
 
@@ -75,6 +89,13 @@
     this.addConstraint(constraint);
     return constraint;
   };
+
+  Body.prototype.AngleConstraint = function() {
+    var constraint = Newton.AngleConstraint.apply(
+      Newton.AngleConstraint, Array.prototype.slice.call(arguments));
+    this.addConstraint(constraint);
+    return constraint;
+  }
 
   Newton.Body = Body;
 
