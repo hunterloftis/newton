@@ -64,7 +64,7 @@ describe('Vector', function() {
     });
   });
 
-  describe('clone', function() {
+  describe('clone()', function() {
     var v1 = Newton.Vector(2, 3);
     var v2 = v1.clone();
 
@@ -79,6 +79,70 @@ describe('Vector', function() {
 
     it('should not share an object reference', function() {
       assert.notEqual(v1, v2);
+    });
+  });
+
+  describe('copy()', function() {
+    var v1 = Newton.Vector(3, 4);
+    var v2 = Newton.Vector().copy(v1);
+
+    it('should return a Vector', function() {
+      assert.instanceOf(v2, Newton.Vector);
+    });
+
+    it('should copy the coordinates', function() {
+      assert.equal(v1.x, v2.x);
+      assert.equal(v1.y, v2.y);
+    });
+
+    it('should not share an object reference', function() {
+      assert.notEqual(v1, v2);
+    });
+  });
+
+  describe('zero()', function() {
+
+    it('should zero out a vector', function() {
+      var v = Newton.Vector().zero();
+      assert.equal(v.x, 0);
+      assert.equal(v.y, 0);
+    });
+  });
+
+  describe('set()', function() {
+
+    it('should set x and y', function() {
+      var v = Newton.Vector().set(1, 2);
+      assert.equal(v.x, 1);
+      assert.equal(v.y, 2);
+    });
+  });
+
+  describe('add()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.add(Newton.Vector(3, 4));
+
+    it('should add components', function() {
+      assert.equal(v1.x, 4);
+      assert.equal(v1.y, 6);
+    });
+
+    it('should add in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('addXY()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.addXY(3, 4);
+
+    it('should add components', function() {
+      assert.equal(v1.x, 4);
+      assert.equal(v1.y, 6);
+    });
+
+    it('should add in-place', function() {
+      assert.equal(v1, v);
     });
   });
 
