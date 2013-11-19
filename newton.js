@@ -12,7 +12,7 @@
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
         var diff = this.getAngle() - this.angle;
         diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
-        diff *= .002, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
+        diff *= 1, this.p1.position.rotateAbout(this.axis.position, diff), this.axis.position.rotateAbout(this.p1.position, -diff), 
         this.p2.position.rotateAbout(this.axis.position, -diff), this.axis.position.rotateAbout(this.p2.position, diff);
     }, Newton.AngleConstraint = AngleConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -523,10 +523,10 @@
         var x = this.x, y = this.y;
         return this.x = y, this.y = -x, this;
     }, Vector.prototype.rotateBy = function(angle) {
-        var x = this.x, y = this.y, sin = Math.sin(angle), cos = Math.cos(angle);
-        return this.x = x * cos - y * sin, this.y = x * sin + y * cos, this;
+        var x = this.x, y = -this.y, sin = Math.sin(angle), cos = Math.cos(angle);
+        return this.x = x * cos - y * sin, this.y = -(x * sin + y * cos), this;
     }, Vector.prototype.rotateAbout = function(pivot, angle) {
-        return this.sub(pivot).reverse().rotateBy(angle).add(pivot), this;
+        return this.sub(pivot).rotateBy(angle).add(pivot), this;
     }, Vector.prototype.getDot = function(v) {
         return this.x * v.x + this.y * v.y;
     }, Vector.prototype.getCross = function(v) {

@@ -157,6 +157,13 @@ describe('Vector', function() {
     it('should subtract in-place', function() {
       assert.equal(v1, v);
     });
+
+    it('should be able to subtract zero', function() {
+      var pivot = Newton.Vector(5, -5);
+      var v = Newton.Vector(0, 0).sub(pivot);
+      assert.equal(v.x, -5);
+      assert.equal(v.y, 5);
+    });
   });
 
   describe('subXY()', function() {
@@ -282,20 +289,26 @@ describe('Vector', function() {
 
     it('should be able to rotate counter-clockwise', function() {
       var v = Newton.Vector(0, 10).rotateBy(Math.PI * 0.25);
-      assert.closeTo(v.x, -7.071067811865475, 0.0001);
-      assert.closeTo(v.y, 7.071067811865475, 0.0001);
+      assert.closeTo(v.x, 7.071067811865475, 0.0001, 'x');
+      assert.closeTo(v.y, 7.071067811865475, 0.0001, 'y');
     });
 
     it('should be able to rotate across the 0-boundary', function() {
-      var v = Newton.Vector(10, 1).rotateBy(-Math.PI * 0.25);
+      var v = Newton.Vector(10, -1).rotateBy(-Math.PI * 0.25);
       assert.closeTo(v.x, 7.778174593052023, 0.0001);
-      assert.closeTo(v.y, -6.363961030678927, 0.0001);
+      assert.closeTo(v.y, 6.363961030678927, 0.0001);
     });
 
     it('should modify in-place', function() {
       var v1 = Newton.Vector(1, 2);
       var v2 = v1.rotateBy(Math.PI);
       assert.equal(v1, v2);
+    });
+
+    it('should go from -5,5 to 5,5 with a positive rotation', function() {
+      var v = Newton.Vector(-5, 5).rotateBy(Math.PI * 0.5);
+      assert.equal(v.x, 5, 'x should equal 5');
+      assert.equal(v.y, 5, 'y should equal 5');
     });
   });
 

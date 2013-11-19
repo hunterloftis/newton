@@ -139,16 +139,16 @@
 
   Vector.prototype.rotateBy = function(angle) {
     var x = this.x;
-    var y = this.y;
+    var y = -this.y;
     var sin = Math.sin(angle);
     var cos = Math.cos(angle);
     this.x = x * cos - y * sin;
-    this.y = x * sin + y * cos;
+    this.y = -(x * sin + y * cos);
     return this;
   };
 
   Vector.prototype.rotateAbout = function(pivot, angle) {
-    this.sub(pivot).reverse().rotateBy(angle).add(pivot);
+    this.sub(pivot).rotateBy(angle).add(pivot);
     return this;
   };
 
