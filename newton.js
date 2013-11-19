@@ -508,7 +508,7 @@
         return this.x -= x, this.y -= y, this;
     }, Vector.prototype.mult = function(v) {
         return this.x *= v.x, this.y *= v.y, this;
-    }, Vector.prototype.multScalar = Vector.prototype.scale = function(scalar) {
+    }, Vector.prototype.scale = function(scalar) {
         return this.x *= scalar, this.y *= scalar, this;
     }, Vector.prototype.div = function(v) {
         return this.x /= v.x, this.y /= v.y, this;

@@ -146,4 +146,60 @@ describe('Vector', function() {
     });
   });
 
+  describe('sub()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.sub(Newton.Vector(3, 4));
+
+    it('should subtract components', function() {
+      assert.equal(v1.x, -2);
+      assert.equal(v1.y, -2);
+    });
+
+    it('should subtract in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('subXY()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.subXY(3, 4);
+
+    it('should subtract components in-place', function() {
+      assert.equal(v1.x, -2);
+      assert.equal(v1.y, -2);
+      assert.equal(v1, v);
+    });
+
+    it('should subtract in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('mult()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.mult(Newton.Vector(2, 3));
+
+    it('should multiply components', function() {
+      assert.equal(v1.x, 2);
+      assert.equal(v1.y, 6);
+    });
+
+    it('should multiply in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
+
+  describe('scale()', function() {
+    var v = Newton.Vector(1, 2);
+    var v1 = v.scale(3);
+
+    it('should scale components', function() {
+      assert.equal(v1.x, 3);
+      assert.equal(v1.y, 6);
+    });
+
+    it('should scale in-place', function() {
+      assert.equal(v1, v);
+    });
+  });
 });

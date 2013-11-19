@@ -96,7 +96,7 @@
     return this;
   };
 
-  Vector.prototype.multScalar = Vector.prototype.scale = function(scalar) {
+  Vector.prototype.scale = function(scalar) {
     this.x *= scalar;
     this.y *= scalar;
     return this;
