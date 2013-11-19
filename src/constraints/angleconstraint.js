@@ -33,7 +33,7 @@
   };
 
   AngleConstraint.prototype.resolve = function(time) {
-    if (this.p1.isDestroyed || this.p2.isDestroyed) {
+    if (this.p1.isDestroyed || this.p2.isDestroyed || this.axis.isDestroyed) {
       this.isDestroyed = true;
       return;
     }

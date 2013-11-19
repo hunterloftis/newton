@@ -10,7 +10,8 @@
         var p1 = this.p1.position.pool().sub(this.axis.position), p2 = this.p2.position.pool().sub(this.axis.position), angle = p1.getAngleTo(p2);
         return p1.free(), p2.free(), angle;
     }, AngleConstraint.prototype.resolve = function() {
-        if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
+        if (this.p1.isDestroyed || this.p2.isDestroyed || this.axis.isDestroyed) return this.isDestroyed = !0, 
+        void 0;
         var diff = this.angle - this.getAngle();
         diff <= -Math.PI ? diff += 2 * Math.PI : diff >= Math.PI && (diff -= 2 * Math.PI), 
         diff *= -.25 * this.stiffness, this.p1.pinned || this.p1.position.rotateAbout(this.axis.position, diff), 
