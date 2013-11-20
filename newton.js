@@ -141,8 +141,9 @@
     "use strict";
     function Edge(p1, p2, material) {
         return this instanceof Edge ? (this.p1 = p1, this.p2 = p2, this.material = material || Newton.Material.simple, 
-        this._rect = new Newton.Rectangle(0, 0, 0, 0), this.layer = void 0, this.vector = Newton.Vector(), 
-        this.update(), void 0) : new Edge(p1, p2, material);
+        this.layer = void 0, this.vector = Newton.Vector(), this.normal = Newton.Vector(), 
+        this.bounds = Newton.Rectangle(), this.testRect = Newton.Rectangle(), this.update(), 
+        void 0) : new Edge(p1, p2, material);
     }
     Edge.COLLISION_TOLERANCE = .5, Edge.getAbc = function(x1, y1, x2, y2) {
         var a = y2 - y1, b = x1 - x2, c = a * x1 + b * y1;
@@ -152,8 +153,8 @@
             c: c
         };
     }, Edge.prototype.update = function() {
-        var vector = this.vector.copy(this.p2.position).sub(this.p1.position);
-        this.normal = vector.clone().turnLeft().unit(), this.bounds = Newton.Rectangle.fromVectors(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
+        this.vector.copy(this.p2.position).sub(this.p1.position), this.normal.copy(this.vector).turnLeft().unit(), 
+        this.bounds.setV(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
     }, Edge.prototype.getCoords = function() {
         return {
             x1: this.p1.position.x,
@@ -166,7 +167,7 @@
     }, Edge.prototype.findIntersection = function(v1, v2) {
         var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
         if (dot >= 0) return !1;
-        var bounds1 = this.bounds, bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+        var bounds1 = this.bounds, bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
         if (!bounds1.overlaps(bounds2)) return !1;
         var l1 = this.getAbc(), l2 = Edge.getAbc(x1, y1, x2, y2), det = l1.a * l2.b - l2.a * l1.b;
         if (0 === det) return !1;
@@ -458,6 +459,9 @@
             return this.left = Math.min(left, right), this.top = Math.min(top, bottom), this.right = Math.max(right, left), 
             this.bottom = Math.max(bottom, top), this.width = this.right - this.left, this.height = this.bottom - this.top, 
             this;
+        },
+        setV: function(v1, v2) {
+            return this.set(v1.x, v1.y, v2.x, v2.y), this;
         },
         contains: function(x, y) {
             return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;

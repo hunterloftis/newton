@@ -21,6 +21,10 @@
       this.height = this.bottom - this.top;
       return this;
     },
+    setV: function(v1, v2) {
+      this.set(v1.x, v1.y, v2.x, v2.y);
+      return this;
+    },
     contains: function(x, y) {
       return (x >= this.left && x <= this.right && y >= this.top && y <= this.bottom);
     },

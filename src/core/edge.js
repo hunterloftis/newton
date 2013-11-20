@@ -9,10 +9,12 @@
     this.p2 = p2;
     this.material = material || Newton.Material.simple;
 
-    this._rect = new Newton.Rectangle(0, 0, 0, 0);
     this.layer = undefined;
 
     this.vector = Newton.Vector();
+    this.normal = Newton.Vector();
+    this.bounds = Newton.Rectangle();
+    this.testRect = Newton.Rectangle();
 
     this.update();
   };
@@ -28,12 +30,17 @@
   };
 
   Edge.prototype.update = function() {
-    var vector = this.vector.copy(this.p2.position).sub(this.p1.position);
+    this.vector
+      .copy(this.p2.position)
+      .sub(this.p1.position);
 
-    this.normal = vector.clone().turnLeft().unit();
+    this.normal
+      .copy(this.vector)
+      .turnLeft()
+      .unit();
 
-    this.bounds = Newton.Rectangle
-      .fromVectors(this.p1.position, this.p2.position)
+    this.bounds
+      .setV(this.p1.position, this.p2.position)
       .expand(Edge.COLLISION_TOLERANCE);
   };
 
@@ -62,7 +69,7 @@
     if (dot >= 0) return false;
 
     var bounds1 = this.bounds;
-    var bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+    var bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
 
     if (!bounds1.overlaps(bounds2)) return false;
 
