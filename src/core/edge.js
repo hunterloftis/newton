@@ -2,6 +2,15 @@
 
   'use strict'
 
+  function pointInPoly(poly, pt){
+    for (var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) {
+      ((poly[i].y <= pt.y && pt.y < poly[j].y) || (poly[j].y <= pt.y && pt.y < poly[i].y))
+      && (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
+      && (c = !c);
+    }
+    return c;
+  }
+
   function Edge(p1, p2, material) {
     if (!(this instanceof Edge)) return new Edge(p1, p2, material);
 
@@ -44,7 +53,14 @@
       .expand(Edge.COLLISION_TOLERANCE);
   };
 
-  Edge.prototype.findIntersection = function(v1, v2) {
+  Edge.prototype.findEdgeParticle = function(v1, v2) {
+    // TODO: implement check for whether v2 is inside of the polygon made by this edge + this edge's last step
+    // TODO: find closest point to v2 on this edge if v2 is inside this poly
+    // TODO: return vector for correction of particle at v2
+    return false;
+  };
+
+  Edge.prototype.findParticleEdge = function(v1, v2) {
     var x1 = v1.x;
     var y1 = v1.y;
     var x2 = v2.x;
@@ -75,6 +91,8 @@
     var dx = x - x1;
     var dy = y - y1;
 
+    // TODO: return vector for correction of particle at v2
+
     return {
       x: x,
       y: y,
@@ -83,6 +101,10 @@
       distance: dx * dx + dy * dy,
       wall: this
     };
+  };
+
+  Edge.prototype.collide = function(intersection) {
+
   };
 
   // friction = range(0, 1)

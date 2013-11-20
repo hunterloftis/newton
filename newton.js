@@ -155,7 +155,9 @@
     }, Edge.prototype.update = function() {
         this.vector.copy(this.p2.position).sub(this.p1.position), this.normal.copy(this.vector).turnLeft().unit(), 
         this.bounds.setV(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
-    }, Edge.prototype.findIntersection = function(v1, v2) {
+    }, Edge.prototype.findEdgeParticle = function() {
+        return !1;
+    }, Edge.prototype.findParticleEdge = function(v1, v2) {
         var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
         if (dot >= 0) return !1;
         var bounds1 = this.bounds, bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
@@ -173,7 +175,7 @@
             distance: dx * dx + dy * dy,
             wall: this
         };
-    }, Edge.prototype.getReflection = function(velocity, restitution) {
+    }, Edge.prototype.collide = function() {}, Edge.prototype.getReflection = function(velocity, restitution) {
         var dir = this.normal.clone(), friction = this.material.friction, velN = dir.scale(velocity.getDot(dir)).scale(restitution), velT = velocity.clone().sub(velN).scale(1 - friction), reflectedVel = velT.sub(velN);
         return reflectedVel;
     }, Edge.prototype.getCoords = function() {
@@ -329,10 +331,11 @@
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             intersect = void 0, nearest = void 0;
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], 0 === i && edge.update(), 
-            edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
+            edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findParticleEdge(particle.lastPosition, particle.position) || edge.findEdgeParticle(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && collisions.push({
                 particle: particle,
+                edge: nearest.wall,
                 intersection: nearest
             });
         }
@@ -340,7 +343,7 @@
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
             var collision = collisions[i];
-            collision.particle.collide(collision.intersection);
+            collision.particle.collide(collision.intersection), collision.edge.collide(collision.intersection);
         }
     }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {

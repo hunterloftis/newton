@@ -146,27 +146,32 @@
   Simulator.prototype.detectCollisions = function(time) {
     var particles = this.collisionParticles;
     var edges = this.edges;
-    var intersect;
-    var particle, edge;
-    var nearest;
-
     var layers = this.layers;
-    var linked;
-    var emptyLink = [];
 
+    var intersect, particle, edge, nearest, linked;
+
+    var emptyLink = [];
     var collisions = [];
 
+    // Loop through all collision particles (particles that are part of edges)
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
       linked = particle.layer ? layers[particle.layer].linked : emptyLink;
       intersect = undefined;
       nearest = undefined;
+
+      // Loop through all edges to see if this particle ran into the edge
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
         edge = edges[j];
         if (i === 0) edge.update();
         if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
           if (particle !== edge.p1 && particle !== edge.p2) {
-            intersect = edge.findIntersection(particle.lastPosition, particle.position);
+
+            intersect =
+              edge.findParticleEdge(particle.lastPosition, particle.position) ||
+              edge.findEdgeParticle(particle.lastPosition, particle.position);
+
+            // TODO: add test here for an intersection with the edge's last position? necessary?
 
             if (intersect && (!nearest || intersect.distance < nearest.distance)) {
               nearest = intersect;
@@ -176,6 +181,7 @@
       }
       if (nearest) collisions.push({
         particle: particle,
+        edge: nearest.wall,
         intersection: nearest
       });
     }
@@ -187,6 +193,7 @@
     for (var i = 0, ilen = collisions.length; i < ilen; i++) {
       var collision = collisions[i];
       collision.particle.collide(collision.intersection);
+      collision.edge.collide(collision.intersection);
     }
   };
 
