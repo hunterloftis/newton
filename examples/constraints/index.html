@@ -46,15 +46,15 @@
     var body = Newton.Body();
 
     var a = body.Particle(x, y);
-    var b = body.Particle(x + size * 5, y + size);
-    var c = body.Particle(x + size * 5, y + size * 2);
+    var b = body.Particle(x + size, y + size);
+    var c = body.Particle(x + size, y + size * 2);
     var d = body.Particle(x, y + size);
-    var e = body.Particle(x - size * 5, y + size * 1.5);
-    var f = body.Particle(x - size * 5, y + size);
+    var e = body.Particle(x - size, y + size * 1.5);
+    var f = body.Particle(x - size, y + size);
 
     body.RigidConstraint(body.particles);
 
-    //a.pin();
+    a.pin();
 
     return body;
   }

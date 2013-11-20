@@ -97,7 +97,7 @@
 
       var diff = goal.sub(this.particles[i].position);
 
-      if (!this.particles[i].pinned) this.particles[i].position.add(diff.scale(0.001));
+      if (!this.particles[i].pinned) this.particles[i].position.add(diff.scale(0.5));
     }
   };
 

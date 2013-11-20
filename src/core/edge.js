@@ -9,10 +9,12 @@
     this.p2 = p2;
     this.material = material || Newton.Material.simple;
 
-    this.compute();
-
     this._rect = new Newton.Rectangle(0, 0, 0, 0);
     this.layer = undefined;
+
+    this.vector = Newton.Vector();
+
+    this.update();
   };
 
   Edge.COLLISION_TOLERANCE = 0.5;
@@ -25,14 +27,11 @@
     return { a: a, b: b, c: c };
   };
 
-  // TODO: currently assuming that particles are stationary, need to compute() after changes
-  Edge.prototype.compute = function() {
-    this.anchor = this.p1.position.clone();                       // TODO: tightly coupled
-    this.vector = this.p2.position.clone().sub(this.p1.position);  // TODO: ditto
-    this.length = this.vector.getLength();
-    this.angle = this.vector.getAngle();
-    this.normal = this.vector.clone().turnLeft().unit();
-    this.unit = this.vector.clone().unit();
+  Edge.prototype.update = function() {
+    var vector = this.vector.copy(this.p2.position).sub(this.p1.position);
+
+    this.normal = vector.clone().turnLeft().unit();
+
     this.bounds = Newton.Rectangle
       .fromVectors(this.p1.position, this.p2.position)
       .expand(Edge.COLLISION_TOLERANCE);
@@ -47,31 +46,19 @@
     };
   };
 
-  Edge.prototype.getProjection = function(vector) {
-    var dot = this.vector.getDot(vector);
-    return this.unit.clone().scale(dot);
-  };
-
-  Edge.prototype.getAngleDelta = function(vector) {
-    return this.angle - vector.getAngle();
-  };
-
   Edge.prototype.getAbc = function() {
     return Edge.getAbc(this.p1.position.x, this.p1.position.y,
       this.p2.position.x, this.p2.position.y);
   }
 
   Edge.prototype.findIntersection = function(v1, v2) {
-    // TODO: determine whether or not it's moving into or out of this one-way edge!
-
     var x1 = v1.x;
     var y1 = v1.y;
     var x2 = v2.x;
     var y2 = v2.y;
 
     // Dot product determines whether particle is moving towards (>0) or away (<0)
-    var dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
-
+    var dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
     if (dot >= 0) return false;
 
     var bounds1 = this.bounds;

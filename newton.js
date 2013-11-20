@@ -76,7 +76,7 @@
         }
         for (angleDelta /= len, i = -1; ++i < len; ) {
             var goal = this.deltas[i].clone().rotateBy(angleDelta).add(center), diff = goal.sub(this.particles[i].position);
-            this.particles[i].pinned || this.particles[i].position.add(diff.scale(.001));
+            this.particles[i].pinned || this.particles[i].position.add(diff.scale(.5));
         }
     }, Newton.RigidConstraint = RigidConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -141,8 +141,8 @@
     "use strict";
     function Edge(p1, p2, material) {
         return this instanceof Edge ? (this.p1 = p1, this.p2 = p2, this.material = material || Newton.Material.simple, 
-        this.compute(), this._rect = new Newton.Rectangle(0, 0, 0, 0), this.layer = void 0, 
-        void 0) : new Edge(p1, p2, material);
+        this._rect = new Newton.Rectangle(0, 0, 0, 0), this.layer = void 0, this.vector = Newton.Vector(), 
+        this.update(), void 0) : new Edge(p1, p2, material);
     }
     Edge.COLLISION_TOLERANCE = .5, Edge.getAbc = function(x1, y1, x2, y2) {
         var a = y2 - y1, b = x1 - x2, c = a * x1 + b * y1;
@@ -151,10 +151,9 @@
             b: b,
             c: c
         };
-    }, Edge.prototype.compute = function() {
-        this.anchor = this.p1.position.clone(), this.vector = this.p2.position.clone().sub(this.p1.position), 
-        this.length = this.vector.getLength(), this.angle = this.vector.getAngle(), this.normal = this.vector.clone().turnLeft().unit(), 
-        this.unit = this.vector.clone().unit(), this.bounds = Newton.Rectangle.fromVectors(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
+    }, Edge.prototype.update = function() {
+        var vector = this.vector.copy(this.p2.position).sub(this.p1.position);
+        this.normal = vector.clone().turnLeft().unit(), this.bounds = Newton.Rectangle.fromVectors(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
     }, Edge.prototype.getCoords = function() {
         return {
             x1: this.p1.position.x,
@@ -162,15 +161,10 @@
             x2: this.p2.position.x,
             y2: this.p2.position.y
         };
-    }, Edge.prototype.getProjection = function(vector) {
-        var dot = this.vector.getDot(vector);
-        return this.unit.clone().scale(dot);
-    }, Edge.prototype.getAngleDelta = function(vector) {
-        return this.angle - vector.getAngle();
     }, Edge.prototype.getAbc = function() {
         return Edge.getAbc(this.p1.position.x, this.p1.position.y, this.p2.position.x, this.p2.position.y);
     }, Edge.prototype.findIntersection = function(v1, v2) {
-        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.scratch.set(x2 - x1, y2 - y1).getDot(this.normal);
+        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
         if (dot >= 0) return !1;
         var bounds1 = this.bounds, bounds2 = this._rect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
         if (!bounds1.overlaps(bounds2)) return !1;
@@ -319,8 +313,7 @@
         }
     }, Simulator.prototype.simulate = function(time, totalTime) {
         this.cull(this.particles), this.cull(this.constraints), this.cull(this.edges), this.callback(time, this, totalTime), 
-        this.integrate(time), this.constrain(time), this.updateEdges(), this.detectCollisions(time), 
-        this.resolveCollisions(time);
+        this.integrate(time), this.constrain(time), this.detectCollisions(time), this.resolveCollisions(time);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
@@ -332,13 +325,12 @@
         }
     }, Simulator.prototype.constrain = function(time) {
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
-    }, Simulator.prototype.updateEdges = function() {
-        for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].compute();
     }, Simulator.prototype.detectCollisions = function() {
         for (var intersect, particle, edge, nearest, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             intersect = void 0, nearest = void 0;
-            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
+            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], 0 === i && edge.update(), 
+            edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (intersect = edge.findIntersection(particle.lastPosition, particle.position), 
             intersect && (!nearest || intersect.distance < nearest.distance) && (nearest = intersect));
             nearest && particle.collide(nearest);
         }

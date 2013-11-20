@@ -95,7 +95,6 @@
     this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
-    this.updateEdges();   // TODO: fix this hack, edges should be more dynamic than they are
     this.detectCollisions(time);
     this.resolveCollisions(time);
   };
@@ -143,11 +142,6 @@
     }
   };
 
-  Simulator.prototype.updateEdges = function() {
-    for (var i = 0, ilen = this.edges.length; i < ilen; i++) {
-      this.edges[i].compute();
-    }
-  };
 
   Simulator.prototype.detectCollisions = function(time) {
     var particles = this.collisionParticles;
@@ -167,6 +161,7 @@
       nearest = undefined;
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
         edge = edges[j];
+        if (i === 0) edge.update();
         if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
           if (particle !== edge.p1 && particle !== edge.p2) {
             intersect = edge.findIntersection(particle.lastPosition, particle.position);
