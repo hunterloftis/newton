@@ -200,6 +200,8 @@
       // collision.edge.collide(collision.intersection);
 
       collision.particle.correct(collision.correction);
+      collision.particle.setVelocity(0, 0);
+
     }
   };
 

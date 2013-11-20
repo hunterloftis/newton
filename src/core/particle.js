@@ -64,6 +64,11 @@
     this.position.add(v);
   };
 
+  Particle.prototype.stop = function() {
+    this.lastPosition.copy(this.position);
+    return this;
+  };
+
   // Sets the position to a coord (place by force)
   Particle.prototype.moveTo = function(x, y) {
     this.position.set(x, y);

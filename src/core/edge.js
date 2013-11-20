@@ -89,7 +89,7 @@
 
     if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 
-    return Newton.Vector(x - x1, y - y1).add(this.normal).scale(-10);
+    return Newton.Vector(x - x2, y - y2).add(this.normal);
   };
 
   Edge.prototype.collide = function(intersection) {

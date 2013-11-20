@@ -161,7 +161,7 @@
         var p1 = this.p1.position, p2 = this.p2.position, l1 = Edge.getAbc(p1.x, p1.y, p2.x, p2.y), l2 = Edge.getAbc(x1, y1, x2, y2), det = l1.a * l2.b - l2.a * l1.b;
         if (0 === det) return !1;
         var x = (l2.b * l1.c - l1.b * l2.c) / det, y = (l1.a * l2.c - l2.a * l1.c) / det;
-        return bounds1.contains(x, y) && bounds2.contains(x, y) ? Newton.Vector(x - x1, y - y1).add(this.normal).scale(-10) : !1;
+        return bounds1.contains(x, y) && bounds2.contains(x, y) ? Newton.Vector(x - x2, y - y2).add(this.normal) : !1;
     }, Edge.prototype.collide = function() {}, Edge.prototype.getReflection = function(velocity, restitution) {
         var dir = this.normal.clone(), friction = this.material.friction, velN = dir.scale(velocity.getDot(dir)).scale(restitution), velT = velocity.clone().sub(velN).scale(1 - friction), reflectedVel = velT.sub(velN);
         return reflectedVel;
@@ -225,6 +225,8 @@
         return this.position.set(x, y), this.lastPosition.copy(this.position), this;
     }, Particle.prototype.correct = function(v) {
         this.pinned || this.position.add(v);
+    }, Particle.prototype.stop = function() {
+        return this.lastPosition.copy(this.position), this;
     }, Particle.prototype.moveTo = function(x, y) {
         return this.position.set(x, y), this;
     }, Particle.prototype.shiftTo = function(x, y) {
@@ -330,7 +332,7 @@
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
             var collision = collisions[i];
-            collision.particle.correct(collision.correction);
+            collision.particle.correct(collision.correction), collision.particle.setVelocity(0, 0);
         }
     }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
