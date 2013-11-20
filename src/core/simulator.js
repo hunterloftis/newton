@@ -194,14 +194,28 @@
   };
 
   Simulator.prototype.resolveCollisions = function(time, collisions) {
+
     for (var i = 0, ilen = collisions.length; i < ilen; i++) {
       var collision = collisions[i];
+      var particle = collision.particle;
+      var edge = collision.edge;
+      var correction = collision.correction;
+
       // collision.particle.collide(collision.intersection);
       // collision.edge.collide(collision.intersection);
 
-      collision.particle.correct(collision.correction);
-      collision.particle.setVelocity(0, 0);
+      var pCorrect = correction.clone().scale(1);
+      var eCorrect1 = correction.clone().scale(-0);
+      var eCorrect2 = correction.clone().scale(-0);
 
+      particle.correct(pCorrect);
+      particle.launch(pCorrect.unit().scale(10));
+
+      edge.p1.correct(eCorrect1);
+      edge.p1.setVelocity(0, 0);
+
+      edge.p2.correct(eCorrect2);
+      edge.p1.setVelocity(0, 0);
     }
   };
 

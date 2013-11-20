@@ -64,6 +64,10 @@
     this.position.add(v);
   };
 
+  Particle.prototype.launch = function(v) {
+    this.lastPosition.copy(this.position).sub(v);
+  };
+
   Particle.prototype.stop = function() {
     this.lastPosition.copy(this.position);
     return this;

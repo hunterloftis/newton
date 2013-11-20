@@ -159,6 +159,8 @@
       var e = Newton.Edge(p1, p2, wallMaterial);
       w.addParticle(p1);
       w.addParticle(p2);
+      p1.pin();
+      p2.pin();
       w.addEdge(e);       // TODO: figure out a more concise API
     }
     return w;
