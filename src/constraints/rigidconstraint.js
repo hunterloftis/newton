@@ -43,24 +43,6 @@
     return deltas;
   };
 
-  // RigidConstraint.prototype.getAngleAbout = function(center) {
-  //   var angleDelta = 0;
-  //   var i = -1, len = this.particles.length;
-
-  //   while (++i < len) {
-  //     angleDelta += this.particles[i].position.clone()
-  //       .sub(center)
-  //       .getAngleFrom(this.deltas[i]);
-  //   }
-
-  //   return angleDelta / len;
-  // };
-
-  var pause = false;
-  $(document).click(function() {
-        pause = true;
-    })
-
   RigidConstraint.prototype.resolve = function(time) {
     var center = this.getCenterMass();
     var angleDelta = 0;

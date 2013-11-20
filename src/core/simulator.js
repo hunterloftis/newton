@@ -148,7 +148,7 @@
     var edges = this.edges;
     var layers = this.layers;
 
-    var intersect, particle, edge, nearest, linked;
+    var hit, particle, edge, nearest, nearestEdge, linked;
 
     var emptyLink = [];
     var collisions = [];
@@ -157,8 +157,9 @@
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
       linked = particle.layer ? layers[particle.layer].linked : emptyLink;
-      intersect = undefined;
+      hit = undefined;
       nearest = undefined;
+      nearestEdge = undefined;
 
       // Loop through all edges to see if this particle ran into the edge
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
@@ -167,22 +168,25 @@
         if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
           if (particle !== edge.p1 && particle !== edge.p2) {
 
-            intersect =
+            hit =
               edge.findParticleEdge(particle.lastPosition, particle.position) ||
               edge.findEdgeParticle(particle.lastPosition, particle.position);
 
             // TODO: add test here for an intersection with the edge's last position? necessary?
 
-            if (intersect && (!nearest || intersect.distance < nearest.distance)) {
-              nearest = intersect;
+            if (hit && (!nearest || hit.getLength() < nearest.getLength())) {
+              nearest = hit;
+              nearestEdge = edge;
             }
           }
         }
       }
+
+      // If we found > 0 intersections, push the earliest (nearest) one into our collisions array
       if (nearest) collisions.push({
         particle: particle,
-        edge: nearest.wall,
-        intersection: nearest
+        edge: nearestEdge,
+        correction: nearest
       });
     }
 
@@ -192,8 +196,10 @@
   Simulator.prototype.resolveCollisions = function(time, collisions) {
     for (var i = 0, ilen = collisions.length; i < ilen; i++) {
       var collision = collisions[i];
-      collision.particle.collide(collision.intersection);
-      collision.edge.collide(collision.intersection);
+      // collision.particle.collide(collision.intersection);
+      // collision.edge.collide(collision.intersection);
+
+      collision.particle.correct(collision.correction);
     }
   };
 

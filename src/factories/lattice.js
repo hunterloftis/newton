@@ -24,7 +24,7 @@
       body.DistanceConstraint(nextTop, nextBottom);
 
       body.Edge(top, nextTop);
-      body.Edge(bottom, nextBottom);
+      body.Edge(nextBottom, bottom);
 
       if (i === segments) {
         body.Edge(nextTop, nextBottom);

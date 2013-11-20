@@ -57,6 +57,7 @@
     // TODO: implement check for whether v2 is inside of the polygon made by this edge + this edge's last step
     // TODO: find closest point to v2 on this edge if v2 is inside this poly
     // TODO: return vector for correction of particle at v2
+
     return false;
   };
 
@@ -88,19 +89,7 @@
 
     if ( !(bounds1.contains(x, y) && bounds2.contains(x, y)) ) return false;
 
-    var dx = x - x1;
-    var dy = y - y1;
-
-    // TODO: return vector for correction of particle at v2
-
-    return {
-      x: x,
-      y: y,
-      dx: dx,
-      dy: dy,
-      distance: dx * dx + dy * dy,
-      wall: this
-    };
+    return Newton.Vector(x - x1, y - y1).add(this.normal).scale(-10);
   };
 
   Edge.prototype.collide = function(intersection) {

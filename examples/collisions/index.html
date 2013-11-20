@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Newton.js: Bodies Example</title>
+  <title>Newton.js: Collisions Example</title>
   <link rel='stylesheet' type='text/css' href='../shared/style.css' />
 </head>
 <body>
@@ -26,37 +26,17 @@
       sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
-      squishy = Newton.Squishy(525, 250, 70, 12),
       boxes = createBoxes(80, 60, 25, 3),
-      fabric = Newton.Fabric(700, 0, 1250, 50, 32, 19),
-      lattice = Newton.Lattice(0, 200, 70, 4, true, false),
-      anchor = squishy.particles[squishy.particles.length - 1];
-
-  anchor.pin(525, 300);
+      lattice = Newton.Lattice(0, 200, 70, 4, true, false);
 
   sim
     .add(gravity)
-    .add(squishy, 'squishy')
-    .add(boxes, 'boxes')
-    .add(fabric, 'fabric')
-    .add(lattice, 'lattice')
+    .add(boxes)
+    .add(lattice)
     .add(container)
-    .link('squishy', 'boxes fabric lattice')
-    .link('boxes', 'boxes squishy fabric lattice')
-    .link('fabric', 'boxes squishy lattice')
-    .link('lattice', 'boxes squishy')
     .start();
 
-  $('#display').on('mousemove', function(e) {
-    var offset = $(this).offset();
-    var x = e.pageX - offset.left;
-    var y = e.pageY - offset.top;
-
-    anchor.pin(x, y);
-  });
-
   setInterval(showStats, 250);
-
 
   function showStats(time) {
     $('#fps').text(sim.fps);

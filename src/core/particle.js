@@ -6,7 +6,6 @@
     if (!(this instanceof Particle)) return new Particle(x, y, size, material);
     this.position = new Newton.Vector(x, y);
     this.lastPosition = this.position.clone();
-    this.lastValidPosition = this.position.clone();
     this.velocity = new Newton.Vector(0, 0);
     this.acceleration = new Newton.Vector(0, 0);
     this.material = material || Newton.Material.simple;
@@ -50,16 +49,12 @@
     // Reset acceleration after integration
     this.acceleration.zero();
 
-    // Reset last valid position after integration
-    this.lastValidPosition.copy(this.lastPosition);
-
     this.colliding = false;
   };
 
   Particle.prototype.placeAt = function(x, y) {
     this.position.set(x, y);
     this.lastPosition.copy(this.position);
-    this.lastValidPosition.copy(this.lastPosition);
     return this;
   };
 
@@ -80,7 +75,6 @@
     var deltaX = x - this.position.x;
     var deltaY = y - this.position.y;
     this.position.addXY(deltaX, deltaY);
-    this.lastValidPosition.addXY(deltaX, deltaY);
     this.lastPosition.addXY(deltaX, deltaY);
   };
 
@@ -107,16 +101,16 @@
 
   Particle.prototype.contain = function(bounds) {
     if (this.position.x > bounds.right) {
-      this.position.x = this.lastPosition.x = this.lastValidPosition.x = bounds.right;
+      this.position.x = this.lastPosition.x = bounds.right;
     }
     else if (this.position.x < bounds.left) {
-      this.position.x = this.lastPosition.x = this.lastValidPosition.x = bounds.left;
+      this.position.x = this.lastPosition.x = bounds.left;
     }
     if (this.position.y > bounds.bottom) {
-      this.position.y = this.lastPosition.y = this.lastValidPosition.y = bounds.bottom;
+      this.position.y = this.lastPosition.y = bounds.bottom;
     }
     else if (this.position.y < bounds.top) {
-      this.position.y = this.lastPosition.y = this.lastValidPosition.y = bounds.top;
+      this.position.y = this.lastPosition.y = bounds.top;
     }
   };
 
@@ -172,9 +166,11 @@
 
     this.position.copy(bouncePoint);
     this.setVelocity(reflectedVelocity.x, reflectedVelocity.y);
-    this.lastValidPosition = bouncePoint;
 
     this.colliding = true;
+
+    intersection.wall.p1.correct(reflectedVelocity.clone().scale(0.5).reverse());
+    intersection.wall.p2.correct(reflectedVelocity.clone().scale(0.5).reverse());
 
     velocity.free();
     bouncePoint.free();
