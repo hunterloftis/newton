@@ -58,12 +58,13 @@
     return this;
   };
 
-  // Adds a vector to position (move by force)
+  // Adds a vector to position
   Particle.prototype.correct = function(v) {
     if (this.pinned) return;
     this.position.add(v);
   };
 
+  // Moves lastPosition to a place relative to current position
   Particle.prototype.launch = function(v) {
     this.lastPosition.copy(this.position).sub(v);
   };
