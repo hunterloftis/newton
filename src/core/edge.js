@@ -44,20 +44,6 @@
       .expand(Edge.COLLISION_TOLERANCE);
   };
 
-  Edge.prototype.getCoords = function() {
-    return {
-      x1: this.p1.position.x,
-      y1: this.p1.position.y,
-      x2: this.p2.position.x,
-      y2: this.p2.position.y
-    };
-  };
-
-  Edge.prototype.getAbc = function() {
-    return Edge.getAbc(this.p1.position.x, this.p1.position.y,
-      this.p2.position.x, this.p2.position.y);
-  }
-
   Edge.prototype.findIntersection = function(v1, v2) {
     var x1 = v1.x;
     var y1 = v1.y;
@@ -73,7 +59,9 @@
 
     if (!bounds1.overlaps(bounds2)) return false;
 
-    var l1 = this.getAbc();
+    var p1 = this.p1.position;
+    var p2 = this.p2.position;
+    var l1 = Edge.getAbc(p1.x, p1.y, p2.x, p2.y);
     var l2 = Edge.getAbc(x1, y1, x2, y2);
     var det = l1.a * l2.b - l2.a * l1.b;
 
@@ -106,6 +94,15 @@
     var velT = velocity.clone().sub(velN).scale(1 - friction);
     var reflectedVel = velT.sub(velN);
     return reflectedVel;
+  };
+
+  Edge.prototype.getCoords = function() {
+    return {
+      x1: this.p1.position.x,
+      y1: this.p1.position.y,
+      x2: this.p2.position.x,
+      y2: this.p2.position.y
+    };
   };
 
   Newton.Edge = Edge;

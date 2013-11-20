@@ -95,8 +95,8 @@
     this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
-    this.detectCollisions(time);
-    this.resolveCollisions(time);
+
+    this.resolveCollisions(time, this.detectCollisions(time));
   };
 
   Simulator.prototype.cull = function(array) {
@@ -154,6 +154,8 @@
     var linked;
     var emptyLink = [];
 
+    var collisions = [];
+
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
       linked = particle.layer ? layers[particle.layer].linked : emptyLink;
@@ -172,12 +174,20 @@
           }
         }
       }
-      if (nearest) particle.collide(nearest);
+      if (nearest) collisions.push({
+        particle: particle,
+        intersection: nearest
+      });
     }
+
+    return collisions;
   };
 
-  Simulator.prototype.resolveCollisions = function(time) {
-
+  Simulator.prototype.resolveCollisions = function(time, collisions) {
+    for (var i = 0, ilen = collisions.length; i < ilen; i++) {
+      var collision = collisions[i];
+      collision.particle.collide(collision.intersection);
+    }
   };
 
   Simulator.prototype.ensureLayer = function(name) {
