@@ -209,7 +209,7 @@
       var eCorrect2 = correction.clone().scale(-0);
 
       particle.correct(pCorrect);
-      particle.launch(pCorrect.unit().scale(10));
+      particle.launch(pCorrect.unit().scale(30));
 
       edge.p1.correct(eCorrect1);
       edge.p1.setVelocity(0, 0);

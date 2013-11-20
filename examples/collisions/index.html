@@ -23,16 +23,18 @@
 <script>
 
   var renderer = Newton.GLRenderer(document.getElementById('display')),
-      sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
+      sim = Newton.Simulator(undefined, renderer.callback, 60, 100),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
-      boxes = createBoxes(80, 60, 25, 3),
-      lattice = Newton.Lattice(0, 200, 70, 4, true, false);
+      boxes = createBoxes(100, 100, 1180, 100, 10),
+      line = createLine(0, 400, 640, 400),
+      segments = createSegments(640, 400, 1280, 400, 10);
 
   sim
     .add(gravity)
     .add(boxes)
-    .add(lattice)
+    .add(line)
+    .add(segments)
     .add(container)
     .start();
 
@@ -46,12 +48,41 @@
     $('#forces').text(sim.forces.length);
   }
 
-  function createBoxes(x, y, size, amount) {
+  function createBoxes(x1, y1, x2, y2, count) {
     var boxes = [];
-    while (amount--) {
-      boxes.push(Newton.Box(x + amount * size * 3, y, size));
+    var xSpace = (x2 - x1) / count;
+    var ySpace = (y2 - y1) / count;
+
+    for (var i = 0; i < count; i++) {
+      boxes.push(Newton.Box(x1 + i * xSpace, y1 + i * ySpace, 25));
     }
+
     return boxes;
+  }
+
+  function createLine(x1, y1, x2, y2) {
+    var body = Newton.Body();
+    var a = body.Particle(x1, y1);
+    var b = body.Particle(x2, y2);
+    body.Edge(a, b);
+    a.pin();
+    b.pin()
+    return body;
+  }
+
+  function createSegments(x1, y1, x2, y2, count) {
+    var body = Newton.Body();
+    var xSpace = (x2 - x1) / count;
+    var ySpace = (y2 - y1) / count;
+
+    for (var i = 0; i < count; i++) {
+      body.Particle(x1 + i * xSpace, y1 + i * ySpace).pin();
+      if (i > 0) body.Edge(body.particles[i - 1], body.particles[i]);
+    }
+    body.Particle(x2, y2).pin();
+    body.Edge(body.particles[count - 1], body.particles[count]);
+
+    return body;
   }
 
 </script>

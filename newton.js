@@ -334,7 +334,7 @@
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
             var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pCorrect = correction.clone().scale(1), eCorrect1 = correction.clone().scale(-0), eCorrect2 = correction.clone().scale(-0);
-            particle.correct(pCorrect), particle.launch(pCorrect.unit().scale(10)), edge.p1.correct(eCorrect1), 
+            particle.correct(pCorrect), particle.launch(pCorrect.unit().scale(30)), edge.p1.correct(eCorrect1), 
             edge.p1.setVelocity(0, 0), edge.p2.correct(eCorrect2), edge.p1.setVelocity(0, 0);
         }
     }, Simulator.prototype.ensureLayer = function(name) {
