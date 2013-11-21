@@ -7,7 +7,11 @@
 
     this.rect = Newton.Rectangle(left, top, right, bottom);
     this.particles = particles;
+
+    this.id = ++BoxConstraint.count;
   }
+
+  BoxConstraint.count = 0;
 
   BoxConstraint.prototype.category = 'boxconstraint';
   BoxConstraint.prototype.priority = 0;

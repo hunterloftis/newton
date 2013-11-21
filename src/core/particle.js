@@ -41,15 +41,13 @@
     // Record last location
     this.lastPosition.copy(this.position);
 
-    // Time-Corrected Verlet integration (TCV)
+    // Verlet integration
     this.position
       .add(this.velocity)
       .add(this.acceleration);
 
     // Reset acceleration after integration
     this.acceleration.zero();
-
-    this.colliding = false;
   };
 
   Particle.prototype.placeAt = function(x, y) {

@@ -26,7 +26,7 @@
       sim = Newton.Simulator(undefined, renderer.callback, 60, 10, 1),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
-      boxes = createBoxes(60, 100, 850, 100, 10),
+      boxes = createBoxes(60, 100, 850, 100, 4),
       line = createLine(0, 400, 400, 400),
       segments = createSegments(400, 400, 800, 400, 5),
       spike1 = createSpike(950, 350, 100),
@@ -34,11 +34,24 @@
       spike2 = createSpike(1150, 350, 100),
       box2 = Newton.Box(1170, 50, 40);
 
+  function wtf() {
+    var a = Newton.Particle(0, 0);
+    var b = Newton.Particle(10, 10);
+    return Newton.DistanceConstraint(a, b);
+  }
+
+  var weirdness = 20; // at 20 box 3 is wonky, at 4 box 4 is wonky
+  var dammit = [];
+  for (var i = 0; i < weirdness; i++) {
+    dammit.push(wtf());
+  }
+
   sim
     .add([gravity, container])
     .add(boxes)
     .add([line, segments])
     //.add([spike1, box1, spike2, box2])
+    .addConstraints(dammit)
     .start();
 
   setInterval(showStats, 250);

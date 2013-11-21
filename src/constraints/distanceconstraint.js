@@ -12,7 +12,11 @@
     this.distance = (typeof distance === 'undefined') ? this.getDistance() : distance;
 
     this.isDestroyed = false;
+
+    this.id = ++DistanceConstraint.count;
   }
+
+  DistanceConstraint.count = 0;
 
   DistanceConstraint.prototype.category = 'linear';
   DistanceConstraint.prototype.priority = 4;

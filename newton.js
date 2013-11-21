@@ -22,9 +22,9 @@
     "use strict";
     function BoxConstraint(left, top, right, bottom, particles) {
         return this instanceof BoxConstraint ? (this.rect = Newton.Rectangle(left, top, right, bottom), 
-        this.particles = particles, void 0) : new BoxConstraint(left, top, right, bottom, particles);
+        this.particles = particles, this.id = ++BoxConstraint.count, void 0) : new BoxConstraint(left, top, right, bottom, particles);
     }
-    BoxConstraint.prototype.category = "boxconstraint", BoxConstraint.prototype.priority = 0, 
+    BoxConstraint.count = 0, BoxConstraint.prototype.category = "boxconstraint", BoxConstraint.prototype.priority = 0, 
     BoxConstraint.prototype.addTo = function(simulator) {
         simulator.addConstraints([ this ]);
     }, BoxConstraint.prototype.resolve = function(time, allParticles) {
@@ -35,10 +35,10 @@
     function DistanceConstraint(p1, p2, stiffness, distance) {
         return this instanceof DistanceConstraint ? (this.p1 = p1, this.p2 = p2, this.stiffness = stiffness || 1, 
         this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
-        this.isDestroyed = !1, void 0) : new DistanceConstraint(p1, p2, stiffness, distance);
+        this.isDestroyed = !1, this.id = ++DistanceConstraint.count, void 0) : new DistanceConstraint(p1, p2, stiffness, distance);
     }
-    DistanceConstraint.prototype.category = "linear", DistanceConstraint.prototype.priority = 4, 
-    DistanceConstraint.prototype.getDistance = function() {
+    DistanceConstraint.count = 0, DistanceConstraint.prototype.category = "linear", 
+    DistanceConstraint.prototype.priority = 4, DistanceConstraint.prototype.getDistance = function() {
         return Newton.Vector.getDistance(this.p1.position, this.p2.position);
     }, DistanceConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return this.isDestroyed = !0, void 0;
@@ -219,7 +219,7 @@
             var drag = Math.min(1, this.velocity.getLength2() / (this.material.maxVelocitySquared + this.randomDrag));
             this.velocity.scale(1 - drag), this.acceleration.scale(1 - drag).scale(time * time), 
             this.lastPosition.copy(this.position), this.position.add(this.velocity).add(this.acceleration), 
-            this.acceleration.zero(), this.colliding = !1;
+            this.acceleration.zero();
         }
     }, Particle.prototype.placeAt = function(x, y) {
         return this.position.set(x, y), this.lastPosition.copy(this.position), this;
@@ -276,7 +276,7 @@
     "use strict";
     function noop() {}
     function prioritySort(a, b) {
-        return b.priority - a.priority;
+        return b.priority - a.priority || b.id - a.id;
     }
     function Simulator(callback, renderers, integrationFps, iterations, warp) {
         return this instanceof Simulator ? (this.callback = callback || noop, this.renderers = renderers || noop, 
@@ -324,11 +324,11 @@
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], 0 === i && edge.update(), 
             edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (hit = edge.findParticleEdge(particle.lastPosition, particle.position) || edge.findEdgeParticle(particle.lastPosition, particle.position), 
             hit && (!nearest || hit.getLength() < nearest.getLength()) && (nearest = hit, nearestEdge = edge));
-            nearest && collisions.push({
+            nearest ? (collisions.push({
                 particle: particle,
                 edge: nearestEdge,
                 correction: nearest
-            });
+            }), particle.colliding = !0) : particle.colliding = !1;
         }
         return collisions;
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
@@ -358,17 +358,12 @@
         for (var i = particles.length; i--; ) -1 === this.collisionParticles.indexOf(particles[i]) && this.collisionParticles.push(particles[i]);
         return this;
     }, Simulator.prototype.addConstraints = function(constraints) {
-        this.constraints.push.apply(this.constraints, constraints), this.constraints.sort(prioritySort);
+        return this.constraints.push.apply(this.constraints, constraints), this.constraints.sort(prioritySort), 
+        this;
     }, Simulator.prototype.findParticle = function(x, y, radius) {
         for (var distance, particles = this.particles, found = void 0, nearest = radius, i = 0, ilen = particles.length; ilen > i; i++) distance = particles[i].getDistance(x, y), 
         nearest >= distance && (found = particles[i], nearest = distance);
         return found;
-    }, Simulator.prototype.addBody = function(body) {
-        this.particles.push.apply(this.particles, body.particles), this.edges.push.apply(this.edges, body.edges), 
-        this.bodies.push(body);
-    }, Simulator.prototype.Layer = function() {
-        var newLayer = Newton.Layer();
-        return this.layers.push(newLayer), newLayer;
     }, Newton.Simulator = Simulator;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";

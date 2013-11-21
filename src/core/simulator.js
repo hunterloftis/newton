@@ -5,7 +5,7 @@
   function noop() {}
 
   function prioritySort(a, b) {
-    return b.priority - a.priority;
+    return b.priority - a.priority || b.id - a.id;
   }
 
   if(!Array.isArray) {
@@ -185,11 +185,17 @@
       }
 
       // If we found > 0 intersections, push the earliest (nearest) one into our collisions array
-      if (nearest) collisions.push({
-        particle: particle,
-        edge: nearestEdge,
-        correction: nearest
-      });
+      if (nearest) {
+        collisions.push({
+          particle: particle,
+          edge: nearestEdge,
+          correction: nearest
+        });
+        particle.colliding = true;
+      }
+      else {
+        particle.colliding = false;
+      }
     }
 
     return collisions;
@@ -217,7 +223,6 @@
       //console.log('velocity, normal', i, velocity, edge.normal.x, edge.normal.y);
 
       particle.correct(pCorrect);
-      //particle.stop();
       particle.launch(edge.normal.clone().scale(velocity));
 
       edge.p1.correct(eCorrect);
@@ -225,9 +230,11 @@
 
       edge.p2.correct(eCorrect);
       edge.p1.setVelocity(0, 0);
-
-      // console.log('from Y, to Y:', particle.lastPosition.y, particle.position.y);
     }
+
+    // if (collisions.length) {
+    //   throw new Error('wtf');
+    // }
 
   };
 
@@ -275,6 +282,7 @@
   Simulator.prototype.addConstraints = function(constraints) {
     this.constraints.push.apply(this.constraints, constraints);
     this.constraints.sort(prioritySort);
+    return this;
   };
 
   // TODO: this could be dramatically optimized by starting with bounding boxes
@@ -293,18 +301,6 @@
     }
 
     return found;
-  };
-
-  Simulator.prototype.addBody = function(body) {
-    this.particles.push.apply(this.particles, body.particles);
-    this.edges.push.apply(this.edges, body.edges);              // TODO: handle cases where the body's particles & edges change after adding
-    this.bodies.push(body);
-  };
-
-  Simulator.prototype.Layer = function() {
-    var newLayer = Newton.Layer();
-    this.layers.push(newLayer);
-    return newLayer;
   };
 
   Newton.Simulator = Simulator;
