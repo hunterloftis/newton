@@ -23,7 +23,7 @@
 <script>
 
   var renderer = Newton.GLRenderer(document.getElementById('display')),
-      sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
+      sim = Newton.Simulator(undefined, renderer.callback, 120, 5),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
       squishy = Newton.Squishy(525, 250, 70, 12),

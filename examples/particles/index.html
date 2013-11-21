@@ -68,7 +68,7 @@
     wallMaterial = Newton.Material();
 
     renderer = Newton.GLRenderer($display[0]);
-    sim = Newton.Simulator(simulate, renderer.callback, 60, 10);
+    sim = Newton.Simulator(simulate, renderer.callback, 120, 5);
 
     walls = createWalls();
     particles = Newton.Body(particleMaterial);

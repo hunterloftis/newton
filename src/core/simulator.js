@@ -93,6 +93,7 @@
     this.cull(this.particles);
     this.cull(this.constraints);
     this.cull(this.edges);
+
     this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
@@ -212,6 +213,9 @@
       var eCorrect = correction.clone().scale(-eInvMass / massTotal);
 
       var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
+
+      //console.log('velocity, normal', i, velocity, edge.normal.x, edge.normal.y);
+
       particle.correct(pCorrect);
       //particle.stop();
       particle.launch(edge.normal.clone().scale(velocity));
@@ -225,10 +229,6 @@
       // console.log('from Y, to Y:', particle.lastPosition.y, particle.position.y);
     }
 
-    // if (collisions.length) {
-    //   console.log('collisions:', collisions.length);
-    //   throw new Error('wtf');
-    // }
   };
 
   Simulator.prototype.ensureLayer = function(name) {
