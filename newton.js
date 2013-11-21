@@ -278,14 +278,14 @@
     function prioritySort(a, b) {
         return b.priority - a.priority;
     }
-    function Simulator(callback, renderers, integrationFps, iterations) {
+    function Simulator(callback, renderers, integrationFps, iterations, warp) {
         return this instanceof Simulator ? (this.callback = callback || noop, this.renderers = renderers || noop, 
         Array.isArray(this.renderers) || (this.renderers = [ this.renderers ]), this.step = this._step.bind(this), 
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
-        this.iterations = iterations || 3, this.startTime = 0, this.layers = {}, this.particles = [], 
-        this.edges = [], this.forces = [], this.constraints = [], this.collisionParticles = [], 
-        void 0) : new Simulator(callback, renderers, integrationFps, iterations);
+        this.iterations = iterations || 3, this.warp = warp || 1, this.startTime = 0, this.layers = {}, 
+        this.particles = [], this.edges = [], this.forces = [], this.constraints = [], this.collisionParticles = [], 
+        void 0) : new Simulator(callback, renderers, integrationFps, iterations, warp);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
@@ -297,8 +297,8 @@
     }, Simulator.prototype._step = function() {
         if (this.running) {
             var time = Date.now(), step = time - this.lastTime;
-            for (this.lastTime = time, step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep; ) this.simulate(this.simulationStep, time - this.startTime), 
-            this.accumulator -= this.simulationStep;
+            for (this.lastTime = time, step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep * this.warp; ) this.simulate(this.simulationStep, time - this.startTime), 
+            this.accumulator -= this.simulationStep * this.warp;
             for (var i = 0; i < this.renderers.length; i++) this.renderers[i](step, this);
             this.frames++, time >= this.countTime && (this.fps = (1e3 * (this.frames / (this.countInterval + time - this.countTime))).toFixed(0), 
             this.frames = 0, this.countTime = time + this.countInterval), Newton.frame(this.step);
@@ -333,9 +333,9 @@
         return collisions;
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
-            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass1 = 1 / edge.p1.getMass(), eInvMass2 = 1 / edge.p2.getMass(), massTotal = pInvMass + eInvMass1 + eInvMass2, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect1 = correction.clone().scale(-eInvMass1 / massTotal), eCorrect2 = correction.clone().scale(-eInvMass2 / massTotal), velocity = particle.position.clone().sub(particle.lastPosition).getLength();
+            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal), velocity = particle.position.clone().sub(particle.lastPosition).getLength();
             particle.correct(pCorrect), particle.launch(edge.normal.clone().scale(velocity)), 
-            edge.p1.correct(eCorrect1), edge.p1.setVelocity(0, 0), edge.p2.correct(eCorrect2), 
+            edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), edge.p2.correct(eCorrect), 
             edge.p1.setVelocity(0, 0);
         }
     }, Simulator.prototype.ensureLayer = function(name) {

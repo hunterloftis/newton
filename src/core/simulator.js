@@ -14,8 +14,8 @@
     };
   }
 
-  function Simulator(callback, renderers, integrationFps, iterations) {
-    if (!(this instanceof Simulator)) return new Simulator(callback, renderers, integrationFps, iterations);
+  function Simulator(callback, renderers, integrationFps, iterations, warp) {
+    if (!(this instanceof Simulator)) return new Simulator(callback, renderers, integrationFps, iterations, warp);
 
     this.callback = callback || noop;
     this.renderers = renderers || noop;
@@ -30,8 +30,9 @@
     this.accumulator = 0;
     this.simulationStep = 1000 / (integrationFps || 60);
     this.iterations = iterations || 3;
-    this.startTime = 0;
+    this.warp = warp || 1;
 
+    this.startTime = 0;
     this.layers = {};
 
     // The basic elements of the simulation
@@ -66,9 +67,9 @@
     this.accumulator += step;
 
     // fixed-timestep physics simulation
-    while (this.accumulator >= this.simulationStep) {
+    while (this.accumulator >= this.simulationStep * this.warp) {
       this.simulate(this.simulationStep, time - this.startTime);
-      this.accumulator -= this.simulationStep;
+      this.accumulator -= this.simulationStep * this.warp;
     }
 
     // arbitrary-timestep rendering
@@ -203,23 +204,22 @@
       // collision.particle.collide(collision.intersection);
       // collision.edge.collide(collision.intersection);
 
-      var pInvMass = 1 / particle.getMass();  // eg 1
-      var eInvMass1 = 1 / edge.p1.getMass();  // eg 0
-      var eInvMass2 = 1 / edge.p2.getMass();  // eg 0
-      var massTotal = pInvMass + eInvMass1 + eInvMass2;
+      var pInvMass = 1 / particle.getMass();
+      var eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass());
+      var massTotal = pInvMass + eInvMass;
 
       var pCorrect = correction.clone().scale(pInvMass / massTotal);
-      var eCorrect1 = correction.clone().scale(-eInvMass1 / massTotal);
-      var eCorrect2 = correction.clone().scale(-eInvMass2 / massTotal);
+      var eCorrect = correction.clone().scale(-eInvMass / massTotal);
 
       var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
       particle.correct(pCorrect);
+      //particle.stop();
       particle.launch(edge.normal.clone().scale(velocity));
 
-      edge.p1.correct(eCorrect1);
+      edge.p1.correct(eCorrect);
       edge.p1.setVelocity(0, 0);
 
-      edge.p2.correct(eCorrect2);
+      edge.p2.correct(eCorrect);
       edge.p1.setVelocity(0, 0);
 
       // console.log('from Y, to Y:', particle.lastPosition.y, particle.position.y);
