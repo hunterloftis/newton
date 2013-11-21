@@ -162,7 +162,7 @@
         if (0 === det) return !1;
         var x = (l2.b * l1.c - l1.b * l2.c) / det, y = (l1.a * l2.c - l2.a * l1.c) / det;
         return bounds1.contains(x, y) && bounds2.contains(x, y) ? Newton.Vector(x - x2, y - y2).add(this.normal) : !1;
-    }, Edge.prototype.collide = function() {}, Edge.prototype.getReflection = function(velocity, restitution) {
+    }, Edge.prototype.getReflection = function(velocity, restitution) {
         var dir = this.normal.clone(), friction = this.material.friction, velN = dir.scale(velocity.getDot(dir)).scale(restitution), velT = velocity.clone().sub(velN).scale(1 - friction), reflectedVel = velT.sub(velN);
         return reflectedVel;
     }, Edge.prototype.getCoords = function() {
@@ -239,8 +239,8 @@
     }, Particle.prototype.getDistance = function(x, y) {
         return this.position.pool().subXY(x, y).getLength();
     }, Particle.prototype.pin = function(x, y) {
-        x = "undefined" != typeof x ? x : this.position.x, y = "undefined" != typeof y ? y : this.position.y, 
-        this.placeAt(x, y), this.pinned = !0, this.size = 1/0;
+        return x = "undefined" != typeof x ? x : this.position.x, y = "undefined" != typeof y ? y : this.position.y, 
+        this.placeAt(x, y), this.pinned = !0, this.size = 1/0, this;
     }, Particle.prototype.setVelocity = function(x, y) {
         return this.lastPosition.copy(this.position).subXY(x, y), this;
     }, Particle.prototype.contain = function(bounds) {
@@ -333,10 +333,10 @@
         return collisions;
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
-            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pCorrect = correction.clone().scale(1);
-            correction.clone().scale(-0), correction.clone().scale(-0);
-            var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
-            particle.correct(pCorrect), particle.launch(edge.normal.clone().scale(velocity));
+            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass1 = 1 / edge.p1.getMass(), eInvMass2 = 1 / edge.p2.getMass(), massTotal = pInvMass + eInvMass1 + eInvMass2, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect1 = correction.clone().scale(-eInvMass1 / massTotal), eCorrect2 = correction.clone().scale(-eInvMass2 / massTotal), velocity = particle.position.clone().sub(particle.lastPosition).getLength();
+            particle.correct(pCorrect), particle.launch(edge.normal.clone().scale(velocity)), 
+            edge.p1.correct(eCorrect1), edge.p1.setVelocity(0, 0), edge.p2.correct(eCorrect2), 
+            edge.p1.setVelocity(0, 0);
         }
     }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {

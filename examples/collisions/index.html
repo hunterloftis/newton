@@ -26,16 +26,19 @@
       sim = Newton.Simulator(undefined, renderer.callback, 60, 10),
       gravity = Newton.LinearGravity(0, 0.002, 0),
       container = Newton.BoxConstraint(0, 0, 1280, 450),
-      boxes = createBoxes(100, 100, 1180, 100, 10),
-      line = createLine(0, 400, 640, 400),
-      segments = createSegments(640, 400, 1280, 400, 10);
+      boxes = createBoxes(100, 100, 800, 100, 7),
+      line = createLine(0, 400, 400, 400),
+      segments = createSegments(400, 400, 800, 400, 5),
+      spike1 = createSpike(950, 350, 100),
+      box1 = Newton.Box(950, 50, 40),
+      spike2 = createSpike(1150, 350, 100),
+      box2 = Newton.Box(1170, 50, 40);
 
   sim
-    .add(gravity)
+    .add([gravity, container])
     .add(boxes)
-    .add(line)
-    .add(segments)
-    .add(container)
+    .add([line, segments])
+    .add([spike1, box1, spike2, box2])
     .start();
 
   setInterval(showStats, 250);
@@ -46,6 +49,16 @@
     $('#edges').text(sim.edges.length);
     $('#constraints').text(sim.constraints.length);
     $('#forces').text(sim.forces.length);
+  }
+
+  function createSpike(x, y, size) {
+    var body = Newton.Body();
+    var a = body.Particle(x - size, y + size).pin();
+    var b = body.Particle(x, y).pin();
+    var c = body.Particle(x + size, y + size).pin();
+    body.Edge(a, b);
+    body.Edge(b, c);
+    return body;
   }
 
   function createBoxes(x1, y1, x2, y2, count) {

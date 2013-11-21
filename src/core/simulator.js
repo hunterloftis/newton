@@ -203,21 +203,24 @@
       // collision.particle.collide(collision.intersection);
       // collision.edge.collide(collision.intersection);
 
-      var pCorrect = correction.clone().scale(1);
-      var eCorrect1 = correction.clone().scale(-0);
-      var eCorrect2 = correction.clone().scale(-0);
+      var pInvMass = 1 / particle.getMass();  // eg 1
+      var eInvMass1 = 1 / edge.p1.getMass();  // eg 0
+      var eInvMass2 = 1 / edge.p2.getMass();  // eg 0
+      var massTotal = pInvMass + eInvMass1 + eInvMass2;
+
+      var pCorrect = correction.clone().scale(pInvMass / massTotal);
+      var eCorrect1 = correction.clone().scale(-eInvMass1 / massTotal);
+      var eCorrect2 = correction.clone().scale(-eInvMass2 / massTotal);
 
       var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
       particle.correct(pCorrect);
       particle.launch(edge.normal.clone().scale(velocity));
-      //particle.launch(Newton.Vector(100, -1000));
-      //particle.stop();
 
-      // edge.p1.correct(eCorrect1);
-      // edge.p1.setVelocity(0, 0);
+      edge.p1.correct(eCorrect1);
+      edge.p1.setVelocity(0, 0);
 
-      // edge.p2.correct(eCorrect2);
-      // edge.p1.setVelocity(0, 0);
+      edge.p2.correct(eCorrect2);
+      edge.p1.setVelocity(0, 0);
 
       // console.log('from Y, to Y:', particle.lastPosition.y, particle.position.y);
     }

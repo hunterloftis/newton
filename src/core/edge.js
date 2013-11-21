@@ -92,10 +92,6 @@
     return Newton.Vector(x - x2, y - y2).add(this.normal);
   };
 
-  Edge.prototype.collide = function(intersection) {
-
-  };
-
   // friction = range(0, 1)
   // restitution = range(0.1, 1)
   Edge.prototype.getReflection = function(velocity, restitution) {

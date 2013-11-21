@@ -102,6 +102,7 @@
     this.placeAt(x, y);
     this.pinned = true;
     this.size = Infinity;
+    return this;
   };
 
   Particle.prototype.setVelocity = function(x, y) {
