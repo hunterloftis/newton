@@ -5,7 +5,7 @@
   function noop() {}
 
   function prioritySort(a, b) {
-    return b.priority - a.priority || b.id - a.id;
+    return b.priority - a.priority || a.id - b.id;
   }
 
   if(!Array.isArray) {
@@ -201,6 +201,7 @@
     return collisions;
   };
 
+  // TODO: expand this naive approach
   Simulator.prototype.resolveCollisions = function(time, collisions) {
     for (var i = 0, ilen = collisions.length; i < ilen; i++) {
       var collision = collisions[i];
@@ -208,33 +209,33 @@
       var edge = collision.edge;
       var correction = collision.correction;
 
-      // collision.particle.collide(collision.intersection);
-      // collision.edge.collide(collision.intersection);
-
       var pInvMass = 1 / particle.getMass();
       var eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass());
       var massTotal = pInvMass + eInvMass;
+
+      // console.log('pInvMass =', pInvMass);
+      // console.log('eInvMass = ', eInvMass);
+      // console.log('total =', massTotal);
+      // console.log('correction:', correction);
 
       var pCorrect = correction.clone().scale(pInvMass / massTotal);
       var eCorrect = correction.clone().scale(-eInvMass / massTotal);
 
       var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
 
-      //console.log('velocity, normal', i, velocity, edge.normal.x, edge.normal.y);
-
       particle.correct(pCorrect);
-      particle.launch(edge.normal.clone().scale(velocity));
+      // particle.launch(edge.normal.clone().scale(velocity));
 
       edge.p1.correct(eCorrect);
       edge.p1.setVelocity(0, 0);
 
       edge.p2.correct(eCorrect);
       edge.p1.setVelocity(0, 0);
-    }
 
-    // if (collisions.length) {
-    //   throw new Error('wtf');
-    // }
+      //console.log(pCorrect, eCorrect);
+
+    }
+    //if (collisions.length) throw new Error('ok');
 
   };
 

@@ -2,12 +2,11 @@
 
   'use strict'
 
-  function pointInPoly(poly, pt){
-    for (var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) {
+  function pointInPoly(pt, poly){
+    for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
       ((poly[i].y <= pt.y && pt.y < poly[j].y) || (poly[j].y <= pt.y && pt.y < poly[i].y))
       && (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
       && (c = !c);
-    }
     return c;
   }
 
@@ -57,6 +56,15 @@
     // TODO: implement check for whether v2 is inside of the polygon made by this edge + this edge's last step
     // TODO: find closest point to v2 on this edge if v2 is inside this poly
     // TODO: return vector for correction of particle at v2
+    var poly = [
+      this.p1.lastPosition, this.p2.lastPosition,
+      this.p2.position, this.p1.position
+    ];
+
+    if (pointInPoly(v2, poly)) {
+      //console.log('point in poly:', v2, poly);
+      return this.p1.position.clone().sub(this.p1.lastPosition);
+    }
 
     return false;
   };

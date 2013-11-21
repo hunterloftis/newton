@@ -135,6 +135,10 @@
     }, Newton.Body = Body;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function pointInPoly(pt, poly) {
+        for (var c = !1, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) (poly[i].y <= pt.y && pt.y < poly[j].y || poly[j].y <= pt.y && pt.y < poly[i].y) && pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x && (c = !c);
+        return c;
+    }
     function Edge(p1, p2, material) {
         return this instanceof Edge ? (this.p1 = p1, this.p2 = p2, this.material = material || Newton.Material.simple, 
         this.layer = void 0, this.vector = Newton.Vector(), this.normal = Newton.Vector(), 
@@ -151,8 +155,9 @@
     }, Edge.prototype.update = function() {
         this.vector.copy(this.p2.position).sub(this.p1.position), this.normal.copy(this.vector).turnLeft().unit(), 
         this.bounds.setV(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
-    }, Edge.prototype.findEdgeParticle = function() {
-        return !1;
+    }, Edge.prototype.findEdgeParticle = function(v1, v2) {
+        var poly = [ this.p1.lastPosition, this.p2.lastPosition, this.p2.position, this.p1.position ];
+        return pointInPoly(v2, poly) ? this.p1.position.clone().sub(this.p1.lastPosition) : !1;
     }, Edge.prototype.findParticleEdge = function(v1, v2) {
         var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
         if (dot >= 0) return !1;
@@ -276,7 +281,7 @@
     "use strict";
     function noop() {}
     function prioritySort(a, b) {
-        return b.priority - a.priority || b.id - a.id;
+        return b.priority - a.priority || a.id - b.id;
     }
     function Simulator(callback, renderers, integrationFps, iterations, warp) {
         return this instanceof Simulator ? (this.callback = callback || noop, this.renderers = renderers || noop, 
@@ -333,8 +338,8 @@
         return collisions;
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
-            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal), velocity = particle.position.clone().sub(particle.lastPosition).getLength();
-            particle.correct(pCorrect), particle.launch(edge.normal.clone().scale(velocity)), 
+            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal);
+            particle.position.clone().sub(particle.lastPosition).getLength(), particle.correct(pCorrect), 
             edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), edge.p2.correct(eCorrect), 
             edge.p1.setVelocity(0, 0);
         }
@@ -369,7 +374,7 @@
     "use strict";
     function Box(x, y, size) {
         var body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
-        return body.DistanceConstraint(ul, ur), body.DistanceConstraint(ur, lr), body.DistanceConstraint(lr, ll), 
+        return body.DistanceConstraint(ul, ur), body.DistanceConstraint(lr, ll), body.DistanceConstraint(ur, lr), 
         body.DistanceConstraint(ll, ul), body.DistanceConstraint(ul, lr), body.DistanceConstraint(ur, ll), 
         body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul), body;
     }

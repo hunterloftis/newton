@@ -11,8 +11,9 @@
     var lr = body.Particle(x + size, y + size);
 
     body.DistanceConstraint(ul, ur);
-    body.DistanceConstraint(ur, lr);
     body.DistanceConstraint(lr, ll);
+
+    body.DistanceConstraint(ur, lr);
     body.DistanceConstraint(ll, ul);
 
     body.DistanceConstraint(ul, lr);
