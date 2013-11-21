@@ -218,6 +218,11 @@
       // console.log('total =', massTotal);
       // console.log('correction:', correction);
 
+
+      // TODO: getting wonkiness from multiple simultaneous decisions with 'correct'
+      // possibly better to just set position directly so the corrections won't
+      // add up in a single frame
+
       var pCorrect = correction.clone().scale(pInvMass / massTotal);
       var eCorrect = correction.clone().scale(-eInvMass / massTotal);
 
