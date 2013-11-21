@@ -224,7 +224,12 @@
       var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
 
       particle.correct(pCorrect);
+      particle.setVelocity(0, 0);
       // particle.launch(edge.normal.clone().scale(velocity));
+
+      // TODO: instead of correcting each linearly, correct
+      // them weighted towards which they're close to?
+      // Or should that angle be handled entirely with velocity?
 
       edge.p1.correct(eCorrect);
       edge.p1.setVelocity(0, 0);

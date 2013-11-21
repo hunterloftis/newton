@@ -340,8 +340,8 @@
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
             var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal);
             particle.position.clone().sub(particle.lastPosition).getLength(), particle.correct(pCorrect), 
-            edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), edge.p2.correct(eCorrect), 
-            edge.p1.setVelocity(0, 0);
+            particle.setVelocity(0, 0), edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), 
+            edge.p2.correct(eCorrect), edge.p1.setVelocity(0, 0);
         }
     }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
