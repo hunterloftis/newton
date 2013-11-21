@@ -212,8 +212,8 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Particle(x, y, size, material) {
-        return this instanceof Particle ? (this.position = new Newton.Vector(x, y), this.lastPosition = this.position.clone(), 
-        this.velocity = new Newton.Vector(0, 0), this.acceleration = new Newton.Vector(0, 0), 
+        return this instanceof Particle ? (this.position = Newton.Vector(x, y), this.lastPosition = this.position.clone(), 
+        this.velocity = Newton.Vector(0, 0), this.acceleration = Newton.Vector(0, 0), this.correction = Newton.Vector(0, 0), 
         this.material = material || Newton.Material.simple, this.size = size || 1, this.randomDrag = 0, 
         this.pinned = !1, this.colliding = !1, this.isDestroyed = !1, this.layer = void 0, 
         void 0) : new Particle(x, y, size, material);
@@ -323,25 +323,34 @@
     }, Simulator.prototype.constrain = function(time) {
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
     }, Simulator.prototype.detectCollisions = function() {
-        for (var hit, particle, edge, nearest, nearestEdge, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
+        for (var hit, particle, edge, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
-            hit = void 0, nearest = void 0, nearestEdge = void 0;
+            hit = void 0, particle.colliding = !1;
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], 0 === i && edge.update(), 
             edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (hit = edge.findParticleEdge(particle.lastPosition, particle.position) || edge.findEdgeParticle(particle.lastPosition, particle.position), 
-            hit && (!nearest || hit.getLength() < nearest.getLength()) && (nearest = hit, nearestEdge = edge));
-            nearest ? (collisions.push({
+            hit && collisions.push({
                 particle: particle,
-                edge: nearestEdge,
-                correction: nearest
-            }), particle.colliding = !0) : particle.colliding = !1;
+                edge: edge,
+                correction: hit,
+                participants: [ particle, edge.p1, edge.p2 ],
+                penetration: hit.getLength()
+            }));
         }
         return collisions;
     }, Simulator.prototype.resolveCollisions = function(time, collisions) {
+        collisions.sort(function(a, b) {
+            return b.penetration - a.penetration;
+        });
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
-            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction, pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass, pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal);
-            particle.position.clone().sub(particle.lastPosition).getLength(), particle.correct(pCorrect), 
-            particle.setVelocity(0, 0), edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), 
-            edge.p2.correct(eCorrect), edge.p1.setVelocity(0, 0);
+            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction;
+            if (!(particle.colliding || edge.p1.colliding || edge.p2.colliding)) {
+                var pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass;
+                particle.colliding = edge.p1.colliding = edge.p2.colliding = !0;
+                var pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal);
+                particle.position.clone().sub(particle.lastPosition).getLength(), particle.correct(pCorrect), 
+                particle.setVelocity(0, 0), edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), 
+                edge.p2.correct(eCorrect), edge.p1.setVelocity(0, 0);
+            }
         }
     }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {

@@ -4,10 +4,11 @@
 
   function Particle(x, y, size, material) {
     if (!(this instanceof Particle)) return new Particle(x, y, size, material);
-    this.position = new Newton.Vector(x, y);
+    this.position = Newton.Vector(x, y);
     this.lastPosition = this.position.clone();
-    this.velocity = new Newton.Vector(0, 0);
-    this.acceleration = new Newton.Vector(0, 0);
+    this.velocity = Newton.Vector(0, 0);
+    this.acceleration = Newton.Vector(0, 0);
+    this.correction = Newton.Vector(0, 0);
     this.material = material || Newton.Material.simple;
     this.size = size || 1.0;
     this.randomDrag = 0; // TODO: make this optional: Math.random() * Particle.randomness + 0.0000000001;

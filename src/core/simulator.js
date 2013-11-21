@@ -150,7 +150,7 @@
     var edges = this.edges;
     var layers = this.layers;
 
-    var hit, particle, edge, nearest, nearestEdge, linked;
+    var hit, particle, edge, linked;
 
     var emptyLink = [];
     var collisions = [];
@@ -160,8 +160,8 @@
       particle = particles[i];
       linked = particle.layer ? layers[particle.layer].linked : emptyLink;
       hit = undefined;
-      nearest = undefined;
-      nearestEdge = undefined;
+
+      particle.colliding = false;
 
       // Loop through all edges to see if this particle ran into the edge
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
@@ -176,74 +176,81 @@
 
             // TODO: add test here for an intersection with the edge's last position? necessary?
 
-            if (hit && (!nearest || hit.getLength() < nearest.getLength())) {
-              nearest = hit;
-              nearestEdge = edge;
-            }
+            // TODO: minimize the stuff created here
+            if (hit) collisions.push({
+              particle: particle,
+              edge: edge,
+              correction: hit,
+              participants: [particle, edge.p1, edge.p2],
+              penetration: hit.getLength()
+            });
           }
         }
-      }
-
-      // If we found > 0 intersections, push the earliest (nearest) one into our collisions array
-      if (nearest) {
-        collisions.push({
-          particle: particle,
-          edge: nearestEdge,
-          correction: nearest
-        });
-        particle.colliding = true;
-      }
-      else {
-        particle.colliding = false;
-      }
-    }
+      } // edges
+    } // particles
 
     return collisions;
   };
 
   // TODO: expand this naive approach
   Simulator.prototype.resolveCollisions = function(time, collisions) {
+    // idea 1 - sort collisions by penetration depth and solve the largest first
+    // flag all participants as "colliding = false" in detect step, then true here at resolution
+    // if any participants in a collision have colliding == true, then they have already
+    // collided and should be skipped
+
+    // sort collisions globally
+    collisions.sort(function(a, b) {
+      return b.penetration - a.penetration
+    });
+
     for (var i = 0, ilen = collisions.length; i < ilen; i++) {
       var collision = collisions[i];
       var particle = collision.particle;
       var edge = collision.edge;
       var correction = collision.correction;
 
-      var pInvMass = 1 / particle.getMass();
-      var eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass());
-      var massTotal = pInvMass + eInvMass;
+      // TODO: needs to look for particle/edge pairs instead of just particles
+      if (!(particle.colliding || edge.p1.colliding || edge.p2.colliding)) {
 
-      // console.log('pInvMass =', pInvMass);
-      // console.log('eInvMass = ', eInvMass);
-      // console.log('total =', massTotal);
-      // console.log('correction:', correction);
+        var pInvMass = 1 / particle.getMass();
+        var eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass());
+        var massTotal = pInvMass + eInvMass;
+
+        particle.colliding = edge.p1.colliding = edge.p2.colliding = true;
+
+        // console.log('pInvMass =', pInvMass);
+        // console.log('eInvMass = ', eInvMass);
+        // console.log('total =', massTotal);
+        // console.log('correction:', correction);
 
 
-      // TODO: getting wonkiness from multiple simultaneous decisions with 'correct'
-      // possibly better to just set position directly so the corrections won't
-      // add up in a single frame
+        // TODO: getting wonkiness from multiple simultaneous decisions with 'correct'
+        // possibly better to just set position directly so the corrections won't
+        // add up in a single frame
 
-      var pCorrect = correction.clone().scale(pInvMass / massTotal);
-      var eCorrect = correction.clone().scale(-eInvMass / massTotal);
+        var pCorrect = correction.clone().scale(pInvMass / massTotal);
+        var eCorrect = correction.clone().scale(-eInvMass / massTotal);
 
-      var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
+        var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
 
-      particle.correct(pCorrect);
-      particle.setVelocity(0, 0);
-      // particle.launch(edge.normal.clone().scale(velocity));
+        particle.correct(pCorrect);
+        particle.setVelocity(0, 0);
+        // particle.launch(edge.normal.clone().scale(velocity));
 
-      // TODO: instead of correcting each linearly, correct
-      // them weighted towards which they're close to?
-      // Or should that angle be handled entirely with velocity?
+        // TODO: instead of correcting each linearly, correct
+        // them weighted towards which they're close to?
+        // Or should that angle be handled entirely with velocity?
 
-      edge.p1.correct(eCorrect);
-      edge.p1.setVelocity(0, 0);
+        edge.p1.correct(eCorrect);
+        edge.p1.setVelocity(0, 0);
 
-      edge.p2.correct(eCorrect);
-      edge.p1.setVelocity(0, 0);
+        edge.p2.correct(eCorrect);
+        edge.p1.setVelocity(0, 0);
 
-      //console.log(pCorrect, eCorrect);
+        //console.log(pCorrect, eCorrect);
 
+      }
     }
     //if (collisions.length) throw new Error('ok');
 
