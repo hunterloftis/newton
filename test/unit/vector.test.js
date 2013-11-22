@@ -195,6 +195,30 @@ describe('Vector', function() {
     });
   });
 
+  describe('merge()', function() {
+    var pos3 = Newton.Vector(3, 3);
+    var neg3 = Newton.Vector(-3, -3);
+    var mixed3 = Newton.Vector(3, -3);
+
+    it('should accept only larger positive values', function() {
+      var v1 = Newton.Vector(1, 5).merge(pos3);
+      var v2 = Newton.Vector(-1, 5).merge(mixed3);
+      assert.equal(v1.x, 3, 'v1.x');
+      assert.equal(v1.y, 5, 'v1.y');
+      assert.equal(v2.x, -1, 'v2.x');
+      assert.equal(v2.y, 5, 'v2.y');
+    });
+
+    it('should accept only smaller negative values', function() {
+      var v1 = Newton.Vector(-1, -5).merge(neg3);
+      var v2 = Newton.Vector(1, -5).merge(mixed3)
+      assert.equal(v1.x, -3);
+      assert.equal(v1.y, -5);
+      assert.equal(v2.x, 3);
+      assert.equal(v2.y, -5);
+    });
+  });
+
   describe('mult()', function() {
     var v = Newton.Vector(1, 2);
     var v1 = v.mult(Newton.Vector(2, 3));

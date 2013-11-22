@@ -215,8 +215,8 @@
         return this instanceof Particle ? (this.position = Newton.Vector(x, y), this.lastPosition = this.position.clone(), 
         this.velocity = Newton.Vector(0, 0), this.acceleration = Newton.Vector(0, 0), this.correction = Newton.Vector(0, 0), 
         this.material = material || Newton.Material.simple, this.size = size || 1, this.randomDrag = 0, 
-        this.pinned = !1, this.colliding = !1, this.isDestroyed = !1, this.layer = void 0, 
-        void 0) : new Particle(x, y, size, material);
+        this.pinned = !1, this.colliding = !1, this.isDestroyed = !1, this.isCollisionPoint = !1, 
+        this.layer = void 0, void 0) : new Particle(x, y, size, material);
     }
     Particle.randomness = 25, Particle.prototype.integrate = function(time) {
         if (!this.pinned) {
@@ -325,7 +325,7 @@
     }, Simulator.prototype.detectCollisions = function() {
         for (var hit, particle, edge, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
-            hit = void 0, particle.colliding = !1;
+            hit = void 0, particle.colliding = !1, particle.isCollisionPoint = !1, particle.correction.set(0, 0);
             for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], 0 === i && edge.update(), 
             edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (hit = edge.findParticleEdge(particle.lastPosition, particle.position) || edge.findEdgeParticle(particle.lastPosition, particle.position), 
             hit && collisions.push({
@@ -343,15 +343,16 @@
         });
         for (var i = 0, ilen = collisions.length; ilen > i; i++) {
             var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction;
-            if (!(particle.colliding || edge.p1.colliding || edge.p2.colliding)) {
+            if (!particle.isCollisionPoint) {
                 var pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass;
-                particle.colliding = edge.p1.colliding = edge.p2.colliding = !0;
+                particle.colliding = edge.p1.colliding = edge.p2.colliding = !0, particle.isCollisionPoint = !0;
                 var pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal);
-                particle.position.clone().sub(particle.lastPosition).getLength(), particle.correct(pCorrect), 
-                particle.setVelocity(0, 0), edge.p1.correct(eCorrect), edge.p1.setVelocity(0, 0), 
-                edge.p2.correct(eCorrect), edge.p1.setVelocity(0, 0);
+                particle.position.clone().sub(particle.lastPosition).getLength(), particle.correction.merge(pCorrect), 
+                edge.p1.correction.merge(eCorrect), edge.p2.correction.merge(eCorrect);
             }
         }
+        for (var i = 0; i < this.collisionParticles.length; i++) this.collisionParticles[i].colliding && (this.collisionParticles[i].position.add(this.collisionParticles[i].correction), 
+        this.collisionParticles[i].stop());
     }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
             linked: [ name ]
@@ -521,6 +522,10 @@
         return this.x -= v.x, this.y -= v.y, this;
     }, Vector.prototype.subXY = function(x, y) {
         return this.x -= x, this.y -= y, this;
+    }, Vector.prototype.merge = function(v) {
+        var dx = v.x - this.x, dy = v.y - this.y;
+        return dx > 0 && this.x > 0 ? this.x += dx : 0 > dx && this.x < 0 && (this.x += dx), 
+        dy > 0 && this.y > 0 ? this.y += dy : 0 > dy && this.y < 0 && (this.y -= dy), this;
     }, Vector.prototype.mult = function(v) {
         return this.x *= v.x, this.y *= v.y, this;
     }, Vector.prototype.scale = function(scalar) {

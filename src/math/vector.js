@@ -101,6 +101,16 @@
     return this;
   };
 
+  Vector.prototype.merge = function(v) {
+    var dx = v.x - this.x;
+    var dy = v.y - this.y;
+    if (dx > 0 && this.x > 0) this.x += dx;
+    else if (dx < 0 && this.x < 0) this.x += dx;
+    if (dy > 0 && this.y > 0) this.y += dy;
+    else if (dy < 0 && this.y < 0) this.y -= dy;
+    return this;
+  };
+
   // Scale
 
   Vector.prototype.mult = function(v) {

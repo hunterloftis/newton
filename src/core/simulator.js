@@ -162,6 +162,8 @@
       hit = undefined;
 
       particle.colliding = false;
+      particle.isCollisionPoint = false;
+      particle.correction.set(0, 0);
 
       // Loop through all edges to see if this particle ran into the edge
       for (var j = 0, jlen = edges.length; j < jlen; j++) {
@@ -199,6 +201,15 @@
     // if any participants in a collision have colliding == true, then they have already
     // collided and should be skipped
 
+    // idea 2 - sort collisions globally by correction distance,
+    // prevent duplicate edge/edge collisions,
+    // sum total differences of corrections per particle eg:
+    // var correctionDelta = thisCorrection.sub(p.correction); (make sure same sign?)
+    // p.correction.add(correctionDelta);
+
+    // idea 3 - add "near" filter back to detection above
+    // then use total correction distance summing
+
     // sort collisions globally
     collisions.sort(function(a, b) {
       return b.penetration - a.penetration
@@ -210,50 +221,33 @@
       var edge = collision.edge;
       var correction = collision.correction;
 
-      // TODO: needs to look for particle/edge pairs instead of just particles
-      if (!(particle.colliding || edge.p1.colliding || edge.p2.colliding)) {
+      if (!particle.isCollisionPoint) {
 
         var pInvMass = 1 / particle.getMass();
         var eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass());
         var massTotal = pInvMass + eInvMass;
 
         particle.colliding = edge.p1.colliding = edge.p2.colliding = true;
-
-        // console.log('pInvMass =', pInvMass);
-        // console.log('eInvMass = ', eInvMass);
-        // console.log('total =', massTotal);
-        // console.log('correction:', correction);
-
-
-        // TODO: getting wonkiness from multiple simultaneous decisions with 'correct'
-        // possibly better to just set position directly so the corrections won't
-        // add up in a single frame
+        particle.isCollisionPoint = true;
 
         var pCorrect = correction.clone().scale(pInvMass / massTotal);
         var eCorrect = correction.clone().scale(-eInvMass / massTotal);
 
         var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
 
-        particle.correct(pCorrect);
-        particle.setVelocity(0, 0);
-        // particle.launch(edge.normal.clone().scale(velocity));
-
-        // TODO: instead of correcting each linearly, correct
-        // them weighted towards which they're close to?
-        // Or should that angle be handled entirely with velocity?
-
-        edge.p1.correct(eCorrect);
-        edge.p1.setVelocity(0, 0);
-
-        edge.p2.correct(eCorrect);
-        edge.p1.setVelocity(0, 0);
-
-        //console.log(pCorrect, eCorrect);
-
+        particle.correction.merge(pCorrect);
+        edge.p1.correction.merge(eCorrect);
+        edge.p2.correction.merge(eCorrect);
       }
     }
     //if (collisions.length) throw new Error('ok');
 
+    for (var i = 0; i < this.collisionParticles.length; i++) {
+      if (this.collisionParticles[i].colliding) {
+        this.collisionParticles[i].position.add(this.collisionParticles[i].correction);
+        this.collisionParticles[i].stop();
+      }
+    }
   };
 
   Simulator.prototype.ensureLayer = function(name) {

@@ -16,6 +16,7 @@
     this.pinned = false;
     this.colliding = false;
     this.isDestroyed = false;
+    this.isCollisionPoint = false;
 
     this.layer = undefined;
   }
