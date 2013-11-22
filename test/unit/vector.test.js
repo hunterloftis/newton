@@ -217,6 +217,15 @@ describe('Vector', function() {
       assert.equal(v2.x, 3);
       assert.equal(v2.y, -5);
     });
+
+    it('should accept any values on zero', function() {
+      var v1 = Newton.Vector(0, 0).merge(pos3);
+      var v2 = Newton.Vector(0, 0).merge(neg3);
+      assert.equal(v1.x, 3, 'v1.x');
+      assert.equal(v1.y, 3, 'v1.y');
+      assert.equal(v2.x, -3, 'v2.x');
+      assert.equal(v2.y, -3, 'v2.y');
+    });
   });
 
   describe('mult()', function() {

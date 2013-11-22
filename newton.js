@@ -524,8 +524,9 @@
         return this.x -= x, this.y -= y, this;
     }, Vector.prototype.merge = function(v) {
         var dx = v.x - this.x, dy = v.y - this.y;
-        return dx > 0 && this.x > 0 ? this.x += dx : 0 > dx && this.x < 0 && (this.x += dx), 
-        dy > 0 && this.y > 0 ? this.y += dy : 0 > dy && this.y < 0 && (this.y -= dy), this;
+        return dx > 0 && this.x >= 0 ? this.x += dx : 0 > dx && this.x <= 0 && (this.x += dx), 
+        dy > 0 && this.y >= 0 ? this.y += dy : 0 > dy && this.y <= 0 && (this.y += dy), 
+        this;
     }, Vector.prototype.mult = function(v) {
         return this.x *= v.x, this.y *= v.y, this;
     }, Vector.prototype.scale = function(scalar) {
