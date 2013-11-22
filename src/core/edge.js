@@ -2,6 +2,7 @@
 
   'use strict'
 
+  // TODO: try to extend this outward a bit?
   function pointInPoly(pt, poly){
     for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
       ((poly[i].y <= pt.y && pt.y < poly[j].y) || (poly[j].y <= pt.y && pt.y < poly[i].y))
@@ -56,36 +57,54 @@
     // TODO: implement check for whether v2 is inside of the polygon made by this edge + this edge's last step
     // TODO: find closest point to v2 on this edge if v2 is inside this poly
     // TODO: return vector for correction of particle at v2
+
     var poly = [
       this.p1.lastPosition, this.p2.lastPosition,
       this.p2.position, this.p1.position
     ];
 
     if (pointInPoly(v2, poly)) {
-      //console.log('point in poly:', v2, poly);
-      return this.p1.position.clone().sub(this.p1.lastPosition);
+      var targetPoint = this.p1.position.clone().add(this.p2.position).scale(0.5).add(this.normal);
+      return targetPoint.sub(v2);
     }
 
     return false;
   };
 
-  Edge.prototype.findParticleEdge = function(v1, v2) {
+  // TODO: implement some method of getting bounds etc of the last position if this thing
+  // then use that if last == true
+  Edge.prototype.findParticleEdge = function(v1, v2, last) {
     var x1 = v1.x;
     var y1 = v1.y;
     var x2 = v2.x;
     var y2 = v2.y;
 
     // Dot product determines whether particle is moving towards (>0) or away (<0)
-    var dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
-    if (dot >= 0) return false;
+    // var dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
+    // if (dot >= 0) return false;
 
-    var bounds1 = this.bounds;
-    var bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+    // var bounds1 = this.bounds;
+    // var bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+
+    if (last) {
+      var bounds1 = Newton.Rectangle
+        .fromVectors(this.p1.lastPosition, this.p2.lastPosition)
+        .expand(Edge.COLLISION_TOLERANCE);
+        var bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+      var p1 = this.p1.lastPosition;
+      var p2 = this.p2.lastPosition;
+    }
+    else {
+      var bounds1 = Newton.Rectangle
+        .fromVectors(this.p1.position, this.p2.position)
+        .expand(Edge.COLLISION_TOLERANCE);
+        var bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+      var p1 = this.p1.position;
+      var p2 = this.p2.position;
+    }
 
     if (!bounds1.overlaps(bounds2)) return false;
 
-    var p1 = this.p1.position;
-    var p2 = this.p2.position;
     var l1 = Edge.getAbc(p1.x, p1.y, p2.x, p2.y);
     var l2 = Edge.getAbc(x1, y1, x2, y2);
     var det = l1.a * l2.b - l2.a * l1.b;

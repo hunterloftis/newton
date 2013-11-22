@@ -157,13 +157,16 @@
         this.bounds.setV(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
     }, Edge.prototype.findEdgeParticle = function(v1, v2) {
         var poly = [ this.p1.lastPosition, this.p2.lastPosition, this.p2.position, this.p1.position ];
-        return pointInPoly(v2, poly) ? this.p1.position.clone().sub(this.p1.lastPosition) : !1;
-    }, Edge.prototype.findParticleEdge = function(v1, v2) {
-        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y, dot = Newton.Vector.claim().set(x2 - x1, y2 - y1).free().getDot(this.normal);
-        if (dot >= 0) return !1;
-        var bounds1 = this.bounds, bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE);
+        if (pointInPoly(v2, poly)) {
+            var targetPoint = this.p1.position.clone().add(this.p2.position).scale(.5).add(this.normal);
+            return targetPoint.sub(v2);
+        }
+        return !1;
+    }, Edge.prototype.findParticleEdge = function(v1, v2, last) {
+        var x1 = v1.x, y1 = v1.y, x2 = v2.x, y2 = v2.y;
+        if (last) var bounds1 = Newton.Rectangle.fromVectors(this.p1.lastPosition, this.p2.lastPosition).expand(Edge.COLLISION_TOLERANCE), bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE), p1 = this.p1.lastPosition, p2 = this.p2.lastPosition; else var bounds1 = Newton.Rectangle.fromVectors(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE), bounds2 = this.testRect.set(x1, y1, x2, y2).expand(Edge.COLLISION_TOLERANCE), p1 = this.p1.position, p2 = this.p2.position;
         if (!bounds1.overlaps(bounds2)) return !1;
-        var p1 = this.p1.position, p2 = this.p2.position, l1 = Edge.getAbc(p1.x, p1.y, p2.x, p2.y), l2 = Edge.getAbc(x1, y1, x2, y2), det = l1.a * l2.b - l2.a * l1.b;
+        var l1 = Edge.getAbc(p1.x, p1.y, p2.x, p2.y), l2 = Edge.getAbc(x1, y1, x2, y2), det = l1.a * l2.b - l2.a * l1.b;
         if (0 === det) return !1;
         var x = (l2.b * l1.c - l1.b * l2.c) / det, y = (l1.a * l2.c - l2.a * l1.c) / det;
         return bounds1.contains(x, y) && bounds2.contains(x, y) ? Newton.Vector(x - x2, y - y2).add(this.normal) : !1;

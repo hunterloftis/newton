@@ -174,6 +174,7 @@
 
             hit =
               edge.findParticleEdge(particle.lastPosition, particle.position) ||
+              //edge.findParticleEdge(particle.lastPosition, particle.position, true) ||
               edge.findEdgeParticle(particle.lastPosition, particle.position);
 
             // TODO: add test here for an intersection with the edge's last position? necessary?
