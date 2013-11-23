@@ -105,9 +105,10 @@
     Body.prototype.addTo = function(simulator, layer) {
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
         simulator.addParticles(this.particles), simulator.addEdges(this.edges), simulator.addConstraints(this.constraints), 
-        this.simulator = simulator, this.layer = layer;
+        simulator.addVolumes(this.volumes), this.simulator = simulator, this.layer = layer;
         for (var i = 0, ilen = this.particles.length; ilen > i; i++) this.particles[i].layer = layer;
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].layer = layer;
+        for (var i = 0, ilen = this.volumes.length; ilen > i; i++) this.volumes[i].layer = layer;
     }, Body.prototype.free = function() {
         this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles);
     }, Body.prototype.addParticle = function(particle) {
@@ -354,8 +355,7 @@
         for (var hit, particle, volume, linked, particles = this.collisionParticles, volumes = this.volumes, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             hit = void 0, particle.colliding = !1, particle.isCollisionPoint = !1, particle.correction.set(0, 0);
-            for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], 0 === i && volume.update(), 
-            volume.layer && -1 === linked.indexOf(volume.layer) || particle !== volume.p1 && particle !== volume.p2 && (hit = volume.getCollision(particle), 
+            for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], volume.layer && -1 === linked.indexOf(volume.layer) || particle !== volume.p1 && particle !== volume.p2 && (hit = !1, 
             hit && collisions.push({
                 particle: particle,
                 volume: volume,
@@ -378,7 +378,7 @@
         for (var i = 0; i < edges.length; i++) this.addCollisionParticles([ edges[i].p1, edges[i].p2 ]);
     }, Simulator.prototype.addVolumes = function(volumes) {
         this.volumes.push.apply(this.volumes, volumes);
-        for (var i = 0; i < volumes.length; i++) this.addCollisionParticles(volumes[i].particls);
+        for (var i = 0; i < volumes.length; i++) this.addCollisionParticles(volumes[i].particles);
     }, Simulator.prototype.addConstraints = function(constraints) {
         return this.constraints.push.apply(this.constraints, constraints), this.constraints.sort(prioritySort), 
         this;
@@ -410,7 +410,7 @@
             var current = body.particles[w * height + h];
             0 === h ? top.push(current) : h === height - 1 && bottom.push(current), 0 === w ? left.push(current) : w === width - 1 && right.push(current);
         }
-        return bottom.reverse(), left.reverse(), body.Volume(top.concat(right).concat(bottom).concat(left)), 
+        return bottom.reverse(), left.reverse(), body.Volume(top.concat(right, bottom, left)), 
         body;
     }
     Newton.Fabric = Fabric;
@@ -769,7 +769,7 @@
         },
         callback: function(time, sim) {
             this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges), 
-            this.drawConstraints(sim.constraints);
+            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints);
         },
         clear: function() {
             var gl = this.gl;
@@ -810,6 +810,17 @@
         drawEdges: function(edges) {
             for (var edge, gl = this.gl, vertices = [], i = 0, ilen = edges.length; ilen > i; i++) edge = edges[i].getCoords(), 
             vertices.push(edge.x1, edge.y1, 0), vertices.push(edge.x2, edge.y2, 0);
+            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+        },
+        drawVolumes: function(volumes) {
+            for (var particle, gl = this.gl, vertices = [], i = 0, ilen = volumes.length; ilen > i; i++) {
+                for (var j = 0, jlen = volumes[i].length; jlen > j; j++) particle = volumes[i].particles[j], 
+                vertices.push(particle.x, particle.y, 0);
+                vertices.push(volumes[i].particles[0].x, volumes[i].particles[0].y, 0);
+            }
             gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 

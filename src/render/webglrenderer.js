@@ -206,6 +206,7 @@
       this.clear(time);
       this.drawParticles(sim.particles);
       this.drawEdges(sim.edges);
+      this.drawVolumes(sim.volumes);
       this.drawConstraints(sim.constraints);
       return;
 
@@ -322,6 +323,32 @@
         edge = edges[i].getCoords();
         vertices.push(edge.x1, edge.y1, 0);
         vertices.push(edge.x2, edge.y2, 0);
+      }
+
+      // TODO: necessary?
+      gl.useProgram(this.edgeShader);
+
+      // position buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.edgeShader.attributes.position);
+
+      gl.lineWidth(3);
+      gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+    },
+    drawVolumes: function(volumes) {
+      var gl = this.gl;
+
+      var vertices = [];
+      var particle;
+
+      for (var i = 0, ilen = volumes.length; i < ilen; i++) {
+        for (var j = 0, jlen = volumes[i].length; j < jlen; j++) {
+          particle = volumes[i].particles[j];
+          vertices.push(particle.x, particle.y, 0);
+        }
+        vertices.push(volumes[i].particles[0].x, volumes[i].particles[0].y, 0);
       }
 
       // TODO: necessary?

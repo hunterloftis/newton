@@ -25,6 +25,7 @@
     simulator.addParticles(this.particles);
     simulator.addEdges(this.edges);
     simulator.addConstraints(this.constraints);
+    simulator.addVolumes(this.volumes);
 
     this.simulator = simulator;
     this.layer = layer;
@@ -35,6 +36,9 @@
     }
     for (var i = 0, ilen = this.edges.length; i < ilen; i++) {
       this.edges[i].layer = layer;
+    }
+    for (var i = 0, ilen = this.volumes.length; i < ilen; i++) {
+      this.volumes[i].layer = layer;
     }
   };
 

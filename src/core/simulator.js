@@ -220,11 +220,10 @@
       // Loop through all volumes to see if this particle ran into the volume
       for (var j = 0, jlen = volumes.length; j < jlen; j++) {
         volume = volumes[j];
-        if (i === 0) volume.update();
         if (!volume.layer || linked.indexOf(volume.layer) !== -1) {
           if (particle !== volume.p1 && particle !== volume.p2) {
 
-            hit = volume.getCollision(particle);
+            hit = false; //volume.getCollision(particle);
 
             if (hit) collisions.push({
               particle: particle,
@@ -276,7 +275,7 @@
   Simulator.prototype.addVolumes = function(volumes) {
     this.volumes.push.apply(this.volumes, volumes);
     for (var i = 0; i < volumes.length; i++) {
-      this.addCollisionParticles(volumes[i].particls);
+      this.addCollisionParticles(volumes[i].particles);
     }
   };
 

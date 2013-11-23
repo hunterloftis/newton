@@ -33,7 +33,7 @@
     bottom.reverse();
     left.reverse();
 
-    body.Volume(top.concat(right).concat(bottom).concat(left));
+    body.Volume(top.concat(right, bottom, left));
 
     return body;
   }
