@@ -53,6 +53,26 @@
       .expand(Edge.COLLISION_TOLERANCE);
   };
 
+  Edge.prototype.getCollision = function(particle) {
+    var inside = particle.lastPosition
+      .getProjection(this.p1.lastPosition, this.lastNormal);
+
+    // >= means it was already inside at the beginning of the frame
+    if (inside >= 0) return false;
+
+    var outside = particle.position
+      .getProjection(this.p1.position, this.normal);
+
+    // < 0 means it ended up outside at the end of the frame anyway
+    if (outside < 0) return false;
+
+    // if true then the particle's trajectory could never hit this edge
+    if (this.getIsWider(last, pos)) return false;
+
+    // return the correction vector
+    return this.clone().applyProjection(inside, this.normal).sub(this);
+  };
+
   Edge.prototype.findEdgeParticle = function(v1, v2) {
     // TODO: implement check for whether v2 is inside of the polygon made by this edge + this edge's last step
     // TODO: find closest point to v2 on this edge if v2 is inside this poly

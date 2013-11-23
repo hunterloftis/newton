@@ -207,6 +207,17 @@
     return Math.atan2(sin, cos);
   };
 
+  // If projection >= 0, it's in this half plane
+  // Otherwise, it isn't
+  Vector.prototype.getProjection = function(vPoint, vDir) {
+    return this.clone().sub(vPoint).getDot(vDir);
+  };
+
+  Vector.prototype.applyProjection = function(projection, vDir) {
+    this.sub(dir.clone().scale(projection));
+    return this;
+  };
+
   Newton.Vector = Vector;
 
 })(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);

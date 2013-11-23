@@ -97,8 +97,7 @@
     this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
-
-    this.resolveCollisions(time, this.detectCollisions(time));
+    this.collide(time);
   };
 
   Simulator.prototype.cull = function(array) {
@@ -144,6 +143,14 @@
     }
   };
 
+  Simulator.prototype.collide = function(time) {
+    var collisions;
+
+    do {
+      collisions = this.detectCollisions(time);
+      this.resolveCollisions(time, collisions);
+    } (while collisions.length > 0)
+  };
 
   Simulator.prototype.detectCollisions = function(time) {
     var particles = this.collisionParticles;
@@ -172,20 +179,13 @@
         if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
           if (particle !== edge.p1 && particle !== edge.p2) {
 
-            hit =
-              edge.findParticleEdge(particle.lastPosition, particle.position) ||
-              //edge.findParticleEdge(particle.lastPosition, particle.position, true) ||
-              edge.findEdgeParticle(particle.lastPosition, particle.position);
+            hit = edge.getCollision(particle);
 
-            // TODO: add test here for an intersection with the edge's last position? necessary?
-
-            // TODO: minimize the stuff created here
             if (hit) collisions.push({
               particle: particle,
               edge: edge,
               correction: hit,
-              participants: [particle, edge.p1, edge.p2],
-              penetration: hit.getLength()
+              distance: hit.getLength()
             });
           }
         }
@@ -195,8 +195,12 @@
     return collisions;
   };
 
-  // TODO: expand this naive approach
   Simulator.prototype.resolveCollisions = function(time, collisions) {
+
+  };
+
+  // TODO: expand this naive approach
+  Simulator.prototype.resolveCollisionsOld = function(time, collisions) {
     // idea 1 - sort collisions by penetration depth and solve the largest first
     // flag all participants as "colliding = false" in detect step, then true here at resolution
     // if any participants in a collision have colliding == true, then they have already
