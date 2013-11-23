@@ -98,9 +98,9 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Body(material) {
-        return this instanceof Body ? (this.particles = [], this.edges = [], this.constraints = [], 
-        this.material = material, this.simulator = void 0, this.layer = void 0, this.isFree = !1, 
-        void 0) : new Body(material);
+        return this instanceof Body ? (this.particles = [], this.edges = [], this.volumes = [], 
+        this.constraints = [], this.material = material, this.simulator = void 0, this.layer = void 0, 
+        this.isFree = !1, void 0) : new Body(material);
     }
     Body.prototype.addTo = function(simulator, layer) {
         if (this.simulator) throw new Error("Not implemented: reparenting a body");
@@ -121,6 +121,12 @@
     }, Body.prototype.Edge = function() {
         var edge = Newton.Edge.apply(Newton.Edge, Array.prototype.slice.call(arguments));
         return this.addEdge(edge), edge;
+    }, Body.prototype.Volume = function() {
+        var volume = Newton.Volume.apply(Newton.Volume, Array.prototype.slice.call(arguments));
+        return this.addVolume(volume), volume;
+    }, Body.prototype.addVolume = function(volume) {
+        return this.volumes.push(volume), volume.layer = this.layer, this.simulator && this.simulator.addVolumes([ volume ]), 
+        this;
     }, Body.prototype.addConstraint = function(constraint) {
         this.constraints.push(constraint), this.simulator && this.simulator.addConstraints([ constraint ]);
     }, Body.prototype.DistanceConstraint = function() {
@@ -155,6 +161,11 @@
     }, Edge.prototype.update = function() {
         this.vector.copy(this.p2.position).sub(this.p1.position), this.normal.copy(this.vector).turnLeft().unit(), 
         this.bounds.setV(this.p1.position, this.p2.position).expand(Edge.COLLISION_TOLERANCE);
+    }, Edge.prototype.getCollision = function(particle) {
+        var inside = particle.lastPosition.getProjection(this.p1.lastPosition, this.lastNormal);
+        if (inside >= 0) return !1;
+        var outside = particle.position.getProjection(this.p1.position, this.normal);
+        return 0 > outside ? !1 : this.getIsWider(last, pos) ? !1 : this.clone().applyProjection(inside, this.normal).sub(this);
     }, Edge.prototype.findEdgeParticle = function(v1, v2) {
         var poly = [ this.p1.lastPosition, this.p2.lastPosition, this.p2.position, this.p1.position ];
         if (pointInPoly(v2, poly)) {
@@ -292,8 +303,8 @@
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
         this.iterations = iterations || 3, this.warp = warp || 1, this.startTime = 0, this.layers = {}, 
-        this.particles = [], this.edges = [], this.forces = [], this.constraints = [], this.collisionParticles = [], 
-        void 0) : new Simulator(callback, renderers, integrationFps, iterations, warp);
+        this.particles = [], this.edges = [], this.volumes = [], this.forces = [], this.constraints = [], 
+        this.collisionParticles = [], void 0) : new Simulator(callback, renderers, integrationFps, iterations, warp);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
@@ -302,6 +313,17 @@
         Newton.frame(this.step);
     }, Simulator.prototype.stop = function() {
         this.running = !1;
+    }, Simulator.prototype.add = function(entity, layer) {
+        var entities = Array.isArray(entity) ? entity : [ entity ];
+        for (this.ensureLayer(layer); entities.length; ) entities.shift().addTo(this, layer);
+        return this;
+    }, Simulator.prototype.link = function(layer, linkedLayers) {
+        return this.ensureLayer(layer), this.layers[layer].linked = linkedLayers.split(" "), 
+        this;
+    }, Simulator.prototype.findParticle = function(x, y, radius) {
+        for (var distance, particles = this.particles, found = void 0, nearest = radius, i = 0, ilen = particles.length; ilen > i; i++) distance = particles[i].getDistance(x, y), 
+        nearest >= distance && (found = particles[i], nearest = distance);
+        return found;
     }, Simulator.prototype._step = function() {
         if (this.running) {
             var time = Date.now(), step = time - this.lastTime;
@@ -313,7 +335,7 @@
         }
     }, Simulator.prototype.simulate = function(time, totalTime) {
         this.cull(this.particles), this.cull(this.constraints), this.cull(this.edges), this.callback(time, this, totalTime), 
-        this.integrate(time), this.constrain(time), this.resolveCollisions(time, this.detectCollisions(time));
+        this.integrate(time), this.constrain(time), this.collide(time);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
@@ -325,84 +347,71 @@
         }
     }, Simulator.prototype.constrain = function(time) {
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
+    }, Simulator.prototype.collide = function(time) {
+        var collisions;
+        do collisions = this.detectCollisions(time), this.resolveCollisions(time, collisions); while (collisions.length > 0);
     }, Simulator.prototype.detectCollisions = function() {
-        for (var hit, particle, edge, linked, particles = this.collisionParticles, edges = this.edges, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
+        for (var hit, particle, volume, linked, particles = this.collisionParticles, volumes = this.volumes, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             hit = void 0, particle.colliding = !1, particle.isCollisionPoint = !1, particle.correction.set(0, 0);
-            for (var j = 0, jlen = edges.length; jlen > j; j++) edge = edges[j], 0 === i && edge.update(), 
-            edge.layer && -1 === linked.indexOf(edge.layer) || particle !== edge.p1 && particle !== edge.p2 && (hit = edge.findParticleEdge(particle.lastPosition, particle.position) || edge.findEdgeParticle(particle.lastPosition, particle.position), 
+            for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], 0 === i && volume.update(), 
+            volume.layer && -1 === linked.indexOf(volume.layer) || particle !== volume.p1 && particle !== volume.p2 && (hit = volume.getCollision(particle), 
             hit && collisions.push({
                 particle: particle,
-                edge: edge,
+                volume: volume,
                 correction: hit,
-                participants: [ particle, edge.p1, edge.p2 ],
-                penetration: hit.getLength()
+                distance: hit.getLength()
             }));
         }
         return collisions;
-    }, Simulator.prototype.resolveCollisions = function(time, collisions) {
-        collisions.sort(function(a, b) {
-            return b.penetration - a.penetration;
-        });
-        for (var i = 0, ilen = collisions.length; ilen > i; i++) {
-            var collision = collisions[i], particle = collision.particle, edge = collision.edge, correction = collision.correction;
-            if (!particle.isCollisionPoint) {
-                var pInvMass = 1 / particle.getMass(), eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass()), massTotal = pInvMass + eInvMass;
-                particle.colliding = edge.p1.colliding = edge.p2.colliding = !0, particle.isCollisionPoint = !0;
-                var pCorrect = correction.clone().scale(pInvMass / massTotal), eCorrect = correction.clone().scale(-eInvMass / massTotal);
-                particle.position.clone().sub(particle.lastPosition).getLength(), particle.correction.merge(pCorrect), 
-                edge.p1.correction.merge(eCorrect), edge.p2.correction.merge(eCorrect);
-            }
-        }
-        for (var i = 0; i < this.collisionParticles.length; i++) this.collisionParticles[i].colliding && (this.collisionParticles[i].position.add(this.collisionParticles[i].correction), 
-        this.collisionParticles[i].stop());
-    }, Simulator.prototype.ensureLayer = function(name) {
+    }, Simulator.prototype.resolveCollisions = function() {}, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
             linked: [ name ]
         }));
-    }, Simulator.prototype.add = function(entity, layer) {
-        var entities = Array.isArray(entity) ? entity : [ entity ];
-        for (this.ensureLayer(layer); entities.length; ) entities.shift().addTo(this, layer);
-        return this;
-    }, Simulator.prototype.link = function(layer, linkedLayers) {
-        return this.ensureLayer(layer), this.layers[layer].linked = linkedLayers.split(" "), 
-        this;
     }, Simulator.prototype.addParticles = function(particles) {
         this.particles.push.apply(this.particles, particles);
-    }, Simulator.prototype.addEdges = function(edges) {
-        this.edges.push.apply(this.edges, edges);
-        for (var i = 0; i < edges.length; i++) this.addCollisionParticles([ edges[i].p1, edges[i].p2 ]);
     }, Simulator.prototype.addCollisionParticles = function(particles) {
         for (var i = particles.length; i--; ) -1 === this.collisionParticles.indexOf(particles[i]) && this.collisionParticles.push(particles[i]);
         return this;
+    }, Simulator.prototype.addEdges = function(edges) {
+        this.edges.push.apply(this.edges, edges);
+        for (var i = 0; i < edges.length; i++) this.addCollisionParticles([ edges[i].p1, edges[i].p2 ]);
+    }, Simulator.prototype.addVolumes = function(volumes) {
+        this.volumes.push.apply(this.volumes, volumes);
+        for (var i = 0; i < volumes.length; i++) this.addCollisionParticles(volumes[i].particls);
     }, Simulator.prototype.addConstraints = function(constraints) {
         return this.constraints.push.apply(this.constraints, constraints), this.constraints.sort(prioritySort), 
         this;
-    }, Simulator.prototype.findParticle = function(x, y, radius) {
-        for (var distance, particles = this.particles, found = void 0, nearest = radius, i = 0, ilen = particles.length; ilen > i; i++) distance = particles[i].getDistance(x, y), 
-        nearest >= distance && (found = particles[i], nearest = distance);
-        return found;
     }, Newton.Simulator = Simulator;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function Volume(particles, material) {
+        return this instanceof Volume ? (this.particles = particles || [], this.material = material || Newton.Material.simple, 
+        this.layer = void 0, void 0) : new Volume(particles, material);
+    }
+    Volume.COLLISION_TOLERANCE = .5, Newton.Volume = Volume;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Box(x, y, size) {
         var body = Newton.Body(), ul = body.Particle(x - size, y - size), ur = body.Particle(x + size, y - size), ll = body.Particle(x - size, y + size), lr = body.Particle(x + size, y + size);
         return body.DistanceConstraint(ul, ur), body.DistanceConstraint(lr, ll), body.DistanceConstraint(ur, lr), 
         body.DistanceConstraint(ll, ul), body.DistanceConstraint(ul, lr), body.DistanceConstraint(ur, ll), 
-        body.Edge(ul, ur), body.Edge(ur, lr), body.Edge(lr, ll), body.Edge(ll, ul), body;
+        body.Volume([ ul, ur, lr, ll ]), body;
     }
     Newton.Box = Box;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Fabric(x1, y1, x2, y2, width, height) {
-        for (var particle, spacing = (x2 - x1) / width, body = Newton.Body(), w = 0; width > w; w++) for (var h = 0; height > h; h++) particle = body.Particle(x1 + w * spacing, y1 + h * spacing), 
+        for (var particle, spacing = (x2 - x1) / width, body = Newton.Body(), top = [], right = [], bottom = [], left = [], w = 0; width > w; w++) for (var h = 0; height > h; h++) particle = body.Particle(x1 + w * spacing, y1 + h * spacing), 
         0 === h && particle.pin();
-        for (var w = 0; width > w; w++) for (var h = 0; height > h; h++) h > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - 1], .2), 
-        w > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - height], .2), 
-        0 === w && h > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - 1]), 
-        h === height - 1 && w > 0 && body.Edge(body.particles[w * height + h], body.particles[w * height + h - height]), 
-        w === width - 1 && h > 0 && body.Edge(body.particles[w * height + h - 1], body.particles[w * height + h]);
-        return body;
+        for (var w = 0; width > w; w++) for (var h = 0; height > h; h++) {
+            h > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - 1], .2), 
+            w > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - height], .2);
+            var current = body.particles[w * height + h];
+            0 === h ? top.push(current) : h === height - 1 && bottom.push(current), 0 === w ? left.push(current) : w === width - 1 && right.push(current);
+        }
+        return bottom.reverse(), left.reverse(), body.Volume(top.concat(right).concat(bottom).concat(left)), 
+        body;
     }
     Newton.Fabric = Fabric;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
@@ -564,6 +573,10 @@
     }, Vector.prototype.getAngleTo = function(v) {
         var cos = this.x * v.x + this.y * v.y, sin = this.y * v.x - this.x * v.y;
         return Math.atan2(sin, cos);
+    }, Vector.prototype.getProjection = function(vPoint, vDir) {
+        return this.clone().sub(vPoint).getDot(vDir);
+    }, Vector.prototype.applyProjection = function(projection) {
+        return this.sub(dir.clone().scale(projection)), this;
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";

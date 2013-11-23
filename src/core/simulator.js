@@ -194,7 +194,7 @@
     do {
       collisions = this.detectCollisions(time);
       this.resolveCollisions(time, collisions);
-    } (while collisions.length > 0)
+    } while (collisions.length > 0);
   };
 
   Simulator.prototype.detectCollisions = function(time) {

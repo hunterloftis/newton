@@ -11,9 +11,9 @@
   }
 
   function Volume(particles, material) {
-    if (!(this instanceof Volume)) return new Volume(p1, p2, material);
+    if (!(this instanceof Volume)) return new Volume(particles, material);
 
-    this.particles = particles;
+    this.particles = particles || [];
     this.material = material || Newton.Material.simple;
 
     this.layer = undefined;

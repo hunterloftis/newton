@@ -19,10 +19,7 @@
     body.DistanceConstraint(ul, lr);
     body.DistanceConstraint(ur, ll);
 
-    body.Edge(ul, ur);
-    body.Edge(ur, lr);
-    body.Edge(lr, ll);
-    body.Edge(ll, ul);
+    body.Volume([ul, ur, lr, ll]);
 
     return body;
   }
