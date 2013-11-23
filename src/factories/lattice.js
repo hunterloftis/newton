@@ -12,6 +12,8 @@
       bottom.pin();
     }
 
+    var vTop = [], vBottom = [];
+
     for (var i = 1; i <= segments; i++) {
       var nextTop = body.Particle(x + i * segmentLength, y);
       var nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
@@ -23,12 +25,12 @@
 
       body.DistanceConstraint(nextTop, nextBottom);
 
-      body.Edge(top, nextTop);
-      body.Edge(nextBottom, bottom);
-
       if (i === segments) {
         body.Edge(nextTop, nextBottom);
       }
+
+      vTop.push(top);
+      vBottom.push(bottom);
 
       top = nextTop;
       bottom = nextBottom;
@@ -38,6 +40,11 @@
       top.pin();
       bottom.pin();
     }
+
+    vTop.push(top);
+    vBottom.push(bottom);
+    vBottom.reverse();
+    body.Volume(vTop.concat(vBottom));
 
     return body;
   }

@@ -419,14 +419,15 @@
     function Lattice(x, y, segmentLength, segments, pinLeft, pinRight) {
         var body = Newton.Body(), top = body.Particle(x, y), bottom = body.Particle(x, y + segmentLength);
         pinLeft && (top.pin(), bottom.pin());
-        for (var i = 1; segments >= i; i++) {
+        for (var vTop = [], vBottom = [], i = 1; segments >= i; i++) {
             var nextTop = body.Particle(x + i * segmentLength, y), nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
             body.DistanceConstraint(top, nextTop), body.DistanceConstraint(bottom, nextBottom), 
             body.DistanceConstraint(top, nextBottom), body.DistanceConstraint(nextTop, bottom), 
-            body.DistanceConstraint(nextTop, nextBottom), body.Edge(top, nextTop), body.Edge(nextBottom, bottom), 
-            i === segments && body.Edge(nextTop, nextBottom), top = nextTop, bottom = nextBottom;
+            body.DistanceConstraint(nextTop, nextBottom), i === segments && body.Edge(nextTop, nextBottom), 
+            vTop.push(top), vBottom.push(bottom), top = nextTop, bottom = nextBottom;
         }
-        return pinRight && (top.pin(), bottom.pin()), body;
+        return pinRight && (top.pin(), bottom.pin()), vTop.push(top), vBottom.push(bottom), 
+        vBottom.reverse(), body.Volume(vTop.concat(vBottom)), body;
     }
     Newton.Lattice = Lattice;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
