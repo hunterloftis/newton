@@ -816,25 +816,15 @@
             gl.drawArrays(gl.LINES, 0, vertices.length / 3);
         },
         drawVolumes: function(volumes) {
-            for (var particle, gl = this.gl, vertices = [], i = 0, ilen = volumes.length; ilen > i; i++) {
-                for (var j = 0, jlen = volumes[i].length; jlen > j; j++) particle = volumes[i].particles[j], 
-                vertices.push(particle.x, particle.y, 0);
-                vertices.push(volumes[i].particles[0].x, volumes[i].particles[0].y, 0);
+            for (var pos, gl = this.gl, vertices = [], i = 0, ilen = volumes.length; ilen > i; i++) if (volumes[i].particles.length) {
+                for (var j = 0, jlen = volumes[i].particles.length; jlen > j; j++) pos = volumes[i].particles[j].position, 
+                vertices.push(pos.x, pos.y, 0);
+                pos = volumes[i].particles[0].position, vertices.push(pos.x, pos.y, 0), vertices.push(void 0, void 0, void 0);
             }
             gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
             gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
-            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
-        },
-        drawCounts: function(ctx, counts) {
-            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText("Particles: " + counts.particles, 10, 20), 
-            ctx.fillText("Edges: " + counts.edges, 10, 40), ctx.fillText("Forces: " + counts.forces, 10, 60), 
-            ctx.fillText("Constraints: " + counts.constraints, 10, 80), ctx.restore();
-        },
-        drawFPS: function(sim) {
-            var text = "FPS: " + sim.fps;
-            ctx.save(), ctx.fillStyle = "#fff", ctx.font = "10pt Helvetica", ctx.fillText(text, 10, 120), 
-            ctx.restore();
+            gl.drawArrays(gl.LINE_STRIP, 0, vertices.length / 3);
         }
     }, Newton.GLRenderer = GLRenderer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);

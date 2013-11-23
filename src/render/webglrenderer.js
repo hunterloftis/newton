@@ -208,19 +208,6 @@
       this.drawEdges(sim.edges);
       this.drawVolumes(sim.volumes);
       this.drawConstraints(sim.constraints);
-      return;
-
-
-
-
-      this.drawForces(ctx, sim.forces);
-      this.drawCounts(ctx, {
-        particles: sim.particles.length,
-        edges: sim.edges.length,
-        forces: sim.forces.length,
-        constraints: sim.constraints.length
-      });
-      this.drawFPS(sim);
     },
     clear: function(time) {
       var gl = this.gl;
@@ -341,14 +328,18 @@
       var gl = this.gl;
 
       var vertices = [];
-      var particle;
+      var pos;
 
       for (var i = 0, ilen = volumes.length; i < ilen; i++) {
-        for (var j = 0, jlen = volumes[i].length; j < jlen; j++) {
-          particle = volumes[i].particles[j];
-          vertices.push(particle.x, particle.y, 0);
+        if (volumes[i].particles.length) {
+          for (var j = 0, jlen = volumes[i].particles.length; j < jlen; j++) {
+            pos = volumes[i].particles[j].position;
+            vertices.push(pos.x, pos.y, 0);
+          }
+          pos = volumes[i].particles[0].position;
+          vertices.push(pos.x, pos.y, 0);
+          vertices.push(undefined, undefined, undefined); // TODO: seems to work, is this a hack?
         }
-        vertices.push(volumes[i].particles[0].x, volumes[i].particles[0].y, 0);
       }
 
       // TODO: necessary?
@@ -361,25 +352,7 @@
       gl.enableVertexAttribArray(this.edgeShader.attributes.position);
 
       gl.lineWidth(3);
-      gl.drawArrays(gl.LINES, 0, vertices.length / 3);
-    },
-    drawCounts: function(ctx, counts) {
-      ctx.save();
-      ctx.fillStyle = '#fff';
-      ctx.font = '10pt Helvetica';
-      ctx.fillText('Particles: ' + counts.particles, 10, 20);
-      ctx.fillText('Edges: ' + counts.edges, 10, 40);
-      ctx.fillText('Forces: ' + counts.forces, 10, 60);
-      ctx.fillText('Constraints: ' + counts.constraints, 10, 80);
-      ctx.restore();
-    },
-    drawFPS: function(sim) {
-      var text = 'FPS: ' + sim.fps;
-      ctx.save();
-      ctx.fillStyle = '#fff';
-      ctx.font = '10pt Helvetica';
-      ctx.fillText(text, 10, 120);
-      ctx.restore();
+      gl.drawArrays(gl.LINE_STRIP, 0, vertices.length / 3);
     }
   };
 
