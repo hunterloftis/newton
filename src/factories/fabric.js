@@ -24,9 +24,9 @@
         var current = body.particles[w * height + h];
 
         if (h === 0) top.push(current);
-        else if (h === height - 1) bottom.push(current);
-        if (w === 0) left.push(current);
-        else if (w === width - 1) right.push(current);
+        else if (h === height - 1 && w < width - 1) bottom.push(current);
+        if (w === 0 && h > 0) left.push(current);
+        else if (w === width - 1 && h > 0) right.push(current);
       }
     }
 

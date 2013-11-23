@@ -363,8 +363,6 @@
             pos = volumes[i].particles[j].position;
             vertices.push(pos.x, pos.y, 0);
           }
-          // pos = volumes[i].particles[0].position;
-          // vertices.push(pos.x, pos.y, 0);
           vertices.push(undefined, undefined, undefined); // TODO: seems to work, is this a hack?
         }
       }

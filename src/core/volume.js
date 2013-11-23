@@ -43,7 +43,7 @@
       for (var i = 1; i < this.particles.length; i++) {
         var point = this.particles[i - 1].position;
         var dir = this.particles[i].position.clone().sub(point);
-        var projection = particle.position.clone().projectOnto(point, dir).sub(particle.position);
+        var projection = particle.position.clone().projectOnto(point, dir).sub(particle.position).scale(0.001);
         var distance = projection.getLength();
         if (distance < nearest) {
           solution = projection;

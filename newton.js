@@ -398,7 +398,7 @@
         for (var poly = [], i = 0; i < this.particles.length; i++) poly.push(this.particles[i].position);
         if (pointInPoly(particle.position, poly)) {
             for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
-                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position), distance = projection.getLength();
+                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position).scale(.001), distance = projection.getLength();
                 nearest > distance && (solution = projection, nearest = distance);
             }
             return solution;
@@ -423,7 +423,8 @@
             h > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - 1], .2), 
             w > 0 && body.DistanceConstraint(body.particles[w * height + h], body.particles[w * height + h - height], .2);
             var current = body.particles[w * height + h];
-            0 === h ? top.push(current) : h === height - 1 && bottom.push(current), 0 === w ? left.push(current) : w === width - 1 && right.push(current);
+            0 === h ? top.push(current) : h === height - 1 && width - 1 > w && bottom.push(current), 
+            0 === w && h > 0 ? left.push(current) : w === width - 1 && h > 0 && right.push(current);
         }
         return bottom.reverse(), left.reverse(), body.Volume(top.concat(right, bottom, left)), 
         body;
