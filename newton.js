@@ -305,7 +305,7 @@
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
         this.iterations = iterations || 3, this.warp = warp || 1, this.startTime = 0, this.layers = {}, 
         this.particles = [], this.edges = [], this.volumes = [], this.forces = [], this.constraints = [], 
-        this.collisionParticles = [], void 0) : new Simulator(callback, renderers, integrationFps, iterations, warp);
+        this.collisionParticles = [], this.collisions = [], void 0) : new Simulator(callback, renderers, integrationFps, iterations, warp);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
@@ -336,7 +336,9 @@
         }
     }, Simulator.prototype.simulate = function(time, totalTime) {
         this.cull(this.particles), this.cull(this.constraints), this.cull(this.edges), this.callback(time, this, totalTime), 
-        this.integrate(time), this.constrain(time), this.collide(time);
+        this.integrate(time), this.constrain(time);
+        var collisions = this.detectCollisions(time);
+        this.resolveCollisions(time, collisions);
     }, Simulator.prototype.cull = function(array) {
         for (var i = 0; i < array.length; ) array[i].isDestroyed ? array.splice(i, 1) : i++;
     }, Simulator.prototype.integrate = function(time) {
@@ -348,14 +350,11 @@
         }
     }, Simulator.prototype.constrain = function(time) {
         for (var constraints = this.constraints, j = 0, jlen = this.iterations; jlen > j; j++) for (var i = 0, ilen = constraints.length; ilen > i; i++) constraints[i].resolve(time, this.particles);
-    }, Simulator.prototype.collide = function(time) {
-        var collisions;
-        do collisions = this.detectCollisions(time), this.resolveCollisions(time, collisions); while (collisions.length > 0);
     }, Simulator.prototype.detectCollisions = function() {
         for (var hit, particle, volume, linked, particles = this.collisionParticles, volumes = this.volumes, layers = this.layers, emptyLink = [], collisions = [], i = 0, ilen = particles.length; ilen > i; i++) {
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             hit = void 0, particle.colliding = !1, particle.isCollisionPoint = !1, particle.correction.set(0, 0);
-            for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], volume.layer && -1 === linked.indexOf(volume.layer) || particle !== volume.p1 && particle !== volume.p2 && (hit = !1, 
+            for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], volume.layer && -1 === linked.indexOf(volume.layer) || -1 === volume.particles.indexOf(particle) && (hit = volume.getCollision(particle), 
             hit && collisions.push({
                 particle: particle,
                 volume: volume,
@@ -363,7 +362,7 @@
                 distance: hit.getLength()
             }));
         }
-        return collisions;
+        return this.collisions = collisions, collisions;
     }, Simulator.prototype.resolveCollisions = function() {}, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
             linked: [ name ]
@@ -385,11 +384,27 @@
     }, Newton.Simulator = Simulator;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
-    function Volume(particles, material) {
-        return this instanceof Volume ? (this.particles = particles || [], this.material = material || Newton.Material.simple, 
-        this.layer = void 0, void 0) : new Volume(particles, material);
+    function pointInPoly(pt, poly) {
+        for (var c = !1, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) (poly[i].y <= pt.y && pt.y < poly[j].y || poly[j].y <= pt.y && pt.y < poly[i].y) && pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x && (c = !c);
+        return c;
     }
-    Volume.COLLISION_TOLERANCE = .5, Newton.Volume = Volume;
+    function Volume(particles, material) {
+        return this instanceof Volume ? (this.particles = [], this.material = material || Newton.Material.simple, 
+        this.layer = void 0, this.setParticles(particles), void 0) : new Volume(particles, material);
+    }
+    Volume.COLLISION_TOLERANCE = .5, Volume.prototype.setParticles = function(particles) {
+        return particles.push(particles[0]), this.particles = particles, this;
+    }, Volume.prototype.getCollision = function(particle) {
+        for (var poly = [], i = 0; i < this.particles.length; i++) poly.push(this.particles[i].position);
+        if (pointInPoly(particle.position, poly)) {
+            for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
+                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position), distance = projection.getLength();
+                nearest > distance && (solution = projection, nearest = distance);
+            }
+            return solution;
+        }
+        return !1;
+    }, Newton.Volume = Volume;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Box(x, y, size) {
@@ -578,6 +593,9 @@
         return this.clone().sub(vPoint).getDot(vDir);
     }, Vector.prototype.applyProjection = function(projection) {
         return this.sub(dir.clone().scale(projection)), this;
+    }, Vector.prototype.projectOnto = function(vPoint, vDir) {
+        var projection = this.clone().sub(vPoint).getDot(vDir);
+        return this.sub(vDir.clone().scale(projection)), this;
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
@@ -770,7 +788,7 @@
         },
         callback: function(time, sim) {
             this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges), 
-            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints);
+            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints), this.drawCollisions(sim.collisions);
         },
         clear: function() {
             var gl = this.gl;
@@ -816,11 +834,21 @@
             gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
             gl.drawArrays(gl.LINES, 0, vertices.length / 3);
         },
+        drawCollisions: function(collisions) {
+            for (var gl = this.gl, vertices = [], i = 0, ilen = collisions.length; ilen > i; i++) {
+                var start = collisions[i].particle.position, end = collisions[i].particle.position.clone().add(collisions[i].correction);
+                vertices.push(start.x, start.y, 0), vertices.push(end.x, end.y, 0);
+            }
+            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+        },
         drawVolumes: function(volumes) {
             for (var pos, gl = this.gl, vertices = [], i = 0, ilen = volumes.length; ilen > i; i++) if (volumes[i].particles.length) {
                 for (var j = 0, jlen = volumes[i].particles.length; jlen > j; j++) pos = volumes[i].particles[j].position, 
                 vertices.push(pos.x, pos.y, 0);
-                pos = volumes[i].particles[0].position, vertices.push(pos.x, pos.y, 0), vertices.push(void 0, void 0, void 0);
+                vertices.push(void 0, void 0, void 0);
             }
             gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 

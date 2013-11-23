@@ -202,13 +202,16 @@
       this.particleSizeBuffer = gl.createBuffer();
       this.edgePositionBuffer = gl.createBuffer();
     },
+
     callback: function(time, sim) {
       this.clear(time);
       this.drawParticles(sim.particles);
       this.drawEdges(sim.edges);
       this.drawVolumes(sim.volumes);
       this.drawConstraints(sim.constraints);
+      this.drawCollisions(sim.collisions);
     },
+
     clear: function(time) {
       var gl = this.gl;
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -324,6 +327,30 @@
       gl.lineWidth(3);
       gl.drawArrays(gl.LINES, 0, vertices.length / 3);
     },
+    drawCollisions: function(collisions) {
+      var gl = this.gl;
+
+      var vertices = [];
+
+      for (var i = 0, ilen = collisions.length; i < ilen; i++) {
+        var start = collisions[i].particle.position;
+        var end = collisions[i].particle.position.clone().add(collisions[i].correction);
+        vertices.push(start.x, start.y, 0);
+        vertices.push(end.x, end.y, 0);
+      }
+
+      // TODO: necessary?
+      gl.useProgram(this.edgeShader);
+
+      // position buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.edgeShader.attributes.position);
+
+      gl.lineWidth(3);
+      gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+    },
     drawVolumes: function(volumes) {
       var gl = this.gl;
 
@@ -336,8 +363,8 @@
             pos = volumes[i].particles[j].position;
             vertices.push(pos.x, pos.y, 0);
           }
-          pos = volumes[i].particles[0].position;
-          vertices.push(pos.x, pos.y, 0);
+          // pos = volumes[i].particles[0].position;
+          // vertices.push(pos.x, pos.y, 0);
           vertices.push(undefined, undefined, undefined); // TODO: seems to work, is this a hack?
         }
       }

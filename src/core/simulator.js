@@ -49,6 +49,7 @@
     // this is essentially a cache so we don't have to recalculate this on every frame
     // instead, we add edge particles, free body particles, and volume particles here whenever those entities are added
     this.collisionParticles = [];
+    this.collisions = [];
   }
 
 
@@ -142,7 +143,9 @@
     this.callback(time, this, totalTime);
     this.integrate(time);
     this.constrain(time);
-    this.collide(time);
+
+    var collisions = this.detectCollisions(time);
+    this.resolveCollisions(time, collisions);
   };
 
   Simulator.prototype.cull = function(array) {
@@ -188,15 +191,6 @@
     }
   };
 
-  Simulator.prototype.collide = function(time) {
-    var collisions;
-
-    do {
-      collisions = this.detectCollisions(time);
-      this.resolveCollisions(time, collisions);
-    } while (collisions.length > 0);
-  };
-
   Simulator.prototype.detectCollisions = function(time) {
     var particles = this.collisionParticles;  // Edge particles + "Free" particles + Volume particles
     var volumes = this.volumes;
@@ -220,10 +214,10 @@
       // Loop through all volumes to see if this particle ran into the volume
       for (var j = 0, jlen = volumes.length; j < jlen; j++) {
         volume = volumes[j];
-        if (!volume.layer || linked.indexOf(volume.layer) !== -1) {
-          if (particle !== volume.p1 && particle !== volume.p2) {
+        if (!volume.layer || linked.indexOf(volume.layer) !== -1) { // TODO: optimize this filtering, maybe precompute some of it
+          if (volume.particles.indexOf(particle) === -1) {
 
-            hit = false; //volume.getCollision(particle);
+            hit = volume.getCollision(particle);
 
             if (hit) collisions.push({
               particle: particle,
@@ -235,6 +229,8 @@
         }
       } // volumes
     } // particles
+
+    this.collisions = collisions; // Temporary, for rendering
 
     return collisions;
   };

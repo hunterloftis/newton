@@ -13,6 +13,7 @@
     <li>edges:<span id='edges'></span></li>
     <li>constraints:<span id='constraints'></span></li>
     <li>forces:<span id='forces'></span></li>
+    <li>collisions:<span id='collisions'></span></li>
   </ul>
   <canvas id="display" width="1280" height="450"></canvas>
 </div>
@@ -64,6 +65,7 @@
     $('#edges').text(sim.edges.length);
     $('#constraints').text(sim.constraints.length);
     $('#forces').text(sim.forces.length);
+    $('#collisions').text(sim.collisions.length);
   }
 
   function createBoxes(x, y, size, amount) {

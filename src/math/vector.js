@@ -218,6 +218,12 @@
     return this;
   };
 
+  Vector.prototype.projectOnto = function(vPoint, vDir) {
+    var projection = this.clone().sub(vPoint).getDot(vDir);
+    this.sub(vDir.clone().scale(projection));
+    return this;
+  };
+
   Newton.Vector = Vector;
 
 })(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
