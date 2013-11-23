@@ -7,6 +7,7 @@
 
     this.particles = [];
     this.edges = [];
+    this.volumes = [];
     this.constraints = [];
 
     this.material = material; // TODO: make this matter
@@ -69,6 +70,20 @@
       Newton.Edge, Array.prototype.slice.call(arguments));
     this.addEdge(edge);
     return edge;
+  };
+
+  Body.prototype.Volume = function() {
+    var volume = Newton.Volume.apply(
+      Newton.Volume, Array.prototype.slice.call(arguments));
+    this.addVolume(volume);
+    return volume;
+  };
+
+  Body.prototype.addVolume = function(volume) {
+    this.volumes.push(volume);
+    volume.layer = this.layer;
+    if (this.simulator) this.simulator.addVolumes([volume]);
+    return this;
   };
 
   Body.prototype.addConstraint = function(constraint) {

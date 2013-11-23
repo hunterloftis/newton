@@ -14,6 +14,9 @@
     };
   }
 
+
+  // Simulator
+
   function Simulator(callback, renderers, integrationFps, iterations, warp) {
     if (!(this instanceof Simulator)) return new Simulator(callback, renderers, integrationFps, iterations, warp);
 
@@ -38,12 +41,18 @@
     // The basic elements of the simulation
     this.particles = [];
     this.edges = [];
+    this.volumes = [];
     this.forces = [];
     this.constraints = [];
 
     // only these particles can collide with things
+    // this is essentially a cache so we don't have to recalculate this on every frame
+    // instead, we add edge particles, free body particles, and volume particles here whenever those entities are added
     this.collisionParticles = [];
   }
+
+
+  // Public API
 
   Simulator.prototype.start = function() {
     this.running = true;
@@ -55,6 +64,42 @@
   Simulator.prototype.stop = function() {
     this.running = false;
   };
+
+  Simulator.prototype.add = function(entity, layer) {
+    var entities = Array.isArray(entity) ? entity : [entity];
+
+    this.ensureLayer(layer);
+    while (entities.length) entities.shift().addTo(this, layer);
+
+    return this;
+  };
+
+  Simulator.prototype.link = function(layer, linkedLayers) {
+    this.ensureLayer(layer);
+    this.layers[layer].linked = linkedLayers.split(' ');
+    return this;
+  };
+
+  Simulator.prototype.findParticle = function(x, y, radius) {
+    // TODO: this could be dramatically optimized by starting with bounding boxes
+    var particles = this.particles;
+    var found = undefined;
+    var nearest = radius;
+    var distance;
+
+    for (var i = 0, ilen = particles.length; i < ilen; i++) {
+      distance = particles[i].getDistance(x, y);
+      if (distance <= nearest) {
+        found = particles[i];
+        nearest = distance;
+      }
+    }
+
+    return found;
+  };
+
+
+  // Simulation loop
 
   Simulator.prototype._step = function() {
     if (!this.running) return;
@@ -153,16 +198,16 @@
   };
 
   Simulator.prototype.detectCollisions = function(time) {
-    var particles = this.collisionParticles;
-    var edges = this.edges;
+    var particles = this.collisionParticles;  // Edge particles + "Free" particles + Volume particles
+    var volumes = this.volumes;
     var layers = this.layers;
 
-    var hit, particle, edge, linked;
+    var hit, particle, volume, linked;
 
     var emptyLink = [];
     var collisions = [];
 
-    // Loop through all collision particles (particles that are part of edges)
+    // Loop through all collision particles (particles that are part of volumes)
     for (var i = 0, ilen = particles.length; i < ilen; i++) {
       particle = particles[i];
       linked = particle.layer ? layers[particle.layer].linked : emptyLink;
@@ -172,24 +217,24 @@
       particle.isCollisionPoint = false;
       particle.correction.set(0, 0);
 
-      // Loop through all edges to see if this particle ran into the edge
-      for (var j = 0, jlen = edges.length; j < jlen; j++) {
-        edge = edges[j];
-        if (i === 0) edge.update();
-        if (!edge.layer || linked.indexOf(edge.layer) !== -1) {
-          if (particle !== edge.p1 && particle !== edge.p2) {
+      // Loop through all volumes to see if this particle ran into the volume
+      for (var j = 0, jlen = volumes.length; j < jlen; j++) {
+        volume = volumes[j];
+        if (i === 0) volume.update();
+        if (!volume.layer || linked.indexOf(volume.layer) !== -1) {
+          if (particle !== volume.p1 && particle !== volume.p2) {
 
-            hit = edge.getCollision(particle);
+            hit = volume.getCollision(particle);
 
             if (hit) collisions.push({
               particle: particle,
-              edge: edge,
+              volume: volume,
               correction: hit,
               distance: hit.getLength()
             });
           }
         }
-      } // edges
+      } // volumes
     } // particles
 
     return collisions;
@@ -199,61 +244,8 @@
 
   };
 
-  // TODO: expand this naive approach
-  Simulator.prototype.resolveCollisionsOld = function(time, collisions) {
-    // idea 1 - sort collisions by penetration depth and solve the largest first
-    // flag all participants as "colliding = false" in detect step, then true here at resolution
-    // if any participants in a collision have colliding == true, then they have already
-    // collided and should be skipped
 
-    // idea 2 - sort collisions globally by correction distance,
-    // prevent duplicate edge/edge collisions,
-    // sum total differences of corrections per particle eg:
-    // var correctionDelta = thisCorrection.sub(p.correction); (make sure same sign?)
-    // p.correction.add(correctionDelta);
-
-    // idea 3 - add "near" filter back to detection above
-    // then use total correction distance summing
-
-    // sort collisions globally
-    collisions.sort(function(a, b) {
-      return b.penetration - a.penetration
-    });
-
-    for (var i = 0, ilen = collisions.length; i < ilen; i++) {
-      var collision = collisions[i];
-      var particle = collision.particle;
-      var edge = collision.edge;
-      var correction = collision.correction;
-
-      if (!particle.isCollisionPoint) {
-
-        var pInvMass = 1 / particle.getMass();
-        var eInvMass = 2 / (edge.p1.getMass() + edge.p2.getMass());
-        var massTotal = pInvMass + eInvMass;
-
-        particle.colliding = edge.p1.colliding = edge.p2.colliding = true;
-        particle.isCollisionPoint = true;
-
-        var pCorrect = correction.clone().scale(pInvMass / massTotal);
-        var eCorrect = correction.clone().scale(-eInvMass / massTotal);
-
-        var velocity = particle.position.clone().sub(particle.lastPosition).getLength();
-
-        particle.correction.merge(pCorrect);
-        edge.p1.correction.merge(eCorrect);
-        edge.p2.correction.merge(eCorrect);
-      }
-    }
-    //if (collisions.length) throw new Error('ok');
-
-    for (var i = 0; i < this.collisionParticles.length; i++) {
-      if (this.collisionParticles[i].colliding) {
-        this.collisionParticles[i].position.add(this.collisionParticles[i].correction);
-        this.collisionParticles[i].stop();
-      }
-    }
-  };
+  // Entity management
 
   Simulator.prototype.ensureLayer = function(name) {
     if (!name) return;
@@ -262,30 +254,8 @@
     };
   };
 
-  Simulator.prototype.add = function(entity, layer) {
-    var entities = Array.isArray(entity) ? entity : [entity];
-
-    this.ensureLayer(layer);
-    while (entities.length) entities.shift().addTo(this, layer);
-
-    return this;
-  };
-
-  Simulator.prototype.link = function(layer, linkedLayers) {
-    this.ensureLayer(layer);
-    this.layers[layer].linked = linkedLayers.split(' ');
-    return this;
-  };
-
   Simulator.prototype.addParticles = function(particles) {
     this.particles.push.apply(this.particles, particles);
-  };
-
-  Simulator.prototype.addEdges = function(edges) {
-    this.edges.push.apply(this.edges, edges);
-    for (var i = 0; i < edges.length; i++) {
-      this.addCollisionParticles([edges[i].p1, edges[i].p2]);
-    }
   };
 
   Simulator.prototype.addCollisionParticles = function(particles) {
@@ -296,29 +266,26 @@
     return this;
   };
 
+  Simulator.prototype.addEdges = function(edges) {
+    this.edges.push.apply(this.edges, edges);
+    for (var i = 0; i < edges.length; i++) {
+      this.addCollisionParticles([edges[i].p1, edges[i].p2]);
+    }
+  };
+
+  Simulator.prototype.addVolumes = function(volumes) {
+    this.volumes.push.apply(this.volumes, volumes);
+    for (var i = 0; i < volumes.length; i++) {
+      this.addCollisionParticles(volumes[i].particls);
+    }
+  };
+
   Simulator.prototype.addConstraints = function(constraints) {
     this.constraints.push.apply(this.constraints, constraints);
     this.constraints.sort(prioritySort);
     return this;
   };
 
-  // TODO: this could be dramatically optimized by starting with bounding boxes
-  Simulator.prototype.findParticle = function(x, y, radius) {
-    var particles = this.particles;
-    var found = undefined;
-    var nearest = radius;
-    var distance;
-
-    for (var i = 0, ilen = particles.length; i < ilen; i++) {
-      distance = particles[i].getDistance(x, y);
-      if (distance <= nearest) {
-        found = particles[i];
-        nearest = distance;
-      }
-    }
-
-    return found;
-  };
 
   Newton.Simulator = Simulator;
 
