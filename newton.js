@@ -396,9 +396,10 @@
         return particles.push(particles[0]), this.particles = particles, this;
     }, Volume.prototype.getCollision = function(particle) {
         for (var poly = [], i = 0; i < this.particles.length; i++) poly.push(this.particles[i].position);
-        if (pointInPoly(particle.position, poly)) {
+        var pos = particle.position;
+        if (pointInPoly(pos, poly)) {
             for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
-                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position).scale(.001), distance = projection.getLength();
+                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point).unit(), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position), distance = projection.getLength();
                 nearest > distance && (solution = projection, nearest = distance);
             }
             return solution;
@@ -600,6 +601,150 @@
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
+    function getGLContext(canvas) {
+        for (var gl, names = [ "webgl", "experimental-webgl", "webkit-3d", "moz-webgl" ], i = 0; !gl && i++ < names.length; ) try {
+            gl = canvas.getContext(names[i]);
+        } catch (e) {}
+        return gl;
+    }
+    function createShaderProgram(gl, vsText, fsText) {
+        var vs = gl.createShader(gl.VERTEX_SHADER), fs = gl.createShader(gl.FRAGMENT_SHADER);
+        if (gl.shaderSource(vs, vsText), gl.shaderSource(fs, fsText), gl.compileShader(vs), 
+        gl.compileShader(fs), !gl.getShaderParameter(vs, gl.COMPILE_STATUS)) throw console.error("error compiling VS shaders:", gl.getShaderInfoLog(vs)), 
+        new Error("shader failure");
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) throw console.error("error compiling FS shaders:", gl.getShaderInfoLog(fs)), 
+        new Error("shader failure");
+        var program = gl.createProgram();
+        return gl.attachShader(program, vs), gl.attachShader(program, fs), gl.linkProgram(program), 
+        program;
+    }
+    function createCircleTexture(gl, size) {
+        size = size || 128;
+        var canvas = document.createElement("canvas");
+        canvas.width = canvas.height = size;
+        var ctx = canvas.getContext("2d"), rad = .5 * size;
+        return ctx.beginPath(), ctx.arc(rad, rad, rad, 0, 2 * Math.PI, !1), ctx.closePath(), 
+        ctx.fillStyle = "#fff", ctx.fill(), createTexture(gl, canvas);
+    }
+    function createTexture(gl, data) {
+        var texture = gl.createTexture();
+        return gl.bindTexture(gl.TEXTURE_2D, texture), gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data), 
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR), gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR), 
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE), gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE), 
+        gl.generateMipmap(gl.TEXTURE_2D), gl.bindTexture(gl.TEXTURE_2D, null), texture;
+    }
+    function GLRenderer(el) {
+        return this instanceof GLRenderer ? (this.el = el, this.width = el.width, this.height = el.height, 
+        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.vArray = new Float32Array(3 * GLRenderer.MAX_PARTICLES), 
+        this.sArray = new Float32Array(GLRenderer.MAX_PARTICLES), this.callback = this.callback.bind(this), 
+        this.gl.viewport(0, 0, this.width, this.height), this.viewportArray = new Float32Array([ this.width, this.height ]), 
+        this.initShaders(), this.initBuffers(), this.particleTexture = createCircleTexture(this.gl), 
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
+        void 0) : new GLRenderer(el);
+    }
+    var POINT_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size + 1.0;", "}" ].join("\n"), LINE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main() {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), CONSTRAINT_FS = [ "void main() {", "gl_FragColor = vec4(0.0, 0.5, 1.0, 1.0);", "}" ].join("\n"), EDGE_FS = [ "void main() {", "gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);", "}" ].join("\n"), COLLISION_FS = [ "void main() {", "gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);", "}" ].join("\n");
+    GLRenderer.MAX_PARTICLES = 1e4, GLRenderer.prototype = {
+        initShaders: function() {
+            var gl = this.gl;
+            this.particleShader = createShaderProgram(gl, POINT_VS, PARTICLE_FS), this.particleShader.uniforms = {
+                viewport: gl.getUniformLocation(this.particleShader, "viewport")
+            }, this.particleShader.attributes = {
+                position: gl.getAttribLocation(this.particleShader, "position"),
+                size: gl.getAttribLocation(this.particleShader, "size")
+            }, gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
+            this.edgeShader = createShaderProgram(gl, LINE_VS, EDGE_FS), this.edgeShader.uniforms = {
+                viewport: gl.getUniformLocation(this.edgeShader, "viewport")
+            }, this.edgeShader.attributes = {
+                position: gl.getAttribLocation(this.edgeShader, "position")
+            }, gl.useProgram(this.edgeShader), gl.uniform2fv(this.edgeShader.uniforms.viewport, this.viewportArray), 
+            this.constraintShader = createShaderProgram(gl, LINE_VS, CONSTRAINT_FS), this.constraintShader.uniforms = {
+                viewport: gl.getUniformLocation(this.constraintShader, "viewport")
+            }, this.constraintShader.attributes = {
+                position: gl.getAttribLocation(this.constraintShader, "position")
+            }, gl.useProgram(this.constraintShader), gl.uniform2fv(this.constraintShader.uniforms.viewport, this.viewportArray), 
+            this.collisionShader = createShaderProgram(gl, LINE_VS, COLLISION_FS), this.collisionShader.uniforms = {
+                viewport: gl.getUniformLocation(this.collisionShader, "viewport")
+            }, this.collisionShader.attributes = {
+                position: gl.getAttribLocation(this.collisionShader, "position")
+            }, gl.useProgram(this.collisionShader), gl.uniform2fv(this.collisionShader.uniforms.viewport, this.viewportArray);
+        },
+        initBuffers: function() {
+            var gl = this.gl;
+            this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer(), 
+            this.edgePositionBuffer = gl.createBuffer();
+        },
+        callback: function(time, sim) {
+            this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges), 
+            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints), this.drawCollisions(sim.collisions);
+        },
+        clear: function() {
+            var gl = this.gl;
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        },
+        drawForces: function(ctx, forces) {
+            ctx.save(), ctx.lineWidth = 2, ctx.strokeStyle = "rgba(255, 255, 255, 0.25)", ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            for (var i = 0, ilen = forces.length; ilen > i; i++) {
+                var force = forces[i];
+                force instanceof Newton.RadialGravity && (ctx.beginPath(), ctx.arc(force.x, force.y, .5 * force.strength * force.strength, 0, 2 * Math.PI, !1), 
+                ctx.fill());
+            }
+            ctx.restore();
+        },
+        drawParticles: function(particles) {
+            var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
+            vertices.length = 0, sizes.length = 0;
+            for (var particle, i = 0, ilen = particles.length; ilen > i; i++) particle = particles[i], 
+            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(particle.size < 8 ? particle.size : 8);
+            if (vertices.length > this.vArray.length) throw new Error("vArray too small to hold vertices");
+            if (this.vArray.set(vertices, 0), sizes.length > this.sArray.length) throw new Error("sArray too small to hold sizes");
+            this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
+            gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+        },
+        drawConstraints: function(constraints) {
+            for (var constraint, coords, gl = this.gl, vertices = [], i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
+            "linear" === constraint.category && (coords = constraint.getCoords(), vertices.push(coords.x1, coords.y1, 0), 
+            vertices.push(coords.x2, coords.y2, 0));
+            gl.useProgram(this.constraintShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.constraintShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.constraintShader.attributes.position), gl.lineWidth(1), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+        },
+        drawEdges: function(edges) {
+            for (var edge, gl = this.gl, vertices = [], i = 0, ilen = edges.length; ilen > i; i++) edge = edges[i].getCoords(), 
+            vertices.push(edge.x1, edge.y1, 0), vertices.push(edge.x2, edge.y2, 0);
+            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+        },
+        drawCollisions: function(collisions) {
+            for (var gl = this.gl, vertices = [], i = 0, ilen = collisions.length; ilen > i; i++) {
+                var start = collisions[i].particle.position, end = collisions[i].particle.position.clone().add(collisions[i].correction);
+                vertices.push(start.x, start.y, 0), vertices.push(end.x, end.y, 0);
+            }
+            gl.useProgram(this.collisionShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.collisionShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.collisionShader.attributes.position), gl.lineWidth(3), 
+            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
+        },
+        drawVolumes: function(volumes) {
+            for (var pos, gl = this.gl, vertices = [], i = 0, ilen = volumes.length; ilen > i; i++) if (volumes[i].particles.length) {
+                for (var j = 0, jlen = volumes[i].particles.length; jlen > j; j++) pos = volumes[i].particles[j].position, 
+                vertices.push(pos.x, pos.y, 0);
+                vertices.push(void 0, void 0, void 0);
+            }
+            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
+            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
+            gl.drawArrays(gl.LINE_STRIP, 0, vertices.length / 3);
+        }
+    }, Newton.GLRenderer = GLRenderer;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
     function rgbToHex(r, g, b) {
         return (1 << 24) + (r << 16) + (g << 8) + b;
     }
@@ -718,144 +863,5 @@
             ctx.restore();
         }
     }, Newton.Renderer = Renderer;
-}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
-    "use strict";
-    function getGLContext(canvas) {
-        for (var gl, names = [ "webgl", "experimental-webgl", "webkit-3d", "moz-webgl" ], i = 0; !gl && i++ < names.length; ) try {
-            gl = canvas.getContext(names[i]);
-        } catch (e) {}
-        return gl;
-    }
-    function createShaderProgram(gl, vsText, fsText) {
-        var vs = gl.createShader(gl.VERTEX_SHADER), fs = gl.createShader(gl.FRAGMENT_SHADER);
-        if (gl.shaderSource(vs, vsText), gl.shaderSource(fs, fsText), gl.compileShader(vs), 
-        gl.compileShader(fs), !gl.getShaderParameter(vs, gl.COMPILE_STATUS)) throw console.error("error compiling VS shaders:", gl.getShaderInfoLog(vs)), 
-        new Error("shader failure");
-        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) throw console.error("error compiling FS shaders:", gl.getShaderInfoLog(fs)), 
-        new Error("shader failure");
-        var program = gl.createProgram();
-        return gl.attachShader(program, vs), gl.attachShader(program, fs), gl.linkProgram(program), 
-        program;
-    }
-    function createCircleTexture(gl, size) {
-        size = size || 128;
-        var canvas = document.createElement("canvas");
-        canvas.width = canvas.height = size;
-        var ctx = canvas.getContext("2d"), rad = .5 * size;
-        return ctx.beginPath(), ctx.arc(rad, rad, rad, 0, 2 * Math.PI, !1), ctx.closePath(), 
-        ctx.fillStyle = "#fff", ctx.fill(), createTexture(gl, canvas);
-    }
-    function createTexture(gl, data) {
-        var texture = gl.createTexture();
-        return gl.bindTexture(gl.TEXTURE_2D, texture), gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data), 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR), gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR), 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE), gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE), 
-        gl.generateMipmap(gl.TEXTURE_2D), gl.bindTexture(gl.TEXTURE_2D, null), texture;
-    }
-    function GLRenderer(el) {
-        return this instanceof GLRenderer ? (this.el = el, this.width = el.width, this.height = el.height, 
-        this.gl = getGLContext(el), this.vertices = [], this.sizes = [], this.vArray = new Float32Array(3 * GLRenderer.MAX_PARTICLES), 
-        this.sArray = new Float32Array(GLRenderer.MAX_PARTICLES), this.callback = this.callback.bind(this), 
-        this.gl.viewport(0, 0, this.width, this.height), this.viewportArray = new Float32Array([ this.width, this.height ]), 
-        this.initShaders(), this.initBuffers(), this.particleTexture = createCircleTexture(this.gl), 
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE), this.gl.enable(this.gl.BLEND), 
-        void 0) : new GLRenderer(el);
-    }
-    var POINT_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "attribute float size;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "gl_PointSize = size + 1.0;", "}" ].join("\n"), LINE_VS = [ "uniform vec2 viewport;", "attribute vec3 position;", "void main() {", "vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;", "vec2 flipped = vec2(scaled.x, -scaled.y);", "gl_Position = vec4(flipped, 0, 1);", "}" ].join("\n"), PARTICLE_FS = [ "precision mediump float;", "uniform sampler2D texture;", "void main() {", "gl_FragColor = texture2D(texture, gl_PointCoord);", "}" ].join("\n"), CONSTRAINT_FS = [ "void main() {", "gl_FragColor = vec4(0.0, 0.5, 1.0, 1.0);", "}" ].join("\n"), EDGE_FS = [ "void main() {", "gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);", "}" ].join("\n");
-    GLRenderer.MAX_PARTICLES = 1e4, GLRenderer.prototype = {
-        initShaders: function() {
-            var gl = this.gl;
-            this.particleShader = createShaderProgram(gl, POINT_VS, PARTICLE_FS), this.particleShader.uniforms = {
-                viewport: gl.getUniformLocation(this.particleShader, "viewport")
-            }, this.particleShader.attributes = {
-                position: gl.getAttribLocation(this.particleShader, "position"),
-                size: gl.getAttribLocation(this.particleShader, "size")
-            }, gl.useProgram(this.particleShader), gl.uniform2fv(this.particleShader.uniforms.viewport, this.viewportArray), 
-            this.edgeShader = createShaderProgram(gl, LINE_VS, EDGE_FS), this.edgeShader.uniforms = {
-                viewport: gl.getUniformLocation(this.edgeShader, "viewport")
-            }, this.edgeShader.attributes = {
-                position: gl.getAttribLocation(this.edgeShader, "position")
-            }, gl.useProgram(this.edgeShader), gl.uniform2fv(this.edgeShader.uniforms.viewport, this.viewportArray), 
-            this.constraintShader = createShaderProgram(gl, LINE_VS, CONSTRAINT_FS), this.constraintShader.uniforms = {
-                viewport: gl.getUniformLocation(this.constraintShader, "viewport")
-            }, this.constraintShader.attributes = {
-                position: gl.getAttribLocation(this.constraintShader, "position")
-            }, gl.useProgram(this.constraintShader), gl.uniform2fv(this.constraintShader.uniforms.viewport, this.viewportArray);
-        },
-        initBuffers: function() {
-            var gl = this.gl;
-            this.particlePositionBuffer = gl.createBuffer(), this.particleSizeBuffer = gl.createBuffer(), 
-            this.edgePositionBuffer = gl.createBuffer();
-        },
-        callback: function(time, sim) {
-            this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges), 
-            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints), this.drawCollisions(sim.collisions);
-        },
-        clear: function() {
-            var gl = this.gl;
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        },
-        drawForces: function(ctx, forces) {
-            ctx.save(), ctx.lineWidth = 2, ctx.strokeStyle = "rgba(255, 255, 255, 0.25)", ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-            for (var i = 0, ilen = forces.length; ilen > i; i++) {
-                var force = forces[i];
-                force instanceof Newton.RadialGravity && (ctx.beginPath(), ctx.arc(force.x, force.y, .5 * force.strength * force.strength, 0, 2 * Math.PI, !1), 
-                ctx.fill());
-            }
-            ctx.restore();
-        },
-        drawParticles: function(particles) {
-            var gl = this.gl, vertices = this.vertices, sizes = this.sizes;
-            vertices.length = 0, sizes.length = 0;
-            for (var particle, i = 0, ilen = particles.length; ilen > i; i++) particle = particles[i], 
-            vertices.push(particle.position.x, particle.position.y, 0), sizes.push(particle.size < 8 ? particle.size : 8);
-            if (vertices.length > this.vArray.length) throw new Error("vArray too small to hold vertices");
-            if (this.vArray.set(vertices, 0), sizes.length > this.sArray.length) throw new Error("sArray too small to hold sizes");
-            this.sArray.set(sizes, 0), gl.activeTexture(gl.TEXTURE0), gl.bindTexture(gl.TEXTURE_2D, this.particleTexture), 
-            gl.useProgram(this.particleShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.particlePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, this.vArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.particleShader.attributes.position), gl.bindBuffer(gl.ARRAY_BUFFER, this.particleSizeBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, this.sArray, gl.STATIC_DRAW), gl.vertexAttribPointer(this.particleShader.attributes.size, 1, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.particleShader.attributes.size), gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
-        },
-        drawConstraints: function(constraints) {
-            for (var constraint, coords, gl = this.gl, vertices = [], i = 0, ilen = constraints.length; ilen > i; i++) constraint = constraints[i], 
-            "linear" === constraint.category && (coords = constraint.getCoords(), vertices.push(coords.x1, coords.y1, 0), 
-            vertices.push(coords.x2, coords.y2, 0));
-            gl.useProgram(this.constraintShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.constraintShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.constraintShader.attributes.position), gl.lineWidth(1), 
-            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
-        },
-        drawEdges: function(edges) {
-            for (var edge, gl = this.gl, vertices = [], i = 0, ilen = edges.length; ilen > i; i++) edge = edges[i].getCoords(), 
-            vertices.push(edge.x1, edge.y1, 0), vertices.push(edge.x2, edge.y2, 0);
-            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
-            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
-        },
-        drawCollisions: function(collisions) {
-            for (var gl = this.gl, vertices = [], i = 0, ilen = collisions.length; ilen > i; i++) {
-                var start = collisions[i].particle.position, end = collisions[i].particle.position.clone().add(collisions[i].correction);
-                vertices.push(start.x, start.y, 0), vertices.push(end.x, end.y, 0);
-            }
-            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
-            gl.drawArrays(gl.LINES, 0, vertices.length / 3);
-        },
-        drawVolumes: function(volumes) {
-            for (var pos, gl = this.gl, vertices = [], i = 0, ilen = volumes.length; ilen > i; i++) if (volumes[i].particles.length) {
-                for (var j = 0, jlen = volumes[i].particles.length; jlen > j; j++) pos = volumes[i].particles[j].position, 
-                vertices.push(pos.x, pos.y, 0);
-                vertices.push(void 0, void 0, void 0);
-            }
-            gl.useProgram(this.edgeShader), gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer), 
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW), gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, !1, 0, 0), 
-            gl.enableVertexAttribArray(this.edgeShader.attributes.position), gl.lineWidth(3), 
-            gl.drawArrays(gl.LINE_STRIP, 0, vertices.length / 3);
-        }
-    }, Newton.GLRenderer = GLRenderer;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports);
 //# sourceMappingURL=newton-map.js

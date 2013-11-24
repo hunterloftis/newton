@@ -49,6 +49,12 @@
     '}'
   ].join('\n');
 
+  var COLLISION_FS = [
+    'void main() {',
+      'gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);',
+    '}'
+  ].join('\n');
+
   function getGLContext(canvas) {
     var names = [
       'webgl',
@@ -195,6 +201,17 @@
       };
       gl.useProgram(this.constraintShader);
       gl.uniform2fv(this.constraintShader.uniforms.viewport, this.viewportArray);
+
+      // collisions
+      this.collisionShader = createShaderProgram(gl, LINE_VS, COLLISION_FS);
+      this.collisionShader.uniforms = {
+        viewport: gl.getUniformLocation(this.collisionShader, 'viewport')
+      };
+      this.collisionShader.attributes = {
+        position: gl.getAttribLocation(this.collisionShader, 'position')
+      };
+      gl.useProgram(this.collisionShader);
+      gl.uniform2fv(this.collisionShader.uniforms.viewport, this.viewportArray);
     },
     initBuffers: function() {
       var gl = this.gl;
@@ -340,13 +357,13 @@
       }
 
       // TODO: necessary?
-      gl.useProgram(this.edgeShader);
+      gl.useProgram(this.collisionShader);
 
       // position buffer
       gl.bindBuffer(gl.ARRAY_BUFFER, this.edgePositionBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-      gl.vertexAttribPointer(this.edgeShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(this.edgeShader.attributes.position);
+      gl.vertexAttribPointer(this.collisionShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.collisionShader.attributes.position);
 
       gl.lineWidth(3);
       gl.drawArrays(gl.LINES, 0, vertices.length / 3);

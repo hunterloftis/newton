@@ -37,13 +37,24 @@
       poly.push(this.particles[i].position);
     }
 
-    if (pointInPoly(particle.position, poly)) {
+    // Another idea: instead of figuring out where the particle should go (and maybe allowing the particle to tunnel through and wrap)
+    // we should send a line back through to the volume's centerpoint
+    // (to encourage volumes to stick together)
+    // but who knows, this might work fine
+    // plus that solution would be weird for free particles and for bodies with arms etc
+
+    var pos = particle.position;
+
+    if (pointInPoly(pos, poly)) {
       var solution;
       var nearest = Infinity;
       for (var i = 1; i < this.particles.length; i++) {
         var point = this.particles[i - 1].position;
-        var dir = this.particles[i].position.clone().sub(point);
-        var projection = particle.position.clone().projectOnto(point, dir).sub(particle.position).scale(0.001);
+        var dir = this.particles[i].position.clone().sub(point).unit();
+
+        var projection = particle.position.clone().projectOnto(point, dir).sub(particle.position);
+        //var proj = pos.clone().sub(point).getDot()
+
         var distance = projection.getLength();
         if (distance < nearest) {
           solution = projection;
