@@ -219,12 +219,22 @@
 
             hit = volume.getCollision(particle);
 
-            if (hit) collisions.push({
-              particle: particle,
-              volume: volume,
-              correction: hit,
-              distance: hit.getLength()
-            });
+            if (hit) {
+              hit.forEach(function(h) {
+                collisions.push({
+                  particle: particle,
+                  volume: volume,
+                  correction: h,
+                  distance: h.getLength()
+                });
+              });
+            }
+            // if (hit) collisions.push({
+            //   particle: particle,
+            //   volume: volume,
+            //   correction: hit[0],
+            //   distance: hit[0].getLength()
+            // });
           }
         }
       } // volumes

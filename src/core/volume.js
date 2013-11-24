@@ -50,14 +50,18 @@
       var nearest = Infinity;
       for (var i = 1; i < this.particles.length; i++) {
         var point = this.particles[i - 1].position;
-        var dir = this.particles[i].position.clone().sub(point).unit();
+        var dir = this.particles[i].position.clone().sub(point).turnLeft().unit();
 
         var projection = particle.position.clone().projectOnto(point, dir).sub(particle.position);
-        //var proj = pos.clone().sub(point).getDot()
 
         var distance = projection.getLength();
         if (distance < nearest) {
-          solution = projection;
+          //solution = projection;
+          solution = [
+            point.clone().sub(pos),
+            this.particles[i].position.clone().sub(pos),
+            projection
+          ];
           nearest = distance;
         }
       }

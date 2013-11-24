@@ -25,10 +25,6 @@
 
       body.DistanceConstraint(nextTop, nextBottom);
 
-      if (i === segments) {
-        body.Edge(nextTop, nextBottom);
-      }
-
       vTop.push(top);
       vBottom.push(bottom);
 

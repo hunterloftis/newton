@@ -110,7 +110,8 @@
         for (var i = 0, ilen = this.edges.length; ilen > i; i++) this.edges[i].layer = layer;
         for (var i = 0, ilen = this.volumes.length; ilen > i; i++) this.volumes[i].layer = layer;
     }, Body.prototype.free = function() {
-        this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles);
+        return this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles), 
+        this;
     }, Body.prototype.addParticle = function(particle) {
         this.particles.push(particle), particle.layer = this.layer, this.simulator && (this.simulator.addParticles([ particle ]), 
         this.isFree && this.simulator.addCollisionParticles([ particle ]));
@@ -355,11 +356,13 @@
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             hit = void 0, particle.colliding = !1, particle.isCollisionPoint = !1, particle.correction.set(0, 0);
             for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], volume.layer && -1 === linked.indexOf(volume.layer) || -1 === volume.particles.indexOf(particle) && (hit = volume.getCollision(particle), 
-            hit && collisions.push({
-                particle: particle,
-                volume: volume,
-                correction: hit,
-                distance: hit.getLength()
+            hit && hit.forEach(function(h) {
+                collisions.push({
+                    particle: particle,
+                    volume: volume,
+                    correction: h,
+                    distance: h.getLength()
+                });
             }));
         }
         return this.collisions = collisions, collisions;
@@ -399,8 +402,9 @@
         var pos = particle.position;
         if (pointInPoly(pos, poly)) {
             for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
-                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point).unit(), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position), distance = projection.getLength();
-                nearest > distance && (solution = projection, nearest = distance);
+                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point).turnLeft().unit(), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position), distance = projection.getLength();
+                nearest > distance && (solution = [ point.clone().sub(pos), this.particles[i].position.clone().sub(pos), projection ], 
+                nearest = distance);
             }
             return solution;
         }
@@ -440,8 +444,8 @@
             var nextTop = body.Particle(x + i * segmentLength, y), nextBottom = body.Particle(x + i * segmentLength, y + segmentLength);
             body.DistanceConstraint(top, nextTop), body.DistanceConstraint(bottom, nextBottom), 
             body.DistanceConstraint(top, nextBottom), body.DistanceConstraint(nextTop, bottom), 
-            body.DistanceConstraint(nextTop, nextBottom), i === segments && body.Edge(nextTop, nextBottom), 
-            vTop.push(top), vBottom.push(bottom), top = nextTop, bottom = nextBottom;
+            body.DistanceConstraint(nextTop, nextBottom), vTop.push(top), vBottom.push(bottom), 
+            top = nextTop, bottom = nextBottom;
         }
         return pinRight && (top.pin(), bottom.pin()), vTop.push(top), vBottom.push(bottom), 
         vBottom.reverse(), body.Volume(vTop.concat(vBottom)), body;

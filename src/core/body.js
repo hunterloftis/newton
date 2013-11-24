@@ -42,9 +42,14 @@
     }
   };
 
+  // TODO: rename this, it's confusingly the same as the claim/free methods from object pooling
+  // alternatively, could use claim / release or acquire / release for pooling
+  // TODO: make this take effect for subsequent particles as well
+  // TODO: make this work for subsequent adds to simulator as well. super flaky
   Body.prototype.free = function() {
     this.isFree = true;
     if (this.simulator) this.simulator.addCollisionParticles(this.particles);
+    return this;
   }
 
   Body.prototype.addParticle = function(particle) {
