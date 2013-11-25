@@ -153,16 +153,18 @@
     ];
 
     var w = Newton.Body(wallMaterial);
+    var v = [];
     for (var i = 0; i < polys.length; i += 4) {
       var p1 = Newton.Particle(polys[i], polys[i + 1]);
       var p2 = Newton.Particle(polys[i + 2], polys[i + 3]);
-      var e = Newton.Edge(p1, p2, wallMaterial);
+      v.push(p1);
       w.addParticle(p1);
       w.addParticle(p2);
       p1.pin();
       p2.pin();
-      w.addEdge(e);       // TODO: figure out a more concise API
     }
+    v.push(polys[0]);
+    w.Volume(v);
     return w;
   }
 
