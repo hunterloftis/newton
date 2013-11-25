@@ -232,12 +232,15 @@
   };
 
   Simulator.prototype.resolveCollisions = function(time, collisions) {
-    var collision;
+    var collision, action, reaction;
     for (var i = 0; i < collisions.length; i++) {
       collision = collisions[i];
-      collision.particle.correct(collision.correction.clone().scale(0.5));
-      collision.v1.correct(collision.correction.scale(-0.5));
-      collision.v2.correct(collision.correction);
+      action = collision.correction.clone().scale(0.5);
+      reaction = collision.correction.clone().scale(-0.5);
+
+      collision.particle.correct(action);
+      collision.v1.correct(reaction);
+      collision.v2.correct(reaction);
     }
   };
 
