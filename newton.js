@@ -453,13 +453,13 @@
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function Squishy(ox, oy, r, points) {
-        for (var spacing = 2 * Math.PI / points, body = Newton.Body(), anchor = Newton.Particle(ox, oy), i = 0; points > i; i++) {
+        for (var spacing = 2 * Math.PI / points, body = Newton.Body(), anchor = Newton.Particle(ox, oy), volume = [], i = 0; points > i; i++) {
             var x = ox + r * Math.cos(i * spacing - .5 * Math.PI), y = oy + r * Math.sin(i * spacing - .5 * Math.PI);
             body.Particle(x, y);
             for (var j = 0; i > j; j++) body.DistanceConstraint(body.particles[i], body.particles[j], .008);
-            i > 0 && body.Edge(body.particles[i - 1], body.particles[i]), body.DistanceConstraint(body.particles[i], anchor, .008);
+            volume.push(body.particles[i]), body.DistanceConstraint(body.particles[i], anchor, .008);
         }
-        return body.Edge(body.particles[points - 1], body.particles[0]), body.addParticle(anchor), 
+        return volume.push(body.particles[0]), body.addParticle(anchor), body.Volume(volume), 
         body;
     }
     Newton.Squishy = Squishy;
