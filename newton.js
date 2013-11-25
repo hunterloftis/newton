@@ -356,17 +356,14 @@
             particle = particles[i], linked = particle.layer ? layers[particle.layer].linked : emptyLink, 
             hit = void 0, particle.colliding = !1, particle.isCollisionPoint = !1, particle.correction.set(0, 0);
             for (var j = 0, jlen = volumes.length; jlen > j; j++) volume = volumes[j], volume.layer && -1 === linked.indexOf(volume.layer) || -1 === volume.particles.indexOf(particle) && (hit = volume.getCollision(particle), 
-            hit && hit.forEach(function(h) {
-                collisions.push({
-                    particle: particle,
-                    volume: volume,
-                    correction: h,
-                    distance: h.getLength()
-                });
-            }));
+            hit && collisions.push(hit));
         }
         return this.collisions = collisions, collisions;
-    }, Simulator.prototype.resolveCollisions = function() {}, Simulator.prototype.ensureLayer = function(name) {
+    }, Simulator.prototype.resolveCollisions = function(time, collisions) {
+        for (var collision, i = 0; i < collisions.length; i++) collision = collisions[i], 
+        collision.particle.correct(collision.correction.clone().scale(.5)), collision.v1.correct(collision.correction.scale(-.5)), 
+        collision.v2.correct(collision.correction);
+    }, Simulator.prototype.ensureLayer = function(name) {
         name && (this.layers[name] || (this.layers[name] = {
             linked: [ name ]
         }));
@@ -403,7 +400,12 @@
         if (pointInPoly(pos, poly)) {
             for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
                 var projection = particle.position.clone().projectSegment(this.particles[i - 1].position, this.particles[i].position).sub(particle.position), distance = projection.getLength();
-                nearest > distance && (solution = [ projection ], nearest = distance);
+                nearest > distance && (solution = {
+                    correction: projection.scale(1.1),
+                    particle: particle,
+                    v1: this.particles[i - 1],
+                    v2: this.particles[i]
+                }, nearest = distance);
             }
             return solution;
         }

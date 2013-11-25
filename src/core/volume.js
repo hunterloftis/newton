@@ -43,6 +43,8 @@
     // but who knows, this might work fine
     // plus that solution would be weird for free particles and for bodies with arms etc
 
+    // TODO: compare by squared distances
+
     var pos = particle.position;
 
     if (pointInPoly(pos, poly)) {
@@ -54,12 +56,12 @@
 
         var distance = projection.getLength();
         if (distance < nearest) {
-          //solution = projection;
-          solution = [
-            //point.clone().sub(pos),
-            //this.particles[i].position.clone().sub(pos),
-            projection
-          ];
+          solution = {
+            correction: projection.scale(1.1),
+            particle: particle,
+            v1: this.particles[i - 1],
+            v2: this.particles[i]
+          };
           nearest = distance;
         }
       }

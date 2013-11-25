@@ -219,22 +219,8 @@
 
             hit = volume.getCollision(particle);
 
-            if (hit) {
-              hit.forEach(function(h) {
-                collisions.push({
-                  particle: particle,
-                  volume: volume,
-                  correction: h,
-                  distance: h.getLength()
-                });
-              });
-            }
-            // if (hit) collisions.push({
-            //   particle: particle,
-            //   volume: volume,
-            //   correction: hit[0],
-            //   distance: hit[0].getLength()
-            // });
+            if (hit) collisions.push(hit);
+
           }
         }
       } // volumes
@@ -246,7 +232,13 @@
   };
 
   Simulator.prototype.resolveCollisions = function(time, collisions) {
-
+    var collision;
+    for (var i = 0; i < collisions.length; i++) {
+      collision = collisions[i];
+      collision.particle.correct(collision.correction.clone().scale(0.5));
+      collision.v1.correct(collision.correction.scale(-0.5));
+      collision.v2.correct(collision.correction);
+    }
   };
 
 
