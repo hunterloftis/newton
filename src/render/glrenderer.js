@@ -226,7 +226,7 @@
       this.drawEdges(sim.edges);
       this.drawVolumes(sim.volumes);
       this.drawConstraints(sim.constraints);
-      this.drawCollisions(sim.collisions);
+      //this.drawCollisions(sim.collisions);
     },
 
     clear: function(time) {

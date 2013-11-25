@@ -685,7 +685,7 @@
         },
         callback: function(time, sim) {
             this.clear(time), this.drawParticles(sim.particles), this.drawEdges(sim.edges), 
-            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints), this.drawCollisions(sim.collisions);
+            this.drawVolumes(sim.volumes), this.drawConstraints(sim.constraints);
         },
         clear: function() {
             var gl = this.gl;
