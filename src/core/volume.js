@@ -57,7 +57,7 @@
         var distance = projection.getLength();
         if (distance < nearest) {
           solution = {
-            correction: projection.scale(1.1),  // TODO: figure out a good scaling factor
+            correction: projection.scale(0.8),  // TODO: figure out a good scaling factor
             particle: particle,
             v1: this.particles[i - 1],
             v2: this.particles[i]

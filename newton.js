@@ -401,7 +401,7 @@
             for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
                 var projection = particle.position.clone().projectSegment(this.particles[i - 1].position, this.particles[i].position).sub(particle.position), distance = projection.getLength();
                 nearest > distance && (solution = {
-                    correction: projection.scale(1.1),
+                    correction: projection.scale(.8),
                     particle: particle,
                     v1: this.particles[i - 1],
                     v2: this.particles[i]
