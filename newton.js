@@ -402,9 +402,8 @@
         var pos = particle.position;
         if (pointInPoly(pos, poly)) {
             for (var solution, nearest = 1/0, i = 1; i < this.particles.length; i++) {
-                var point = this.particles[i - 1].position, dir = this.particles[i].position.clone().sub(point).turnLeft().unit(), projection = particle.position.clone().projectOnto(point, dir).sub(particle.position), distance = projection.getLength();
-                nearest > distance && (solution = [ point.clone().sub(pos), this.particles[i].position.clone().sub(pos), projection ], 
-                nearest = distance);
+                var projection = particle.position.clone().projectSegment(this.particles[i - 1].position, this.particles[i].position).sub(particle.position), distance = projection.getLength();
+                nearest > distance && (solution = [ projection ], nearest = distance);
             }
             return solution;
         }
@@ -602,6 +601,11 @@
     }, Vector.prototype.projectOnto = function(vPoint, vDir) {
         var projection = this.clone().sub(vPoint).getDot(vDir);
         return this.sub(vDir.clone().scale(projection)), this;
+    }, Vector.prototype.projectSegment = function(vA, vB) {
+        var normal = vB.clone().sub(vA).turnLeft().unit(), projection = this.clone().sub(vA).getDot(normal);
+        return this.sub(normal.scale(projection)), this.x > vA.x && this.x > vB.x ? this.x = Math.max(vA.x, vB.x) : this.x < vA.x && this.x < vB.x && (this.x = Math.min(vA.x, vB.x)), 
+        this.y > vA.y && this.y > vB.y ? this.y = Math.max(vA.y, vB.y) : this.y < vA.y && this.y < vB.y && (this.y = Math.min(vA.y, vB.y)), 
+        this;
     }, Newton.Vector = Vector;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";

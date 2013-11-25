@@ -224,6 +224,19 @@
     return this;
   };
 
+  Vector.prototype.projectSegment = function(vA, vB) {
+    var normal = vB.clone().sub(vA).turnLeft().unit();
+    var projection = this.clone().sub(vA).getDot(normal);
+    this.sub(normal.scale(projection));
+
+    if (this.x > vA.x && this.x > vB.x) this.x = Math.max(vA.x, vB.x);
+    else if (this.x < vA.x && this.x < vB.x) this.x = Math.min(vA.x, vB.x);
+    if (this.y > vA.y && this.y > vB.y) this.y = Math.max(vA.y, vB.y);
+    else if (this.y < vA.y && this.y < vB.y) this.y = Math.min(vA.y, vB.y);
+
+    return this;
+  };
+
   Newton.Vector = Vector;
 
 })(typeof exports === 'undefined'? this['Newton']=this['Newton'] || {} : exports);
