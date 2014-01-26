@@ -15,8 +15,12 @@ build:
 test-unit:
 	node_modules/.bin/mocha test/unit/*.test.js
 
+# Performance tests
+test-perf:
+	node_modules/.bin/matcha 
+
 # All tests
-test: test-unit
+test: test-unit test-perf
 
 # Publish to github, npm, & bower
 publish:

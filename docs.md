@@ -1,5 +1,7 @@
 # Newton
 
+(I've taken a new job at Recurly and moved across the country to San Francisco... updates will be slow, but I'll get to them!)
+
 ## API Reference
 
 - The loop ([Overview](#theloop), [Simulator](#newtonsimulator), [Renderer](#newtonrenderer))
