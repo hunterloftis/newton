@@ -15,7 +15,8 @@
     "grunt-release": "~0.6.0",
     "bower": "~1.2.7",
     "mocha": "~1.14.0",
-    "chai": "~1.8.1"
+    "chai": "~1.8.1",
+    "matcha": "~0.4.1"
   },
   "author": "Hunter Loftis <hunter@hunterloftis.com>",
   "license": "MIT",
