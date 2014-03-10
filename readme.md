@@ -9,11 +9,11 @@ var renderer = newton.GLRenderer(display);
 
 var sim = newton.Simulator(null, renderer)
   .add(newton.LinearForce(0, 1))              // gravity
-  .add(newton.SquishBody(0, 0, 50, 50))       // falling object
+  .add(newton.SquishBody(0, 0, 50, 10))       // falling object
   .add(newton.BoxConstraint(0, 0, 400, 480))  // container
   .start();
 ```
-[Try this example](#)
+[Check out this example](#) or [see other examples.](#)
 
 - **Soft bodies** - Newton is based on verlet particle integration,
 which enables *deformation and destruction* and thus better simulation
@@ -55,8 +55,8 @@ var newton = require('newton');
 ## Documentation
 
 - Users
-  - [Examples](#)
   - [Getting started guide](#)
+  - [Examples](#)
   - [Complete API reference](#)
 - Contributors
   - [Under the hood](#)
