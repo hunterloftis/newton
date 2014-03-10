@@ -5,14 +5,16 @@ designed from the ground up for JavaScript.
 
 ```js
 var display = document.getElementById('display');
-var renderer = newton.GLRenderer(display);
 
-var sim = newton.Simulator(null, renderer)
+var sim = newton.Simulator()
   .add(newton.LinearForce(0, 1))              // gravity
   .add(newton.SquishBody(0, 0, 50, 10))       // falling object
   .add(newton.BoxConstraint(0, 0, 400, 480))  // container
   .start();
+
+newton.GLRenderer(display).render(sim);
 ```
+
 [Check out this example](#) or [see other examples.](#)
 
 - **Soft bodies** - Newton is based on verlet particle integration,
