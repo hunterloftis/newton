@@ -94,8 +94,17 @@ sim
 
 ```js
 sim.remove(body);
+```
+
+```js
 sim.remove(particle);
+```
+
+```js
 body.remove(particle);
+```
+
+```js
 particle.remove();
 ```
 
