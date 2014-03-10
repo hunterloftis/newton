@@ -24,8 +24,8 @@ separate from the renderer. This keeps rendering smooth and fast while
 ensuring that simulations will be *identical and repeatable*
 even across different machines.
 - **Arbitrary renderer** - Newton comes with a WebGL-based debug renderer,
-but allows you to render any way you like, including Canvas, SVG, and CSS.
-It can also run simulations with or without a renderer in node.js.
+but allows you to render any way you like including Canvas, SVG, or on the DOM.
+It can also run simulations in node.js.
 - **Web workers** - Physics have *almost zero CPU cost* because
 Newton runs on a web-worker thread in the background.
 
