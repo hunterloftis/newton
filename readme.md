@@ -30,7 +30,7 @@ It can also run simulations in node.js.
 - **Web workers** - Physics have *almost zero CPU cost* because
 Newton runs on a web-worker thread in the background.
 
-[Learn how to use Newton in your own project.](#)
+[Learn how to use Newton in your own project.](docs/guide.md)
 
 ## Installation
 
@@ -58,9 +58,10 @@ var newton = require('newton');
 ## Documentation
 
 - Users
-  - [Getting started guide](#)
-  - [Examples](#)
+  - [Getting started guide](docs/guide.md)
+  - [Examples](docs/comparison.md)
   - [Complete API reference](#)
+  - [Comparison with other physics engines]()
 - Contributors
   - [Under the hood](#)
   - [Motivation and philosophy](#)
