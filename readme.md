@@ -21,11 +21,13 @@ of fabric, fluids, and organic characters than
 traditional rigid-body engines.
 - **Fixed-time** - Newton's simulator runs in a fixed-interval time accumulator,
 separate from the renderer. This keeps rendering smooth and fast while
-ensuring that simulations will be *identical and repeatable
-even across different machines.*
+ensuring that simulations will be *identical and repeatable*
+even across different machines.
 - **Arbitrary renderer** - Newton comes with a WebGL-based debug renderer,
 but allows you to render any way you like, including Canvas, SVG, and CSS.
-Newton can even run simulations in node.js!
+It can also run simulations with or without a renderer in node.js.
+- **Web workers** - Physics have *almost zero CPU cost* because
+Newton runs on a web-worker thread in the background.
 
 [Learn how to use Newton in your own project.](#)
 
@@ -70,7 +72,7 @@ var newton = require('newton');
   - [Fluids and particle effects](#)
   - [Rigid vs deformable bodies](#)
   - [Mechanics (springs, axles, etc)](#)
-
+  - [Multi-user simulations with node.js](#)
 
 ## License
 
