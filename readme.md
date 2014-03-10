@@ -4,15 +4,13 @@ Newton is a fast, powerful, easy-to-use soft-body physics engine
 designed from the ground up for JavaScript.
 
 ```js
-var display = document.getElementById('display');
-
 var sim = newton.Simulator()
   .add(newton.LinearForce(0, 1))              // gravity
   .add(newton.SquishBody(0, 0, 50, 10))       // falling object
   .add(newton.BoxConstraint(0, 0, 400, 480))  // container
   .start();
 
-newton.GLRenderer(display).render(sim);
+newton.GLRenderer(document.getElementById('display')).render(sim);
 ```
 
 [Check out this example](#) or [see other examples.](#)
