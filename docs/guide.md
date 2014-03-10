@@ -114,13 +114,11 @@ particle.remove();
 function SquishBody(x, y, r) {
   newton.Body.call(this);
 
-  var particles = [];
   for (var p = 0; p < 10; p++) {
     var x1 = x + Math.cos(p / 10 * Math.PI * 2);
     var y1 = y + Math.sin(p / 10 * Math.PI * 2);
-    particles.push(newton.Particle(x1, y1));
+    this.add(newton.Particle(x1, y1));
   }
-  this.add(particles);
 }
 
 SquishBody.prototype = newton.Body;
