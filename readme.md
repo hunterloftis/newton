@@ -58,9 +58,9 @@ var newton = require('newton');
 ## Documentation
 
 - Users
-  - [Getting started guide](docs/guide.md)
+  - **[Getting started guide](docs/guide.md)**
+  - **[Complete API reference](#)**
   - [Examples](#)
-  - [Complete API reference](#)
   - [Comparison with other physics engines](docs/comparison.md)
 - Contributors
   - [Under the hood](#)
