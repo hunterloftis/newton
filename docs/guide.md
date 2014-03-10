@@ -132,11 +132,8 @@ var body = new SquishBody(0, 0, 20);
 var renderer = newton.GLRenderer();
 
 renderer.on('pointerdown', function(x, y) {
-  var bodies = sim.hitList(x, y);
-  var body = bodies[0];
-  if (!body) return;
-
-  body.remove();
+  var body = sim.hitList(x, y)[0];
+  if (body) body.remove();
 });
 ```
 
