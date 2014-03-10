@@ -10,7 +10,8 @@ var sim = newton.Simulator()
   .add(newton.BoxConstraint(0, 0, 400, 480))  // container
   .start();
 
-newton.GLRenderer(document.getElementById('display')).render(sim);
+var display = document.getElementById('display');
+var renderer = newton.GLRenderer(display).render(sim);
 ```
 
 [Check out this example](#) or [see other examples.](#)
