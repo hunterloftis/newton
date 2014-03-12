@@ -14,18 +14,17 @@
   Renderer.prototype = {
     callback: function(time, sim) {
       var ctx = this.ctx;
+      this.counts = {
+        particles: 0,
+        edges: 0,
+        forces: 0,
+        bodies: 0,
+        layers: 0,
+        constraints: 0
+      }
 
       this.clear(ctx, time);
-      this.drawConstraints(ctx, sim.constraints);
-      this.drawEdges(ctx, sim.edges);
-      this.drawParticles(ctx, sim.particles);
-      this.drawForces(ctx, sim.forces);
-      this.drawCounts(ctx, {
-        particles: sim.particles.length,
-        edges: sim.edges.length,
-        forces: sim.forces.length,
-        constraints: sim.constraints.length
-      });
+      this.drawSim(ctx, sim);
       this.drawFPS(ctx, sim);
     },
     clear: function(ctx, time) {
@@ -33,6 +32,29 @@
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, this.width, this.height);
       ctx.restore();
+    },
+    drawSim: function(ctx, sim) {
+      this.drawLayers(ctx, sim.layers);
+      this.drawConstraints(ctx, sim.constraints);
+      this.drawEdges(ctx, sim.edges);
+      this.drawParticles(ctx, sim.particles);
+      this.drawForces(ctx, sim.forces);
+      this.drawCounts(ctx, this.counts);
+    },
+    drawLayers: function(ctx, layers) {
+      for (var i = 0, ilen = layers.length; i < ilen; ++i) {
+        this.drawBodies(ctx, layers[i].bodies);
+        this.drawForces(ctx, layers[i].forces);
+      }
+      this.counts.layers += layers.length;
+    },
+    drawBodies: function(ctx, bodies) {
+      for (var i = 0, ilen = bodies.length; i < ilen; ++i) {
+        this.drawConstraints(ctx, bodies[i].constraints);
+        this.drawEdges(ctx, bodies[i].edges);
+        this.drawParticles(ctx, bodies[i].particles);
+      }
+      this.counts.bodies += bodies.length;
     },
     drawForces: function(ctx, forces) {
       ctx.save();
@@ -48,6 +70,7 @@
           ctx.fill();
         }
       }
+      this.counts.forces += forces.length;
 
       ctx.restore();
     },
@@ -83,7 +106,7 @@
         }
         ctx.stroke();
       }
-
+      this.counts.particles += particles.length;
       ctx.restore();
     },
     drawConstraints: function(ctx, constraints) {
@@ -114,6 +137,7 @@
           ctx.stroke();
         }
       }
+      this.counts.constraints += constraints.length;
       ctx.restore();
     },
     drawEdges: function(ctx, edges) {
@@ -129,6 +153,7 @@
         ctx.closePath();
         ctx.stroke();
       }
+      this.counts.edges += edges.length;
       ctx.restore();
 
       return edges.length;
@@ -141,6 +166,8 @@
       ctx.fillText('Edges: ' + counts.edges, 10, 40);
       ctx.fillText('Forces: ' + counts.forces, 10, 60);
       ctx.fillText('Constraints: ' + counts.constraints, 10, 80);
+      ctx.fillText('Layers: ' + counts.layers, 10, 100);
+      ctx.fillText('Bodies: ' + counts.layers, 10, 120);
       ctx.restore();
     },
     drawFPS: function(ctx, sim) {
@@ -148,7 +175,7 @@
       ctx.save();
       ctx.fillStyle = '#fff';
       ctx.font = '10pt Helvetica';
-      ctx.fillText(text, 10, 120);
+      ctx.fillText(text, 10, 140);
       ctx.restore();
     }
   };
