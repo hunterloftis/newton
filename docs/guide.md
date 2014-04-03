@@ -3,7 +3,6 @@
 ## The basics
 
 ### Installing the library
-
 ```
 bower install newton
 ```
@@ -16,7 +15,6 @@ into your page with a `<script>` tag.*
 **npm:** `npm install newton`
 
 ### Creating a simulation
-
 ```js
 var sim = newton.Simulator();
 sim.start();
@@ -24,7 +22,6 @@ sim.start();
 An empty simulation.
 
 ### Adding particles
-
 ```js
 var particle = newton.Particle(10, 20);  // x, y
 sim.add(particle);
@@ -32,7 +29,6 @@ sim.add(particle);
 Particles are the first basic elements of Newton.
 
 ### Rendering
-
 ```js
 var display = document.getElementById('display');
 var renderer = newton.GLRenderer(display)
@@ -46,7 +42,6 @@ You can render anyway you like - canvas, webgl, DOM, SVG, etc.
 All renderers support a simple interface.
 
 ### Basics demo
-
 ```js
 var sim = newton.Simulator();
 var particle = newton.Particle(20, 10);
@@ -66,7 +61,6 @@ As you can see, we're up and running - but it's a little boring with just one Pa
 ## Movement
 
 ### Adding forces
-
 ```js
 var gravity = newton.LinearForce(0, 1);
 sim.add(gravity);
@@ -78,7 +72,6 @@ Newton comes with a library of Forces, to which you can also add your own.
 Force implementations tend to be very short (< 30 lines).
 
 ### Adding constraints
-
 ```js
 var container = newton.BoxConstraint(0, 0, 100, 100);   // x, y, width, height
 sim.add(container);
@@ -93,7 +86,6 @@ The BoxConstraint above is a location rule that keeps a particle within a rectan
 Newton comes with a library of Constraints to which you can also add your own custom implementations.
 
 ### Grouping into bodies
-
 ```js
 var spring = newton.Body();
 var p1 = spring.Particle(-10, 0);
@@ -115,7 +107,6 @@ They have no effect on collisions or any other part of the simulation.
 `sim.add(body)` just calls `sim.add(this)` on each element within `body`.
 
 ### Movement demo
-
 ```js
 var sim = newton.Simulator();
 var display = document.getElementById('display');
@@ -143,7 +134,6 @@ Now things are getting interesting. Our little chain has come to life!
 ## Collisions
 
 ### Adding volumes
-
 ```js
 var particles = [
   newton.Particle(0, 0),
@@ -167,7 +157,6 @@ particles can't collide with each other, or with constraints, or with anything e
 Volumes follow right-hand rule.
 
 ### Separating with layers
-
 ```js
 // rain, platform, and character are instances of Newton.Body
 sim.add(rain, 'background')
@@ -187,7 +176,6 @@ and the character would interact with the platform,
 but the rain and character would not effect each other.
 
 ### Adding materials
-
 ```js
 var material = newton.Material({
   mass: 1,
@@ -205,7 +193,6 @@ Bodies can have a material, which overrides the Simulation material.
 Particles can also have materials, which overrides their Body material.
 
 ### Collisions demo
-
 ```js
 var sim = newton.Simulator();
 var display = document.getElementById('display');
@@ -252,7 +239,6 @@ but they exist on different layers so they won't interfere with each other.
 ## Dynamic behavior
 
 ### Listening to events
-
 ```js
 sim
   .on('step', function(time) { })
@@ -264,7 +250,6 @@ Instances of Simulator, Body, Particle, Constraint, and Volume all broadcast eve
 For details about the events and their arguments, check the full API docs for those object types.
 
 ### Removing elements
-
 ```js
 sim.remove(body);       // remove all Particles, Forces, and Constraints attached to this Body
 sim.remove(particle);   // remove this Particle from the Simulation (and all Bodies in its chain)
@@ -273,7 +258,6 @@ particle.remove();
 ```
 
 ### Creating custom body factories
-
 ```js
 function SquishBody(x, y, r) {
   newton.Body.call(this);
@@ -291,15 +275,12 @@ var body = new SquishBody(0, 0, 20);
 ```
 
 ### Behavior demo
-
 ```js
-
 ```
 
 ## Interactivity
 
 ### Input
-
 ```js
 var renderer = newton.GLRenderer();
 
@@ -310,7 +291,6 @@ renderer.on('pointerdown', function(x, y) {
 ```
 
 ## Output (custom renderers)
-
 ```js
 var sim = newton.Simulator();
 
