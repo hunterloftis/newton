@@ -1,7 +1,6 @@
 # Newton
 
-Newton is a fast, powerful, easy-to-use soft-body physics engine
-designed from the ground up for JavaScript.
+Newton is a fast, 2D, soft-body physics engine for node.js and the browser.
 
 ```js
 var sim = newton.Simulator()
@@ -20,8 +19,8 @@ var renderer = newton.GLRenderer(display).render(sim);
 which enables *deformation and destruction* and thus better simulation
 of fabric, fluids, and organic characters than
 traditional rigid-body engines.
-- **Fixed-time** - Newton's simulator runs in a fixed-interval time accumulator,
-separate from the renderer. This keeps rendering smooth and fast while
+- **Fixed-time** - The simulator runs in a fixed-interval time accumulator,
+separate from rendering. This keeps rendering smooth and fast while
 ensuring that simulations will be *identical and repeatable*
 even across different machines.
 - **Arbitrary renderer** - Newton comes with a WebGL-based debug renderer,
