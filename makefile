@@ -1,11 +1,10 @@
 # Set up for local development
 setup:
 	npm install
-	node_modules/bower/bin/bower install
 
 # Build newton.js then watch source files for changes
 dev:
-	grunt dev
+	node_modules/.bin/grunt dev
 
 # Build newton.js
 build:
@@ -17,7 +16,7 @@ test-unit:
 
 # Performance tests
 test-perf:
-	node_modules/.bin/matcha 
+	node_modules/.bin/matcha
 
 # All tests
 test: test-unit test-perf

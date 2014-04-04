@@ -1,7 +1,5 @@
 ;(function(Newton) {
 
-  'use strict'
-
   var POINT_VS = [
     'uniform vec2 viewport;',
     'attribute vec3 position;',
@@ -137,6 +135,8 @@
   function GLRenderer(el) {
     if (!(this instanceof GLRenderer)) return new GLRenderer(el);
 
+    this.draw = this.draw.bind(this);
+
     this.el = el;
     this.width = el.width;
     this.height = el.height;
@@ -147,8 +147,6 @@
     // TODO: convert this from a vec3 to a vec2
     this.vArray = new Float32Array(GLRenderer.MAX_PARTICLES * 3);
     this.sArray = new Float32Array(GLRenderer.MAX_PARTICLES);
-
-    this.callback = this.callback.bind(this); // TODO: shim for Function.bind
 
     this.gl.viewport(0, 0, this.width, this.height);
     this.viewportArray = new Float32Array([this.width, this.height]);
@@ -220,13 +218,20 @@
       this.edgePositionBuffer = gl.createBuffer();
     },
 
-    callback: function(time, sim) {
+    render: function(sim) {
+      this.sim = sim;
+      Newton.frame(this.draw);
+    },
+
+    draw: function() {
+      var sim = this.sim;
+      var time = sim.time;
       this.clear(time);
       this.drawParticles(sim.particles);
       this.drawEdges(sim.edges);
       this.drawVolumes(sim.volumes);
       this.drawConstraints(sim.constraints);
-      //this.drawCollisions(sim.collisions);
+      Newton.frame(this.draw);
     },
 
     clear: function(time) {

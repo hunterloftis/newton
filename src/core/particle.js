@@ -1,6 +1,6 @@
 ;(function(Newton) {
 
-  'use strict'
+  'use strict';
 
   function Particle(x, y, size, material) {
     if (!(this instanceof Particle)) return new Particle(x, y, size, material);
@@ -22,6 +22,11 @@
   }
 
   Particle.randomness = 25;
+
+  Particle.prototype.addTo = function(sim, layer) {
+    this.layer = layer;
+    sim.particles.push(this);
+  };
 
   Particle.prototype.integrate = function(time) {
     if (this.pinned) return;

@@ -52,6 +52,8 @@
     this.collisions = [];
   }
 
+  Newton.Emitter(Simulator.prototype);
+
 
   // Public API
 
