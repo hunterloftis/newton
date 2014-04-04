@@ -3,6 +3,7 @@
 ## The basics
 
 ### Installing the library
+
 ```
 bower install newton
 ```
@@ -15,6 +16,7 @@ into your page with a `<script>` tag.*
 **npm:** `npm install newton`
 
 ### Creating a simulation
+
 ```js
 var sim = newton.Simulator();
 sim.start();
@@ -22,6 +24,7 @@ sim.start();
 An empty simulation.
 
 ### Adding particles
+
 ```js
 var particle = newton.Particle(10, 20);  // x, y
 sim.add(particle);
@@ -29,6 +32,7 @@ sim.add(particle);
 Particles are the first basic elements of Newton.
 
 ### Rendering
+
 ```js
 var display = document.getElementById('display');
 var renderer = newton.GLRenderer(display)
@@ -42,6 +46,7 @@ You can render anyway you like - canvas, webgl, DOM, SVG, etc.
 All renderers support a simple interface.
 
 ### Basics demo
+
 ```js
 var sim = newton.Simulator();
 var particle = newton.Particle(20, 10);
@@ -61,6 +66,7 @@ As you can see, we're up and running - but it's a little boring with just one Pa
 ## Movement
 
 ### Adding forces
+
 ```js
 var gravity = newton.LinearForce(0, 1);
 sim.add(gravity);
@@ -72,6 +78,7 @@ Newton comes with a library of Forces, to which you can also add your own.
 Force implementations tend to be very short (< 30 lines).
 
 ### Adding constraints
+
 ```js
 var container = newton.BoxConstraint(0, 0, 100, 100);   // x, y, width, height
 sim.add(container);
@@ -86,12 +93,13 @@ The BoxConstraint above is a location rule that keeps a particle within a rectan
 Newton comes with a library of Constraints to which you can also add your own custom implementations.
 
 ### Grouping into bodies
+
 ```js
 var spring = newton.Body();
-var p1 = spring.Particle(-10, 0);
-var p2 = spring.Particle(10, 0);
+var p1 = spring.add(newton.Particle(-10, 0));   // create a Particle and add it to the spring Body
+var p2 = spring.add(newton.Particle(10, 0));
 
-spring.SpringConstraint(p1, p2, 0.5);
+spring.add(newton.SpringConstraint(p1, p2, 0.5));
 sim.add(spring);
 ```
 When building a simulation, you frequently want to refer to
@@ -107,6 +115,7 @@ They have no effect on collisions or any other part of the simulation.
 `sim.add(body)` just calls `sim.add(this)` on each element within `body`.
 
 ### Movement demo
+
 ```js
 var sim = newton.Simulator();
 var display = document.getElementById('display');
@@ -115,11 +124,11 @@ var renderer = newton.GLRenderer(display);
 var string = newton.Body();
 var i = 7, last, current;
 while (i--) {
-  current = string.Particle(250 + i * 20, 10);
-  if (last) string.DistanceConstraint(current, last);
+  current = string.add(newton.Particle(250 + i * 20, 10));
+  if (last) string.add(newton.DistanceConstraint(current, last));
   last = current;
 }
-string.PinConstraint(last);
+string.add(newton.PinConstraint(last));   // A PinConstraint pins a Particle in place
 
 renderer.render(sim);
 renderer.viewport(0, 0, 500, 500);
@@ -134,6 +143,7 @@ Now things are getting interesting. Our little chain has come to life!
 ## Collisions
 
 ### Adding volumes
+
 ```js
 var particles = [
   newton.Particle(0, 0),
@@ -157,6 +167,7 @@ particles can't collide with each other, or with constraints, or with anything e
 Volumes follow right-hand rule.
 
 ### Separating with layers
+
 ```js
 // rain, platform, and character are instances of Newton.Body
 sim.add(rain, 'background')
@@ -176,6 +187,7 @@ and the character would interact with the platform,
 but the rain and character would not effect each other.
 
 ### Adding materials
+
 ```js
 var material = newton.Material({
   mass: 1,
@@ -193,6 +205,7 @@ Bodies can have a material, which overrides the Simulation material.
 Particles can also have materials, which overrides their Body material.
 
 ### Collisions demo
+
 ```js
 var sim = newton.Simulator();
 var display = document.getElementById('display');
@@ -219,14 +232,13 @@ Shape.prototype = Object.create(newton.Body.prototype);
 var rock = newton.Material({ mass: 3, friction: 1, restitution: 0 });
 var plastic = newton.Material({ mass: 0.5, friction: 0.8, restitution: 0.5 });
 
+renderer.render(sim);
+renderer.viewport(0, 0, 500, 500);
+
 for (var i = 0; i < 30; i++) {
   sim.add(new Shape(rock), 'rocks');
   sim.add(new Shape(plastic), 'plastics');
 }
-
-renderer.render(sim);
-renderer.viewport(0, 0, 500, 500);
-
 sim.add(newton.BoxConstraint(0, 0, 320, 200));
 sim.add(newton.LinearGravity(0, 1, 1));
 sim.start();
@@ -239,27 +251,35 @@ but they exist on different layers so they won't interfere with each other.
 ## Dynamic behavior
 
 ### Listening to events
+
 ```js
 sim
   .on('step', function(time) { })
   .on('collision', function(volumeA, volumeB) { });
 
 body.on('collision', function(volumeA, volumeB) { });
+body.off('collision');
 ```
 Instances of Simulator, Body, Particle, Constraint, and Volume all broadcast events.
 For details about the events and their arguments, check the full API docs for those object types.
 
 ### Removing elements
+
 ```js
 sim.remove(body);       // remove all Particles, Forces, and Constraints attached to this Body
-sim.remove(particle);   // remove this Particle from the Simulation (and all Bodies in its chain)
+
+sim.remove(particle);   // these are all equivalent
 body.remove(particle);
 particle.remove();
 ```
+Elements in Newton also remove themselves whenever they find themselves in an impossible state.
+For example, if you remove a Particle referenced by a Constraint, that Constraint will
+automatically remove itself.
 
 ### Creating custom body factories
+
 ```js
-function SquishBody(x, y, r) {
+function SquishyBall(x, y, r) {
   newton.Body.call(this);
 
   for (var p = 0; p < 10; p++) {
@@ -269,18 +289,71 @@ function SquishBody(x, y, r) {
   }
 }
 
-SquishBody.prototype = newton.Body;
+SquishyBall.prototype = Object.create(newton.Body);
 
-var body = new SquishBody(0, 0, 20);
+var body = new SquishyBall(0, 0, 20);
 ```
+Extending Body allows you to create higher-level abstractions in your simulation.
+Since Bodies can include sub-Bodies, you can compose larger components
+out of smaller, simpler parts.
 
 ### Behavior demo
+
 ```js
+var sim = newton.Simulator();
+var display = document.getElementById('display');
+var renderer = newton.GLRenderer(display);
+
+function BoobyTrap(x, y) {
+  var x1, top, bottom, lastTop, lastBottom;
+  newton.Body.call(this);
+  this.time = 0;
+  this.pin = newton.Particle(x, y);
+  this.add(pin);
+  for (var i = 0; i < 4; i++) {
+    x1 = (i - 1.5) * 30;
+    top = this.add(newton.Particle(x1, y + 40));
+    bottom = this.add(newton.Particle(x1, y + 70));
+    this.add(newton.DistanceConstraint(top, bottom));
+    if (i == 1 || i == 2) this.add(newton.DistanceConstraint(this.pin, top));
+    if (lastTop) this.add(newton.DistanceConstraint(lastTop, top));
+    if (lastBottom) this.add(newton.DistanceConstraint(lastBottom, bottom));
+    lastTop = top;
+    lastBottom = bottom;
+  }
+}
+
+BoobyTrap.prototype = Object.create(newton.Body.prototype);
+
+BoobyTrap.prototype.launch = function() {
+  this.pin.remove();
+};
+
+renderer.render(sim);
+renderer.viewport(0, 0, 500, 500);
+
+var bt = new BoobyTrap(250, 10);
+
+sim.on('step', function checkTime(time, sim) {
+  if (time < 2000) return;
+  bt.launch();
+  sim.off();
+});
+
+sim.add(bt);
+sim.add(newton.BoxConstraint(0, 0, 500, 500));
+sim.start();
 ```
+[Try it out.](#)
+
+Now we're talking! Implementing Body types with advanced behaviors
+opens up a whole world of re-usable game objects. In this case,
+dangerous ones.
 
 ## Interactivity
 
 ### Input
+
 ```js
 var renderer = newton.GLRenderer();
 
@@ -291,6 +364,7 @@ renderer.on('pointerdown', function(x, y) {
 ```
 
 ## Output (custom renderers)
+
 ```js
 var sim = newton.Simulator();
 
