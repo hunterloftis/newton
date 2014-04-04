@@ -1,0 +1,36 @@
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>Newton.js: Movement Demo</title>
+  <link rel='stylesheet' type='text/css' href='shared/style.css' />
+</head>
+<body>
+
+<div class='wrap'>
+  <canvas id="display" width="1000" height="600"></canvas>
+</div>
+
+<script type='text/javascript' src='../newton.js'></script>
+<script>
+  var sim = Newton.Simulator();
+  var display = document.getElementById('display');
+  var renderer = Newton.GLRenderer(display);
+
+  var string = Newton.Body();
+  var i = 20, last, current;
+  while (i--) {
+    current = string.add(Newton.Particle(500 + i * 20, 50));
+    if (last) string.add(Newton.DistanceConstraint(current, last));
+    last = current;
+  }
+  string.add(Newton.PinConstraint(last));   // A PinConstraint pins a Particle in place
+
+  renderer.render(sim);
+
+  sim.add(string);
+  sim.add(Newton.LinearForce(Math.PI * 2, 0.001));
+  sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
+  sim.start();
+</script>
+
+</body>

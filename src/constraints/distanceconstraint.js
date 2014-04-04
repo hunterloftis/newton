@@ -18,6 +18,7 @@
 
   DistanceConstraint.count = 0;
 
+  DistanceConstraint.prototype.type = 'Constraint';
   DistanceConstraint.prototype.category = 'linear';
   DistanceConstraint.prototype.priority = 4;
 

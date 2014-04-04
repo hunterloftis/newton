@@ -17,12 +17,10 @@
 
   // Simulator
 
-  function Simulator(callback, renderers, integrationFps, iterations, warp) {
-    if (!(this instanceof Simulator)) return new Simulator(callback, renderers, integrationFps, iterations, warp);
+  function Simulator(callback, integrationFps, iterations, warp) {
+    if (!(this instanceof Simulator)) return new Simulator(callback, integrationFps, iterations, warp);
 
     this.callback = callback || noop;
-    this.renderers = renderers || noop;
-    if (!Array.isArray(this.renderers)) this.renderers = [this.renderers];
     this.step = this._step.bind(this);
     this.lastTime = 0;
     this.running = false;
@@ -118,11 +116,6 @@
     while (this.accumulator >= this.simulationStep * this.warp) {
       this.simulate(this.simulationStep, time - this.startTime);
       this.accumulator -= this.simulationStep * this.warp;
-    }
-
-    // arbitrary-timestep rendering
-    for (var i = 0; i < this.renderers.length; i++) {
-      this.renderers[i](step, this);
     }
 
     // framerate monitoring

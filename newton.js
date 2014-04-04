@@ -37,8 +37,9 @@
         this.distance = "undefined" == typeof distance ? this.getDistance() : distance, 
         this.isDestroyed = !1, void (this.id = ++DistanceConstraint.count)) : new DistanceConstraint(p1, p2, stiffness, distance);
     }
-    DistanceConstraint.count = 0, DistanceConstraint.prototype.category = "linear", 
-    DistanceConstraint.prototype.priority = 4, DistanceConstraint.prototype.getDistance = function() {
+    DistanceConstraint.count = 0, DistanceConstraint.prototype.type = "Constraint", 
+    DistanceConstraint.prototype.category = "linear", DistanceConstraint.prototype.priority = 4, 
+    DistanceConstraint.prototype.getDistance = function() {
         return Newton.Vector.getDistance(this.p1.position, this.p2.position);
     }, DistanceConstraint.prototype.resolve = function() {
         if (this.p1.isDestroyed || this.p2.isDestroyed) return void (this.isDestroyed = !0);
@@ -52,6 +53,18 @@
             y2: this.p2.position.y
         };
     }, Newton.DistanceConstraint = DistanceConstraint;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function PinConstraint(particle) {
+        return this instanceof PinConstraint ? (this.particle = particle, this.position = particle.position.clone(), 
+        void (this.id = ++PinConstraint.count)) : new PinConstraint(particle);
+    }
+    PinConstraint.count = 0, PinConstraint.prototype.type = "Constraint", PinConstraint.prototype.category = "PinConstraint", 
+    PinConstraint.prototype.priority = 0, PinConstraint.prototype.addTo = function(simulator) {
+        simulator.addConstraints([ this ]);
+    }, PinConstraint.prototype.resolve = function() {
+        this.particle.placeAt(this.position.x, this.position.y);
+    }, Newton.PinConstraint = PinConstraint;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function RigidConstraint(particles, iterations) {
@@ -112,9 +125,11 @@
     }, Body.prototype.free = function() {
         return this.isFree = !0, this.simulator && this.simulator.addCollisionParticles(this.particles), 
         this;
+    }, Body.prototype.add = function(entity) {
+        return this["add" + entity.type](entity);
     }, Body.prototype.addParticle = function(particle) {
-        this.particles.push(particle), particle.layer = this.layer, this.simulator && (this.simulator.addParticles([ particle ]), 
-        this.isFree && this.simulator.addCollisionParticles([ particle ]));
+        return this.particles.push(particle), particle.layer = this.layer, this.simulator && (this.simulator.addParticles([ particle ]), 
+        this.isFree && this.simulator.addCollisionParticles([ particle ])), particle;
     }, Body.prototype.Particle = function() {
         var particle = Newton.Particle.apply(Newton.Particle, Array.prototype.slice.call(arguments));
         return this.addParticle(particle), particle;
@@ -243,7 +258,7 @@
         this.pinned = !1, this.colliding = !1, this.isDestroyed = !1, this.isCollisionPoint = !1, 
         void (this.layer = void 0)) : new Particle(x, y, size, material);
     }
-    Particle.randomness = 25, Particle.prototype.addTo = function(sim, layer) {
+    Particle.randomness = 25, Particle.prototype.type = "Particle", Particle.prototype.addTo = function(sim, layer) {
         this.layer = layer, sim.particles.push(this);
     }, Particle.prototype.integrate = function(time) {
         if (!this.pinned) {
@@ -310,14 +325,13 @@
     function prioritySort(a, b) {
         return b.priority - a.priority || a.id - b.id;
     }
-    function Simulator(callback, renderers, integrationFps, iterations, warp) {
-        return this instanceof Simulator ? (this.callback = callback || noop, this.renderers = renderers || noop, 
-        Array.isArray(this.renderers) || (this.renderers = [ this.renderers ]), this.step = this._step.bind(this), 
+    function Simulator(callback, integrationFps, iterations, warp) {
+        return this instanceof Simulator ? (this.callback = callback || noop, this.step = this._step.bind(this), 
         this.lastTime = 0, this.running = !1, this.fps = 0, this.frames = 0, this.countTime = 0, 
         this.countInterval = 250, this.accumulator = 0, this.simulationStep = 1e3 / (integrationFps || 60), 
         this.iterations = iterations || 3, this.warp = warp || 1, this.startTime = 0, this.layers = {}, 
         this.particles = [], this.edges = [], this.volumes = [], this.forces = [], this.constraints = [], 
-        this.collisionParticles = [], void (this.collisions = [])) : new Simulator(callback, renderers, integrationFps, iterations, warp);
+        this.collisionParticles = [], void (this.collisions = [])) : new Simulator(callback, integrationFps, iterations, warp);
     }
     Array.isArray || (Array.isArray = function(vArg) {
         return "[object Array]" === Object.prototype.toString.call(vArg);
@@ -342,7 +356,6 @@
             var time = Date.now(), step = time - this.lastTime;
             for (this.lastTime = time, step > 100 && (step = 0), this.accumulator += step; this.accumulator >= this.simulationStep * this.warp; ) this.simulate(this.simulationStep, time - this.startTime), 
             this.accumulator -= this.simulationStep * this.warp;
-            for (var i = 0; i < this.renderers.length; i++) this.renderers[i](step, this);
             this.frames++, time >= this.countTime && (this.fps = (this.frames / (this.countInterval + time - this.countTime) * 1e3).toFixed(0), 
             this.frames = 0, this.countTime = time + this.countInterval), Newton.frame(this.step);
         }
@@ -476,6 +489,22 @@
         body;
     }
     Newton.Squishy = Squishy;
+}("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
+    "use strict";
+    function LinearForce(angle, strength, falloff) {
+        return this instanceof LinearForce ? (this.angle = angle, this.strength = strength, 
+        this.vector = new Newton.Vector(0, strength).rotateBy(angle), this.simulator = void 0, 
+        void (this.layer = void 0)) : new LinearForce(angle, strength, falloff);
+    }
+    LinearForce.prototype.addTo = function(simulator, layer) {
+        simulator.forces.push(this), this.simulator = simulator, this.layer = layer;
+    }, LinearForce.prototype.setAngle = function(angle) {
+        this.angle = angle, this.vector.set(0, this.strength).rotateBy(this.angle);
+    }, LinearForce.prototype.setStrength = function(strength) {
+        this.strength = strength, this.vector.set(0, this.strength).rotateBy(this.angle);
+    }, LinearForce.prototype.applyTo = function(particle) {
+        particle.accelerateVector(this.vector);
+    }, Newton.LinearForce = LinearForce;
 }("undefined" == typeof exports ? this.Newton = this.Newton || {} : exports), function(Newton) {
     "use strict";
     function LinearGravity(angle, strength, falloff) {

@@ -52,6 +52,10 @@
     return this;
   }
 
+  Body.prototype.add = function(entity) {
+    return this['add' + entity.type](entity);
+  };
+
   Body.prototype.addParticle = function(particle) {
     this.particles.push(particle);
     particle.layer = this.layer;  // TODO: make sure this stays in sync
@@ -59,6 +63,7 @@
       this.simulator.addParticles([particle]);
       if (this.isFree) this.simulator.addCollisionParticles([particle]);
     }
+    return particle;
   };
 
   Body.prototype.Particle = function() {

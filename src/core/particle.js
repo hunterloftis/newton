@@ -23,6 +23,8 @@
 
   Particle.randomness = 25;
 
+  Particle.prototype.type = 'Particle';
+
   Particle.prototype.addTo = function(sim, layer) {
     this.layer = layer;
     sim.particles.push(this);
