@@ -17,7 +17,8 @@
     "mocha": "~1.14.0",
     "chai": "~1.8.1",
     "matcha": "~0.4.1",
-    "grunt-cli": "~0.1.13"
+    "grunt-cli": "~0.1.13",
+    "watchify": "~0.6.3"
   },
   "author": "Hunter Loftis <hunter@hunterloftis.com>",
   "license": "MIT",
