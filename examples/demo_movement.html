@@ -17,7 +17,7 @@
   var renderer = Newton.GLRenderer(display);
 
   var string = Newton.Body();
-  var i = 20, last, current;
+  var i = 22, last, current;
   while (i--) {
     current = string.add(Newton.Particle(500 + i * 20, 50));
     if (last) string.add(Newton.DistanceConstraint(current, last));

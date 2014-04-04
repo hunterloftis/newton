@@ -1,6 +1,6 @@
 ;(function(Newton) {
 
-  'use strict'
+  'use strict';
 
   function noop() {}
 

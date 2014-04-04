@@ -1,11 +1,11 @@
 ;(function(Newton) {
 
-  'use strict'
+  'use strict';
 
   function Rectangle(left, top, right, bottom) {
     if (!(this instanceof Rectangle)) return new Rectangle(left, top, right, bottom);
     this.set.apply(this, arguments);
-  };
+  }
 
   Rectangle.fromVectors = function(v1, v2) {
     return new Rectangle(v1.x, v1.y, v2.x, v2.y);
@@ -39,7 +39,7 @@
       this.bottom += amount;
       return this;
     }
-  }
+  };
 
   Newton.Rectangle = Rectangle;
 

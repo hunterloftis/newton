@@ -1,6 +1,6 @@
 ;(function(Newton) {
 
-  'use strict'
+  'use strict';
 
   function PinConstraint(particle) {
     if (!(this instanceof PinConstraint)) return new PinConstraint(particle);
