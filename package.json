@@ -29,5 +29,8 @@
   "readmeFilename": "readme.md",
   "bugs": {
     "url": "https://github.com/hunterloftis/newton/issues"
+  },
+  "dependencies": {
+    "eventemitter2": "~0.4.13"
   }
 }
