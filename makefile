@@ -4,7 +4,7 @@ setup:
 
 # Build newton.js then watch source files for changes
 dev:
-	node_modules/.bin/watchify index.js -o build/newton.js
+	node_modules/.bin/watchify index.js --s Newton -o build/newton.js
 
 # Build newton.js
 build:
