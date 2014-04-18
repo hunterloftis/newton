@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://github.com/hunterloftis/newton"
   },
+  "scripts": {
+    "test": "mocha spec/*.spec.js"
+  },
   "devDependencies": {
     "matcha": "~0.4.1",
     "watchify": "^0.6.4",

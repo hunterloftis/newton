@@ -18,6 +18,6 @@ dist: install
 	cat dist/newton.js | node_modules/.bin/uglifyjs > dist/newton.min.js
 
 test: install
-	node_modules/.bin/mocha spec/*.spec.js
+	npm test
 
 .phony: build docs examples lib node_modules old spec
