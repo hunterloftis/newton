@@ -16,14 +16,18 @@
   var display = document.getElementById('display');
   var renderer = Newton.GLRenderer(display);
   var string = Newton.Body();
+  var prev, current;
 
-  var i = 22, last, current;
-  while (i--) {
+  for (var i = 0; i < 22; i++) {
     current = string.add(Newton.Particle(500 + i * 20, 50));
-    if (last) string.add(Newton.DistanceConstraint(current, last));
-    last = current;
+
+    // A PinConstraint pins a Particle in place
+    if (i === 0) string.add(Newton.PinConstraint(current));
+
+    // A DistanceConstraint attaches this particle to the previous particle
+    if (prev) string.add(Newton.DistanceConstraint(prev, current));
+    prev = current;
   }
-  string.add(Newton.PinConstraint(last));   // A PinConstraint pins a Particle in place
 
   renderer.render(sim);
 
