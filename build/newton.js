@@ -674,6 +674,8 @@ this["Newton"] =
   \************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
+	// TODO: make ordering smarter. detect chains
+	
 	var Vector = __webpack_require__(/*! ../vector */ 1);
 	var Constraint = __webpack_require__(/*! ../constraint */ 2);
 	
@@ -949,7 +951,7 @@ this["Newton"] =
 	
 	  for (var i = 0; i < points.length; i++) {
 	    point = points[i];
-	    vertices.push(point.position.x, point.position.y, 0);
+	    vertices.push(point.position.x, point.position.y);
 	    sizes.push(4);
 	  }
 	
