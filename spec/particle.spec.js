@@ -42,7 +42,12 @@ describe('Particle', function() {
   describe('#accelerate', function() {
 
     it('from (1, 2) by (3, 4) should yield (4, 6)', function() {
-      var p = Particle(1, 2);
+      var p = Particle();
+      assert.equal(p.acceleration.x, 0);
+      assert.equal(p.acceleration.y, 0);
+      p.accelerate(Vector(1, 2));
+      assert.equal(p.acceleration.x, 1);
+      assert.equal(p.acceleration.y, 2);
       p.accelerate(Vector(3, 4));
       assert.equal(p.acceleration.x, 4);
       assert.equal(p.acceleration.y, 6);
