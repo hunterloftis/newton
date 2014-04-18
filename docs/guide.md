@@ -61,7 +61,7 @@ As you can see, we're up and running - but it's a little boring with just one Pa
 ### Adding forces
 
 ```js
-var gravity = Newton.LinearForce(0, 1);
+var gravity = Newton.LinearForce(6, Math.PI * 1.5);
 sim.add(gravity);
 ```
 Forces are the second basic elements of Newton.
@@ -132,7 +132,7 @@ sim.add(string);
 renderer.render(sim);
 
 // A LinearForce simulates gravity
-sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
+sim.add(Newton.LinearForce(7, Math.PI * 1.5));
 
 // A BoxConstraint keeps our string within the viewport
 sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
