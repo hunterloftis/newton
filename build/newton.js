@@ -424,7 +424,7 @@ this["Newton"] =
 	  this._viewportArray = viewportArray;
 	  this._verticesCache = [];
 	  this._sizesCache = [];
-	  this._vArray = new Float32Array(MAX_POINTS * 3);
+	  this._vArray = new Float32Array(MAX_POINTS * 2);
 	  this._sArray = new Float32Array(MAX_POINTS);
 	  this._texture = createCircleTexture(gl);
 	  this._shader = createCircleShader(gl, viewportArray);
@@ -456,12 +456,10 @@ this["Newton"] =
 	  gl.activeTexture(gl.TEXTURE0);
 	  gl.bindTexture(gl.TEXTURE_2D, this._texture);
 	
-	  gl.useProgram(this._shader);
-	
 	  // position buffer
 	  gl.bindBuffer(gl.ARRAY_BUFFER, this._positionBuffer);
 	  gl.bufferData(gl.ARRAY_BUFFER, vArray, gl.STATIC_DRAW);
-	  gl.vertexAttribPointer(attributes.position, 3, gl.FLOAT, false, 0, 0);
+	  gl.vertexAttribPointer(attributes.position, 2, gl.FLOAT, false, 0, 0);
 	  gl.enableVertexAttribArray(attributes.position);
 	
 	  // size buffer
@@ -470,7 +468,7 @@ this["Newton"] =
 	  gl.vertexAttribPointer(attributes.size, 1, gl.FLOAT, false, 0, 0);
 	  gl.enableVertexAttribArray(attributes.size);
 	
-	  gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+	  gl.drawArrays(gl.POINTS, 0, vertices.length / 2);
 	};
 	
 	module.exports = PointRenderer;
