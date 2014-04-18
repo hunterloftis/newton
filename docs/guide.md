@@ -2,14 +2,14 @@
 
 ## The basics
 
-### Installing the library
+### Install the library
 
-- [newton.js](https://raw.githubusercontent.com/hunterloftis/newton/master/dist/newton.js)
-- [newton.min.js](https://raw.githubusercontent.com/hunterloftis/newton/master/dist/newton.min.js)
+- [newton.js](hunterloftis.github.io/newton/dist/newton.js)
+- [newton.min.js](hunterloftis.github.io/newton/dist/newton.min.js)
 
 **npm:** `npm install newton`
 
-### Creating a simulation
+### Create a simulation
 
 An empty simulation.
 
@@ -19,7 +19,7 @@ var sim = Newton.Simulator();
 sim.start();
 ```
 
-### Adding particles
+### Add particles
 
 Particles are the first basic elements of Newton.
 
@@ -31,7 +31,7 @@ sim.add(particle);
 sim.start();
 ```
 
-### Rendering
+### Render
 
 Newton ships with a WebGL-based renderer for development and debugging.
 To use it, you'll need to create a canvas element on your page.
@@ -48,7 +48,7 @@ var renderer = Newton.GLRenderer(display);
 renderer.render(sim);
 ```
 
-### Basics demo
+### Demo
 
 As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
 
@@ -68,7 +68,7 @@ sim.start();
 
 ## Movement
 
-### Adding forces
+### Add forces
 
 Forces are the second basic elements of Newton.
 By combining them with Particles, we can create movement.
@@ -81,7 +81,7 @@ var gravity = Newton.LinearForce(7, Math.PI * 1.5);   // strength, direction
 sim.add(gravity);
 ```
 
-### Adding constraints
+### Add constraints
 
 Constraints are the third basic elements of Newton.
 They create rules that Particles follow - for example,
@@ -96,7 +96,7 @@ Newton comes with a library of Constraints to which you can also add your own cu
 var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
 sim.add(container);
 ```
-### Grouping into bodies
+### Group into bodies
 
 When building a simulation, you frequently want to refer to
 a group of particles, forces, and constraints as a single entity.
@@ -130,11 +130,13 @@ for (var i = 0; i < 25; i++) {
 }
 ```
 
-### Movement demo
+### Demo
 
 Now things are getting interesting. Our little string has come to life!
 
-[Try it out.](http://hunterloftis.github.io/newton/examples/guide_movement.html)
+<a class="jsbin-embed" href="http://jsbin.com/facom/1/embed?output">Newton Demo</a>
+
+[Play with the code](http://jsbin.com/facom/1/edit?js,output)
 
 ```js
 var sim = Newton.Simulator();
