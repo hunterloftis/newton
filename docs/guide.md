@@ -48,18 +48,20 @@ var renderer = Newton.GLRenderer(display);
 renderer.render(sim);
 ```
 
-### Demo
+### Demo: Basics
 
 As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
 
-[Try it out.](http://hunterloftis.github.io/newton/examples/guide_basics.html)
+<p>
+  <iframe src="http://jsbin.com/xidod/2" style="width: 100%; height: 520px;"></iframe>
+</p>
 
 ```js
 var sim = Newton.Simulator();
 var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
 
-var particle = Newton.Particle(500, 180);
+var particle = Newton.Particle(225, 225);
 
 renderer.render(sim);
 sim.add(particle);
@@ -130,7 +132,7 @@ for (var i = 0; i < 25; i++) {
 }
 ```
 
-### Demo
+### Demo: Movement
 
 Now things are getting interesting. Our little string has come to life!
 
@@ -144,16 +146,16 @@ var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
 
 var gravity = Newton.LinearForce(7, Math.PI * 1.5);
-var container = Newton.BoxConstraint(0, 0, 1000, 600);
+var container = Newton.BoxConstraint(0, 0, 500, 500);
 var string = Newton.Body();
 
 var prev, current;
 
 // build a string to dangle
-for (var i = 0; i < 25; i++) {
+for (var i = 0; i < 40; i++) {
 
   // add a particle to the string
-  current = string.add(Newton.Particle(500 + i * 20, 180));
+  current = string.add(Newton.Particle(250 + i * 11, 100));
 
   // a PinConstraint pins the first Particle in place
   if (!prev) string.add(Newton.PinConstraint(current));
