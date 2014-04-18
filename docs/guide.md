@@ -140,7 +140,7 @@ sim.start();
 ```
 [Try it out.](http://hunterloftis.github.io/newton/examples/guide_movement.html)
 
-Now things are getting interesting. Our little chain has come to life!
+Now things are getting interesting. Our little string has come to life!
 
 ## Collisions
 

@@ -27,14 +27,14 @@ If you'd like to help, please get in touch!
 
 ## Roadmap
 
-- [x] [Getting started guide](https://github.com/hunterloftis/newton/blob/master/docs/guide.md)
-- [ ] Feature completeness with getting started guide demos
-- [ ] Unit tests
-- [ ] API docs
-- [ ] Performance benchmarks
-- [ ] Shape Constraint (rigid bodies)
-- [ ] Registration Points (for custom rendering)
-- [ ] Web Workers (offloading from the main CPU)
+- ☑ [Getting started guide](https://github.com/hunterloftis/newton/blob/master/docs/guide.md)
+- ◻ Feature completeness with getting started guide demos
+- ◻ Unit tests
+- ◻ API docs
+- ◻ Performance benchmarks
+- ◻ Shape Constraint (rigid bodies)
+- ◻ Registration Points (for custom rendering)
+- ◻ Web Workers (offloading from the main CPU)
 
 ## Contributing quick start
 
