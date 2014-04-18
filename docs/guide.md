@@ -52,7 +52,7 @@ renderer.render(sim);
 sim.add(particle);
 sim.start();
 ```
-[Try it out.](#)
+[Try it out.](http://hunterloftis.github.io/newton/examples/guide_basics.html)
 
 As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
 
@@ -138,7 +138,7 @@ sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
 sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
 sim.start();
 ```
-[Try it out.](#)
+[Try it out.](http://hunterloftis.github.io/newton/examples/guide_movement.html)
 
 Now things are getting interesting. Our little chain has come to life!
 
