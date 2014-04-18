@@ -103,11 +103,11 @@ for (var i = 0; i < 25; i++) {
   // add a particle to the string
   current = string.add(Newton.Particle(500 + i * 20, 180));
 
-  // a PinConstraint pins a Particle in place
-  if (i === 0) string.add(Newton.PinConstraint(current));
+  // a PinConstraint pins the first Particle in place
+  if (!prev) string.add(Newton.PinConstraint(current));
+  // a RopeConstraint attaches subsequent particles to the previous particle
+  else string.add(Newton.RopeConstraint(prev, current));
 
-  // a RopeConstraint attaches this particle to the previous particle
-  if (prev) string.add(Newton.RopeConstraint(prev, current));
   prev = current;
 }
 ```
@@ -142,11 +142,11 @@ for (var i = 0; i < 25; i++) {
   // add a particle to the string
   current = string.add(Newton.Particle(500 + i * 20, 180));
 
-  // a PinConstraint pins a Particle in place
-  if (i === 0) string.add(Newton.PinConstraint(current));
+  // a PinConstraint pins the first Particle in place
+  if (!prev) string.add(Newton.PinConstraint(current));
+  // a RopeConstraint attaches subsequent particles to the previous particle
+  else string.add(Newton.RopeConstraint(prev, current));
 
-  // a RopeConstraint attaches this particle to the previous particle
-  if (prev) string.add(Newton.RopeConstraint(prev, current));
   prev = current;
 }
 
