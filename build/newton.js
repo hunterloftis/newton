@@ -1059,7 +1059,7 @@ this["Newton"] =
 	  this._bodies = [];
 	  this._forces = [];
 	  this._constraints = [];
-	  this._iterations = 3;             // TODO: option
+	  this._iterations = 10;             // TODO: option
 	}
 	
 	Simulator.prototype = Object.create(Emitter.prototype);
@@ -1133,7 +1133,7 @@ this["Newton"] =
 	module.exports = Simulator;
 	
 	function prioritySort(a, b) {
-	  return b.priority - a.priority || a.id - b.id;
+	  return b.priority - a.priority || b.id - a.id;
 	}
 
 
