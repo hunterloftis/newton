@@ -134,9 +134,7 @@ for (var i = 0; i < 25; i++) {
 
 Now things are getting interesting. Our little string has come to life!
 
-<div class="embed-container">
-  <a class="jsbin-embed foo" href="http://jsbin.com/iwovaj/74/embed?js,output">Simple Animation Tests</a><script src="http://static.jsbin.com/js/embed.js"></script>
-</div>
+<iframe src="http://jsbin.com/iwovaj/74/embed?js,output" class=" foo" id="" style="border: 1px solid rgb(170, 170, 170); width: 100%; min-height: 300px; height: 554px;"></iframe>
 
 <a class="jsbin-embed" href="http://jsbin.com/facom/1/embed?output">Newton Demo</a>
 
