@@ -142,6 +142,57 @@ sim.start();
 
 Now things are getting interesting. Our little string has come to life!
 
+## Behavior
+
+### Creating custom body factories
+
+```js
+function SquishyBall(x, y, r) {
+  Newton.Body.call(this);
+
+  for (var p = 0; p < 10; p++) {
+    var x1 = x + Math.cos(p / 10 * Math.PI * 2);
+    var y1 = y + Math.sin(p / 10 * Math.PI * 2);
+    this.add(Newton.Particle(x1, y1));
+  }
+}
+
+SquishyBall.prototype = Object.create(Newton.Body);
+
+var body = new SquishyBall(0, 0, 20);
+```
+Extending Body allows you to create higher-level abstractions in your simulation.
+Since Bodies can include sub-Bodies, you can compose larger components
+out of smaller, simpler parts.
+
+### Input
+
+```js
+var renderer = Newton.GLRenderer();
+
+renderer.on('pointerdown', function(x, y) {
+  var body = sim.hitList(x, y)[0];
+  if (body) body.remove();
+});
+```
+
+### Removing elements
+
+```js
+sim.remove(body);       // remove all Particles, Forces, and Constraints attached to this Body
+
+sim.remove(particle);   // these are all equivalent
+body.remove(particle);
+particle.remove();
+```
+Elements in Newton also remove themselves whenever they find themselves in an impossible state.
+For example, if you remove a Particle referenced by a Constraint, that Constraint will
+automatically remove itself.
+
+### Behavior Demo
+
+(destroyable bridge with bridge factory goes here)
+
 ## Collisions
 
 ### Adding volumes
@@ -213,9 +264,9 @@ var sim = Newton.Simulator();
 var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
 
-function Shape(material) {
+function Triangle(material) {
   Newton.Body.call(this);
-  var i = 8, angle = (Math.PI * 2) / i;
+  var i = 3, angle = (Math.PI * 2) / i;
   var x0 = Math.random() * 320, y0 = Math.random() * 200;
   var particles;
 
@@ -229,7 +280,7 @@ function Shape(material) {
   this.setMaterial(material);
 }
 
-Shape.prototype = Object.create(Newton.Body.prototype);
+Triangle.prototype = Object.create(Newton.Body.prototype);
 
 var rock = Newton.Material({ mass: 3, friction: 1, restitution: 0 });
 var plastic = Newton.Material({ mass: 0.5, friction: 0.8, restitution: 0.5 });
@@ -238,8 +289,8 @@ renderer.render(sim);
 renderer.viewport(0, 0, 500, 500);
 
 for (var i = 0; i < 30; i++) {
-  sim.add(new Shape(rock), 'rocks');
-  sim.add(new Shape(plastic), 'plastics');
+  sim.add(new Triangle(rock), 'rocks');
+  sim.add(new Triangle(plastic), 'plastics');
 }
 sim.add(Newton.BoxConstraint(0, 0, 320, 200));
 sim.add(Newton.LinearGravity(0, 1, 1));
@@ -265,39 +316,6 @@ body.off('collision');
 Instances of Simulator, Body, Particle, Constraint, and Volume all broadcast events.
 For details about the events and their arguments, check the full API docs for those object types.
 
-### Removing elements
-
-```js
-sim.remove(body);       // remove all Particles, Forces, and Constraints attached to this Body
-
-sim.remove(particle);   // these are all equivalent
-body.remove(particle);
-particle.remove();
-```
-Elements in Newton also remove themselves whenever they find themselves in an impossible state.
-For example, if you remove a Particle referenced by a Constraint, that Constraint will
-automatically remove itself.
-
-### Creating custom body factories
-
-```js
-function SquishyBall(x, y, r) {
-  Newton.Body.call(this);
-
-  for (var p = 0; p < 10; p++) {
-    var x1 = x + Math.cos(p / 10 * Math.PI * 2);
-    var y1 = y + Math.sin(p / 10 * Math.PI * 2);
-    this.add(Newton.Particle(x1, y1));
-  }
-}
-
-SquishyBall.prototype = Object.create(Newton.Body);
-
-var body = new SquishyBall(0, 0, 20);
-```
-Extending Body allows you to create higher-level abstractions in your simulation.
-Since Bodies can include sub-Bodies, you can compose larger components
-out of smaller, simpler parts.
 
 ### Behavior demo
 
@@ -355,19 +373,6 @@ sim.start();
 Now we're talking! Implementing Body types with advanced behaviors
 opens up a whole world of re-usable game objects. In this case,
 dangerous ones.
-
-## Interactivity
-
-### Input
-
-```js
-var renderer = Newton.GLRenderer();
-
-renderer.on('pointerdown', function(x, y) {
-  var body = sim.hitList(x, y)[0];
-  if (body) body.remove();
-});
-```
 
 ## Output (custom renderers)
 
