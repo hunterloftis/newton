@@ -105,6 +105,7 @@ for (var i = 0; i < 25; i++) {
 
   // a PinConstraint pins the first Particle in place
   if (!prev) string.add(Newton.PinConstraint(current));
+
   // a RopeConstraint attaches subsequent particles to the previous particle
   else string.add(Newton.RopeConstraint(prev, current));
 
@@ -144,6 +145,7 @@ for (var i = 0; i < 25; i++) {
 
   // a PinConstraint pins the first Particle in place
   if (!prev) string.add(Newton.PinConstraint(current));
+
   // a RopeConstraint attaches subsequent particles to the previous particle
   else string.add(Newton.RopeConstraint(prev, current));
 
