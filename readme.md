@@ -2,6 +2,8 @@
 
 A playful, particle-based physics engine designed from the ground up for JavaScript.
 
+[![Build Status](https://travis-ci.org/hunterloftis/newton.svg?branch=master)](https://travis-ci.org/hunterloftis/newton)
+
 ## Reboot
 
 Newton is getting a reboot.
