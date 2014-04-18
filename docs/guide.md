@@ -116,6 +116,7 @@ var renderer = Newton.GLRenderer(display);
 var string = Newton.Body();
 var prev, current;
 
+// Build a string to dangle
 for (var i = 0; i < 25; i++) {
   current = string.add(Newton.Particle(500 + i * 20, 180));
 
@@ -127,9 +128,8 @@ for (var i = 0; i < 25; i++) {
   prev = current;
 }
 
-renderer.render(sim);
-
 sim.add(string);
+renderer.render(sim);
 
 // A LinearForce simulates gravity
 sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
@@ -307,19 +307,23 @@ var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
 
 function BoobyTrap(x, y) {
-  var x1, top, bottom, lastTop, lastBottom;
   Newton.Body.call(this);
+
+  var x1, top, bottom, lastTop, lastBottom;
   this.time = 0;
   this.pin = Newton.Particle(x, y);
   this.add(pin);
+
   for (var i = 0; i < 4; i++) {
     x1 = (i - 1.5) * 30;
     top = this.add(Newton.Particle(x1, y + 40));
     bottom = this.add(Newton.Particle(x1, y + 70));
     this.add(Newton.DistanceConstraint(top, bottom));
+
     if (i == 1 || i == 2) this.add(Newton.DistanceConstraint(this.pin, top));
     if (lastTop) this.add(Newton.DistanceConstraint(lastTop, top));
     if (lastBottom) this.add(Newton.DistanceConstraint(lastBottom, bottom));
+
     lastTop = top;
     lastBottom = bottom;
   }
@@ -327,22 +331,22 @@ function BoobyTrap(x, y) {
 
 BoobyTrap.prototype = Object.create(Newton.Body.prototype);
 
-BoobyTrap.prototype.launch = function() {
+BoobyTrap.prototype.spring = function() {
   this.pin.remove();
 };
 
 renderer.render(sim);
 renderer.viewport(0, 0, 500, 500);
 
-var bt = new BoobyTrap(250, 10);
+var trap = new BoobyTrap(250, 10);
 
 sim.on('step', function checkTime(time, sim) {
   if (time < 2000) return;
-  bt.launch();
+  trap.spring();
   sim.off();
 });
 
-sim.add(bt);
+sim.add(trap);
 sim.add(Newton.BoxConstraint(0, 0, 500, 500));
 sim.start();
 ```

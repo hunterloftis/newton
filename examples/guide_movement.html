@@ -17,6 +17,7 @@
   var string = Newton.Body();
   var prev, current;
 
+  // Build a string to dangle
   for (var i = 0; i < 25; i++) {
     current = string.add(Newton.Particle(500 + i * 20, 180));
 
@@ -28,9 +29,8 @@
     prev = current;
   }
 
-  renderer.render(sim);
-
   sim.add(string);
+  renderer.render(sim);
 
   // A LinearForce simulates gravity
   sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
