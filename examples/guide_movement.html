@@ -18,14 +18,14 @@
   var string = Newton.Body();
   var prev, current;
 
-  for (var i = 0; i < 22; i++) {
-    current = string.add(Newton.Particle(500 + i * 20, 50));
+  for (var i = 0; i < 25; i++) {
+    current = string.add(Newton.Particle(500 + i * 20, 180));
 
     // A PinConstraint pins a Particle in place
     if (i === 0) string.add(Newton.PinConstraint(current));
 
-    // A DistanceConstraint attaches this particle to the previous particle
-    if (prev) string.add(Newton.DistanceConstraint(prev, current));
+    // A RopeConstraint attaches this particle to the previous particle
+    if (prev) string.add(Newton.RopeConstraint(prev, current));
     prev = current;
   }
 
@@ -33,7 +33,7 @@
 
   sim.add(string);
   sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
-  sim.add(Newton.BoxConstraint(0, 0, 1000, 200));
+  sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
   sim.start();
 </script>
 

@@ -7,6 +7,7 @@ module.exports = {
   Constraint: require('./lib/constraint'),
   PinConstraint: require('./lib/constraints/pin-constraint'),
   DistanceConstraint: require('./lib/constraints/distance-constraint'),
+  RopeConstraint: require('./lib/constraints/rope-constraint'),
   BoxConstraint: require('./lib/constraints/box-constraint'),
   Force: require('./lib/force'),
   LinearForce: require('./lib/forces/linear-force')
