@@ -4,7 +4,7 @@ A playful, particle-based physics engine designed from the ground up for JavaScr
 
 ## Reboot
 
-I'm rebooting Newton.
+Newton is getting a reboot.
 
 A lot of folks have been excited by playing with this library -
 it introduces some new things to the JS physics landscape:
