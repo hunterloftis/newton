@@ -25,6 +25,11 @@ from the ground up, focusing on maintainability:
 If you'd like to help, please get in touch!
 [@hunterloftis](http://twitter.com/hunterloftis)
 
+## Demos
+
+- [Drawing a particle](http://hunterloftis.github.io/newton/examples/guide_basics.html)
+- [A rope](http://hunterloftis.github.io/newton/examples/guide_movement.html)
+
 ## Roadmap
 
 - ☑ [Getting started guide](https://github.com/hunterloftis/newton/blob/master/docs/guide.md)
