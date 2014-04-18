@@ -315,11 +315,29 @@ Particle.prototype.accelerate = function(v) {
 };
 
 Particle.prototype.bound = function(min, max) {
-  this.position.min(min).max(max);
+  if (this.position.x < min.x) {
+    this.position.x = this.lastPosition.x = min.x;
+  }
+  else if (this.position.x > max.x) {
+    this.position.x = this.lastPosition.x = max.x;
+  }
+  if (this.position.y < min.y) {
+    this.position.y = this.lastPosition.y = min.y;
+  }
+  else if (this.position.y > max.y) {
+    this.position.y = this.lastPosition.y = max.y;
+  }
 };
 
-Particle.prototype.move = function(v) {
-  this.position.add(v);
+Particle.prototype.getPoint = function() {
+  return {
+    x: this.position.x,
+    y: this.position.y
+  };
+};
+
+Particle.prototype.getVelocity = function() {
+  return this.position.clone().sub(this.lastPosition);
 };
 
 Particle.prototype.integrate = function(time) {
@@ -339,17 +357,18 @@ Particle.prototype.integrate = function(time) {
   this.acceleration.zero();
 };
 
+Particle.prototype.move = function(v) {
+  this.position.add(v);
+};
+
 Particle.prototype.place = function(v) {
   this.position.copy(v);
   this.lastPosition.copy(this.position);
   return this;
 };
 
-Particle.prototype.getPoint = function() {
-  return {
-    x: this.position.x,
-    y: this.position.y
-  };
+Particle.prototype.setVelocity = function(v) {
+  this.lastPosition.copy(this.position).sub(v);
 };
 
 module.exports = Particle;
@@ -836,7 +855,7 @@ Vector.prototype.getLength = function() {
 Vector.prototype.min = function(v) {
   if (this.x < v.x) this.x = v.x;
   if (this.y < v.y) this.y = v.y;
-  return this;
+  else return false;
 };
 
 Vector.prototype.max = function(v) {

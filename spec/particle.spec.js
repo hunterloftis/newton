@@ -74,18 +74,34 @@ describe('Particle', function() {
 
   describe('.bound()', function() {
 
+    beforeEach(function() {
+      this.p = Particle(40, 50);
+    });
+
     it('should stay above min', function() {
-      var p = Particle(40, 50);
-      p.bound(Vector(75, 75), Vector(100, 100));
-      assert.equal(p.position.x, 75);
-      assert.equal(p.position.y, 75);
+      this.p.bound(Vector(75, 75), Vector(100, 100));
+      assert.deepEqual(this.p.getPoint(), { x: 75, y: 75 });
     });
 
     it('should stay below max', function() {
-      var p = Particle(40, 50);
-      p.bound(Vector(0, 0), Vector(25, 25));
-      assert.equal(p.position.x, 25);
-      assert.equal(p.position.y, 25);
+      this.p.bound(Vector(0, 0), Vector(25, 25));
+      assert.deepEqual(this.p.getPoint(), { x: 25, y: 25 });
+    });
+
+    it('should set x velocity to zero on correction', function() {
+      this.p.setVelocity(Vector(5, 5));
+      this.p.bound(Vector(0, 0), Vector(25, 100));
+      var vel = this.p.getVelocity();
+      assert.equal(vel.x, 0);
+      assert.equal(vel.y, 5);
+    });
+
+    it('should set y velocity to zero on correction', function() {
+      this.p.setVelocity(Vector(5, 5));
+      this.p.bound(Vector(0, 0), Vector(100, 25));
+      var vel = this.p.getVelocity();
+      assert.equal(vel.x, 5);
+      assert.equal(vel.y, 0);
     });
 
   });
@@ -96,6 +112,19 @@ describe('Particle', function() {
     it('should return an object with x and y values', function() {
       assert.deepEqual(p.getPoint(), { x: 3, y: 4 });
     });
+  });
+
+  describe('getVelocity()', function() {
+
+    it('should return the current velocity', function() {
+      var p = Particle(2, 1);
+      p.lastPosition.x = 0;
+      p.lastPosition.y = 0;
+      var vel = p.getVelocity();
+      assert.equal(vel.x, 2);
+      assert.equal(vel.y, 1);
+    });
+
   });
 
   describe('.move()', function() {
@@ -178,8 +207,26 @@ describe('Particle', function() {
     });
 
     it('should reset velocity to zero', function() {
-      assert.equal(this.p.position.x, this.p.lastPosition.x);
-      assert.equal(this.p.position.y, this.p.lastPosition.y);
+      var vel = this.p.getVelocity();
+      assert.equal(vel.x, 0);
+      assert.equal(vel.y, 0);
+    });
+
+  });
+
+  describe('.setVelocity()', function() {
+
+    var p = Particle();
+    p.setVelocity(Vector(5, -11));
+
+    it('should set the current velocity', function() {
+      var vel = p.getVelocity();
+      assert.equal(vel.x, 5);
+      assert.equal(vel.y, -11);
+    });
+
+    it('should not change the current position', function() {
+      assert.deepEqual(p.getPoint(), { x: 0, y: 0 });
     });
 
   });
