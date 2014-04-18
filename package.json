@@ -1,14 +1,11 @@
 {
   "name": "newton",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "main": "index.js",
-  "description": "An easy-to-use, feature-rich physics engine that's designed from the ground up for JavaScript.",
+  "description": "A playful, particle-based physics engine designed from the ground up for JavaScript.",
   "repository": {
     "type": "git",
     "url": "https://github.com/hunterloftis/newton"
-  },
-  "scripts": {
-    "watch": "webpack --progress --colors --watch --cache -d"
   },
   "devDependencies": {
     "grunt-contrib-uglify": "0.2.x",

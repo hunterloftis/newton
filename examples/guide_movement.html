@@ -1,17 +1,16 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <title>Newton.js: Movement Demo</title>
   <link rel='stylesheet' type='text/css' href='shared/style.css' />
 </head>
 <body>
-
 <div class='wrap'>
   <canvas id="display" width="1000" height="600"></canvas>
 </div>
-
 <script type='text/javascript' src='../build/newton.js'></script>
 <script>
+
   var sim = Newton.Simulator();
   var display = document.getElementById('display');
   var renderer = Newton.GLRenderer(display);
@@ -32,9 +31,13 @@
   renderer.render(sim);
 
   sim.add(string);
+
+  // A LinearForce simulates gravity
   sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
+
+  // A BoxConstraint keeps our string within the viewport
   sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
   sim.start();
-</script>
 
+</script>
 </body>

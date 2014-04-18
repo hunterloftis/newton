@@ -4,14 +4,8 @@
 
 ### Installing the library
 
-```
-bower install newton
-```
-
-**old-school:** *Drop
-[newton.js](https://raw.github.com/hunterloftis/newton/master/newton.js) or
-[newton.min.js](https://raw.github.com/hunterloftis/newton/master/newton.min.js)
-into your page with a `<script>` tag.*
+- [newton.js](https://raw.github.com/hunterloftis/newton/master/newton.js)
+- [newton.min.js](https://raw.github.com/hunterloftis/newton/master/newton.min.js)
 
 **npm:** `npm install newton`
 
@@ -48,12 +42,11 @@ All renderers support a simple interface.
 ### Basics demo
 
 ```js
-var sim = newton.Simulator();
-var particle = newton.Particle(20, 10);
+var sim = Newton.Simulator();
 var display = document.getElementById('display');
-var renderer = newton.GLRenderer(display);
+var renderer = Newton.GLRenderer(display);
+var particle = Newton.Particle(500, 300);
 
-renderer.viewport(0, 0, 40, 20);
 renderer.render(sim);
 
 sim.add(particle);
@@ -117,23 +110,32 @@ They have no effect on collisions or any other part of the simulation.
 ### Movement demo
 
 ```js
-var sim = newton.Simulator();
+var sim = Newton.Simulator();
 var display = document.getElementById('display');
-var renderer = newton.GLRenderer(display);
+var renderer = Newton.GLRenderer(display);
+var string = Newton.Body();
+var prev, current;
 
-var string = newton.Body();
-var i = 7, last, current;
-while (i--) {
-  current = string.add(newton.Particle(250 + i * 20, 10));
-  if (last) string.add(newton.DistanceConstraint(current, last));
-  last = current;
+for (var i = 0; i < 25; i++) {
+  current = string.add(Newton.Particle(500 + i * 20, 180));
+
+  // A PinConstraint pins a Particle in place
+  if (i === 0) string.add(Newton.PinConstraint(current));
+
+  // A RopeConstraint attaches this particle to the previous particle
+  if (prev) string.add(Newton.RopeConstraint(prev, current));
+  prev = current;
 }
-string.add(newton.PinConstraint(last));   // A PinConstraint pins a Particle in place
 
 renderer.render(sim);
-renderer.viewport(0, 0, 500, 500);
 
 sim.add(string);
+
+// A LinearForce simulates gravity
+sim.add(Newton.LinearForce(0.01, Math.PI * 1.5));
+
+// A BoxConstraint keeps our string within the viewport
+sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
 sim.start();
 ```
 [Try it out.](#)

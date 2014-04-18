@@ -50,18 +50,18 @@ this["Newton"] =
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  Simulator: __webpack_require__(/*! ./lib/simulator */ 16),
-	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 14),
-	  Particle: __webpack_require__(/*! ./lib/particle */ 12),
+	  Simulator: __webpack_require__(/*! ./lib/simulator */ 17),
+	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 15),
+	  Particle: __webpack_require__(/*! ./lib/particle */ 13),
 	  Vector: __webpack_require__(/*! ./lib/vector */ 1),
 	  Body: __webpack_require__(/*! ./lib/body */ 7),
 	  Constraint: __webpack_require__(/*! ./lib/constraint */ 2),
 	  PinConstraint: __webpack_require__(/*! ./lib/constraints/pin-constraint */ 10),
 	  DistanceConstraint: __webpack_require__(/*! ./lib/constraints/distance-constraint */ 9),
-	  RopeConstraint: __webpack_require__(/*! ./lib/constraints/rope-constraint */ 18),
+	  RopeConstraint: __webpack_require__(/*! ./lib/constraints/rope-constraint */ 11),
 	  BoxConstraint: __webpack_require__(/*! ./lib/constraints/box-constraint */ 8),
 	  Force: __webpack_require__(/*! ./lib/force */ 3),
-	  LinearForce: __webpack_require__(/*! ./lib/forces/linear-force */ 11)
+	  LinearForce: __webpack_require__(/*! ./lib/forces/linear-force */ 12)
 	};
 
 
@@ -749,6 +749,59 @@ this["Newton"] =
 
 /***/ },
 /* 11 */
+/*!********************************************!*\
+  !*** ./lib/constraints/rope-constraint.js ***!
+  \********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	// TODO: make ordering smarter. detect chains
+	// TODO: inherit from distanceconstraint, or just give distanceconstraint some options
+	
+	var Vector = __webpack_require__(/*! ../vector */ 1);
+	var Constraint = __webpack_require__(/*! ../constraint */ 2);
+	
+	function RopeConstraint(p1, p2) {
+	  if (!(this instanceof RopeConstraint)) return new RopeConstraint(p1, p2);
+	  Constraint.call(this);
+	
+	  this._p1 = p1;
+	  this._p2 = p2;
+	  this._distance = this.getDistance();
+	  this._stiffness = 1;
+	}
+	
+	RopeConstraint.prototype = Object.create(Constraint.prototype);
+	
+	RopeConstraint.prototype.getDistance = function() {
+	  return Vector.getDistance(this._p1.position, this._p2.position);
+	};
+	
+	RopeConstraint.prototype.correct = function(time, particles) {
+	  var pos1 = this._p1.position;
+	  var pos2 = this._p2.position;
+	  var delta = pos2.pool().sub(pos1);
+	  var length = delta.getLength();
+	  var offBy = length - this._distance;
+	
+	  if (offBy <= 0) return;
+	
+	  // TODO: handle different masses
+	  var factor = offBy / length * this._stiffness;
+	  var correction1 = delta.pool().scale(factor * 1);
+	  var correction2 = delta.scale(-factor * 1);
+	
+	  this._p1.correct(correction1);
+	  this._p2.correct(correction2);
+	
+	  delta.free();
+	  correction1.free();
+	};
+	
+	module.exports = RopeConstraint;
+
+
+/***/ },
+/* 12 */
 /*!************************************!*\
   !*** ./lib/forces/linear-force.js ***!
   \************************************/
@@ -774,7 +827,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /*!*************************!*\
   !*** ./lib/particle.js ***!
   \*************************/
@@ -831,7 +884,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /*!*************************!*\
   !*** ./lib/renderer.js ***!
   \*************************/
@@ -849,16 +902,16 @@ this["Newton"] =
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /*!********************************************!*\
   !*** ./lib/renderers/gl-renderer/index.js ***!
   \********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Renderer = __webpack_require__(/*! ../../renderer */ 13);
+	var Renderer = __webpack_require__(/*! ../../renderer */ 14);
 	var GLUtil = __webpack_require__(/*! ./gl-util */ 5);
 	var onFrame = __webpack_require__(/*! ../../frame */ 4).onFrame;
-	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 15);
+	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 16);
 	
 	var MAX_PARTICLES = 10000;
 	
@@ -894,7 +947,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /*!*****************************************************!*\
   !*** ./lib/renderers/gl-renderer/point-renderer.js ***!
   \*****************************************************/
@@ -1041,13 +1094,13 @@ this["Newton"] =
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /*!**************************!*\
   !*** ./lib/simulator.js ***!
   \**************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Emitter = __webpack_require__(/*! eventemitter2 */ 17);
+	var Emitter = __webpack_require__(/*! eventemitter2 */ 18);
 	var onFrame = __webpack_require__(/*! ./frame */ 4).onFrame;
 	var Accumulator = __webpack_require__(/*! ./accumulator */ 6);
 	
@@ -1143,7 +1196,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /*!**********************************************!*\
   !*** ./~/eventemitter2/lib/eventemitter2.js ***!
   \**********************************************/
@@ -1710,59 +1763,6 @@ this["Newton"] =
 	  }
 	
 	}(typeof process !== 'undefined' && typeof process.title !== 'undefined' && typeof exports !== 'undefined' ? exports : window);
-
-
-/***/ },
-/* 18 */
-/*!********************************************!*\
-  !*** ./lib/constraints/rope-constraint.js ***!
-  \********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	// TODO: make ordering smarter. detect chains
-	// TODO: inherit from distanceconstraint, or just give distanceconstraint some options
-	
-	var Vector = __webpack_require__(/*! ../vector */ 1);
-	var Constraint = __webpack_require__(/*! ../constraint */ 2);
-	
-	function RopeConstraint(p1, p2) {
-	  if (!(this instanceof RopeConstraint)) return new RopeConstraint(p1, p2);
-	  Constraint.call(this);
-	
-	  this._p1 = p1;
-	  this._p2 = p2;
-	  this._distance = this.getDistance();
-	  this._stiffness = 1;
-	}
-	
-	RopeConstraint.prototype = Object.create(Constraint.prototype);
-	
-	RopeConstraint.prototype.getDistance = function() {
-	  return Vector.getDistance(this._p1.position, this._p2.position);
-	};
-	
-	RopeConstraint.prototype.correct = function(time, particles) {
-	  var pos1 = this._p1.position;
-	  var pos2 = this._p2.position;
-	  var delta = pos2.pool().sub(pos1);
-	  var length = delta.getLength();
-	  var offBy = length - this._distance;
-	
-	  if (offBy <= 0) return;
-	
-	  // TODO: handle different masses
-	  var factor = offBy / length * this._stiffness;
-	  var correction1 = delta.pool().scale(factor * 1);
-	  var correction2 = delta.scale(-factor * 1);
-	
-	  this._p1.correct(correction1);
-	  this._p2.correct(correction2);
-	
-	  delta.free();
-	  correction1.free();
-	};
-	
-	module.exports = RopeConstraint;
 
 
 /***/ }

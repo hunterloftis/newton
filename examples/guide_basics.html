@@ -1,17 +1,16 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <title>Newton.js: Basics Demo</title>
   <link rel='stylesheet' type='text/css' href='shared/style.css' />
 </head>
 <body>
-
 <div class='wrap'>
   <canvas id="display" width="1000" height="600"></canvas>
 </div>
-
 <script type='text/javascript' src='../build/newton.js'></script>
 <script>
+
   var sim = Newton.Simulator();
   var display = document.getElementById('display');
   var renderer = Newton.GLRenderer(display);
@@ -21,6 +20,6 @@
 
   sim.add(particle);
   sim.start();
-</script>
 
+</script>
 </body>
