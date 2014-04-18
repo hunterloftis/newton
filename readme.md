@@ -27,7 +27,7 @@ If you'd like to help, please get in touch!
 
 ## Roadmap
 
-- [x] [Getting started guide](blob/master/docs/guide.md)
+- [x] [Getting started guide](https://github.com/hunterloftis/newton/blob/master/docs/guide.md)
 - [ ] Feature completeness with getting started guide demos
 - [ ] Unit tests
 - [ ] API docs
