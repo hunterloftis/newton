@@ -55,7 +55,7 @@ describe('Particle', function() {
     });
   });
 
-  describe('#accelerate', function() {
+  describe('.accelerate()', function() {
 
     before(function() {
       this.p = Particle();
@@ -72,7 +72,7 @@ describe('Particle', function() {
 
   });
 
-  describe('#bound', function() {
+  describe('.bound()', function() {
 
     it('should stay above min', function() {
       var p = Particle(40, 50);
@@ -90,18 +90,18 @@ describe('Particle', function() {
 
   });
 
-  describe('#correct', function() {
+  describe('.correct()', function() {
 
     it('should yield (4, 6) from (1, 2) + (3, 4)', function() {
       var p = Particle(1, 2);
-      p.correct(Vector(3, 4));
+      p.move(Vector(3, 4));
       assert.equal(p.position.x, 4);
       assert.equal(p.position.y, 6);
     });
 
   });
 
-  describe('#integrate', function() {
+  describe('.integrate()', function() {
 
     describe('a stationary particle', function() {
 
@@ -130,9 +130,34 @@ describe('Particle', function() {
 
     });
 
+    describe('a moving particle', function() {
+
+      describe('with zero acceleration', function() {
+        var p = Particle();
+        p.move(Vector(5, -10));
+        p.integrate(20);
+
+        it('should continue moving at the same rate', function() {
+          assert.deepEqual({ x: 10, y: -20 }, p.getPoint());
+        });
+      });
+
+      describe('with acceleration of (-2, 5) units / sec / sec', function() {
+        var p = Particle();
+        p.move(Vector(5, -10));
+        p.accelerate(Vector(-2, 5));
+
+        it('should move to (9.2, -18) after 20ms', function() {
+          p.integrate(20);
+          assert.deepEqual({ x: 9.2, y: -18 }, p.getPoint());
+        });
+      });
+
+    });
+
   });
 
-  describe('#place', function() {
+  describe('.place()', function() {
 
     before(function() {
       this.p = Particle(1, 2);
