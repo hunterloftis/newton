@@ -142,8 +142,8 @@ DistanceConstraint.prototype.correct = function(time, particles) {
   var correction1 = delta.pool().scale(factor * 1);
   var correction2 = delta.scale(-factor * 1);
 
-  this._p1.correct(correction1);
-  this._p2.correct(correction2);
+  this._p1.move(correction1);
+  this._p2.move(correction2);
 
   delta.free();
   correction1.free();
@@ -209,8 +209,8 @@ RopeConstraint.prototype.correct = function(time, particles) {
   var correction1 = delta.pool().scale(factor * 1);
   var correction2 = delta.scale(-factor * 1);
 
-  this._p1.correct(correction1);
-  this._p2.correct(correction2);
+  this._p1.move(correction1);
+  this._p2.move(correction2);
 
   delta.free();
   correction1.free();
@@ -318,7 +318,7 @@ Particle.prototype.bound = function(min, max) {
   this.position.min(min).max(max);
 };
 
-Particle.prototype.correct = function(v) {
+Particle.prototype.move = function(v) {
   this.position.add(v);
 };
 
@@ -328,7 +328,7 @@ Particle.prototype.integrate = function(time) {
     .sub(this.lastPosition);
 
   this.acceleration
-    .scale(time * time);
+    .scale(time * time * 0.001);  // scale to units / second / second
 
   this.lastPosition.copy(this.position);
 
@@ -343,6 +343,13 @@ Particle.prototype.place = function(v) {
   this.position.copy(v);
   this.lastPosition.copy(this.position);
   return this;
+};
+
+Particle.prototype.getPoint = function() {
+  return {
+    x: this.position.x,
+    y: this.position.y
+  };
 };
 
 module.exports = Particle;
@@ -807,6 +814,10 @@ Vector.prototype.copy = function(v) {
   this.x = v.x;
   this.y = v.y;
   return this;
+};
+
+Vector.prototype.equals = function(v) {
+  return this.x === v.x && this.y === v.y;
 };
 
 Vector.prototype.pool = function() {
