@@ -50,214 +50,22 @@ this["Newton"] =
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  Simulator: __webpack_require__(/*! ./lib/simulator */ 10),
-	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 8),
-	  Particle: __webpack_require__(/*! ./lib/particle */ 6),
-	  Vector: __webpack_require__(/*! ./lib/vector */ 3),
-	  Body: __webpack_require__(/*! ./lib/body */ 5),
-	  Constraint: __webpack_require__(/*! ./lib/constraint */ 12),
-	  PinConstraint: __webpack_require__(/*! ./lib/constraints/pin-constraint */ 14),
-	  DistanceConstraint: __webpack_require__(/*! ./lib/constraints/distance-constraint */ 13),
-	  BoxConstraint: __webpack_require__(/*! ./lib/constraints/box-constraint */ 17),
-	  Force: __webpack_require__(/*! ./lib/force */ 15),
-	  LinearForce: __webpack_require__(/*! ./lib/forces/linear-force */ 16)
+	  Simulator: __webpack_require__(/*! ./lib/simulator */ 16),
+	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 14),
+	  Particle: __webpack_require__(/*! ./lib/particle */ 12),
+	  Vector: __webpack_require__(/*! ./lib/vector */ 1),
+	  Body: __webpack_require__(/*! ./lib/body */ 7),
+	  Constraint: __webpack_require__(/*! ./lib/constraint */ 2),
+	  PinConstraint: __webpack_require__(/*! ./lib/constraints/pin-constraint */ 10),
+	  DistanceConstraint: __webpack_require__(/*! ./lib/constraints/distance-constraint */ 9),
+	  BoxConstraint: __webpack_require__(/*! ./lib/constraints/box-constraint */ 8),
+	  Force: __webpack_require__(/*! ./lib/force */ 3),
+	  LinearForce: __webpack_require__(/*! ./lib/forces/linear-force */ 11)
 	};
 
 
 /***/ },
 /* 1 */
-/*!**********************!*\
-  !*** ./lib/frame.js ***!
-  \**********************/
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = getFrame();
-	
-	function getFrame() {
-	  var lastTime = 0;
-	
-	  // Browsers
-	  if (typeof window !== 'undefined') {
-	    var vendors = ['ms', 'moz', 'webkit', 'o'];
-	    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-	    var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-	    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-	    var isChrome = !!window.chrome && !isOpera;
-	
-	    for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-	      window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-	      window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-	    }
-	
-	    if (!window.requestAnimationFrame) {
-	      window.requestAnimationFrame = timeoutFrame;
-	      window.cancelAnimationFrame = cancelTimeoutFrame;
-	    }
-	
-	    return {
-	      onFrame: window.requestAnimationFrame.bind(window),
-	      cancelFrame: window.cancelAnimationFrame.bind(window)
-	    };
-	  }
-	
-	  // Node
-	  return {
-	    onFrame: timeoutFrame,
-	    cancelFrame: cancelTimeoutFrame
-	  };
-	
-	  function timeoutFrame(simulator, element) {
-	    var currTime = new Date().getTime();
-	    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-	    var id = setTimeout(function() { simulator(currTime + timeToCall); }, timeToCall);
-	    lastTime = currTime + timeToCall;
-	    return id;
-	  }
-	
-	  function cancelTimeoutFrame(id) {
-	    clearTimeout(id);
-	  }
-	}
-
-
-/***/ },
-/* 2 */
-/*!**********************************************!*\
-  !*** ./lib/renderers/gl-renderer/gl-util.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var POINT_VS = [
-	  'uniform vec2 viewport;',
-	  'attribute vec3 position;',
-	  'attribute float size;',
-	
-	  'void main() {',
-	    'vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;',
-	    'vec2 flipped = vec2(scaled.x, -scaled.y);',
-	
-	    'gl_Position = vec4(flipped, 0, 1);',
-	    'gl_PointSize = size + 1.0;',
-	  '}'
-	].join('\n');
-	
-	var CIRCLE_FS = [
-	  'precision mediump float;',
-	  'uniform sampler2D texture;',
-	
-	  'void main() {',
-	    'gl_FragColor = texture2D(texture, gl_PointCoord);',
-	  '}'
-	].join('\n');
-	
-	module.exports = {
-	  getGLContext: getGLContext,
-	  createCircleTexture: createCircleTexture,
-	  createCircleShader: createCircleShader,
-	  createShaderProgram: createShaderProgram,
-	  createTexture: createTexture
-	};
-	
-	function getGLContext(canvas) {
-	  var names = [
-	    'webgl',
-	    'experimental-webgl',
-	    'webkit-3d',
-	    'moz-webgl'
-	  ];
-	
-	  var i = 0, gl;
-	  while (!gl && i++ < names.length) {
-	    try {
-	      gl = canvas.getContext(names[i]);
-	    } catch(e) {}
-	  }
-	  return gl;
-	}
-	
-	function createCircleTexture(gl, size) {
-	  size = size || 32;
-	
-	  var canvas = document.createElement('canvas');
-	  canvas.width = canvas.height = size;
-	  var ctx = canvas.getContext('2d');
-	  var rad = size * 0.5;
-	
-	  ctx.beginPath();
-	  ctx.arc(rad, rad, rad, 0, Math.PI * 2, false);
-	  ctx.closePath();
-	  ctx.fillStyle = '#fff';
-	  ctx.fill();
-	
-	  return createTexture(gl, canvas);
-	}
-	
-	function createTexture(gl, data) {
-	  var texture = gl.createTexture();
-	
-	  gl.bindTexture(gl.TEXTURE_2D, texture);
-	  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
-	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	  gl.generateMipmap(gl.TEXTURE_2D);
-	  gl.bindTexture(gl.TEXTURE_2D, null);
-	
-	  return texture;
-	}
-	
-	function createShaderProgram(gl, vsText, fsText) {
-	  var vs = gl.createShader(gl.VERTEX_SHADER);
-	  var fs = gl.createShader(gl.FRAGMENT_SHADER);
-	
-	  gl.shaderSource(vs, vsText);
-	  gl.shaderSource(fs, fsText);
-	
-	  gl.compileShader(vs);
-	  gl.compileShader(fs);
-	
-	  if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-	    console.error('error compiling VS shaders:', gl.getShaderInfoLog(vs));
-	    throw new Error('shader failure');
-	  }
-	
-	  if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
-	    console.error('error compiling FS shaders:', gl.getShaderInfoLog(fs));
-	    throw new Error('shader failure');
-	  }
-	
-	  var program = gl.createProgram();
-	
-	  gl.attachShader(program, vs);
-	  gl.attachShader(program, fs);
-	  gl.linkProgram(program);
-	
-	  return program;
-	}
-	
-	function createCircleShader(gl, viewportArray, viewportAttr, positionAttr, sizeAttr) {
-	  viewportAttr = viewportAttr || 'viewport';
-	  positionAttr = positionAttr || 'position';
-	  sizeAttr = sizeAttr || 'size';
-	
-	  var shader = createShaderProgram(gl, POINT_VS, CIRCLE_FS);
-	  shader.uniforms = {
-	    viewport: gl.getUniformLocation(shader, viewportAttr)
-	  };
-	  shader.attributes = {
-	    position: gl.getAttribLocation(shader, positionAttr),
-	    size: gl.getAttribLocation(shader, sizeAttr)
-	  };
-	  gl.useProgram(shader);
-	  gl.uniform2fv(shader.uniforms.viewport, viewportArray);
-	
-	  return shader;
-	}
-
-
-/***/ },
-/* 3 */
 /*!***********************!*\
   !*** ./lib/vector.js ***!
   \***********************/
@@ -530,7 +338,236 @@ this["Newton"] =
 
 
 /***/ },
+/* 2 */
+/*!***************************!*\
+  !*** ./lib/constraint.js ***!
+  \***************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var id = 0;
+	
+	function Constraint() {
+	  this.id = id++;
+	}
+	
+	Constraint.prototype.type = 'Constraint';
+	Constraint.prototype.priority = 10;
+	Constraint.prototype.correct = function() {};
+	
+	module.exports = Constraint;
+
+
+/***/ },
+/* 3 */
+/*!**********************!*\
+  !*** ./lib/force.js ***!
+  \**********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Force() {
+	
+	}
+	
+	Force.prototype.type = 'Force';
+	Force.prototype.apply = function() {};
+	
+	module.exports = Force;
+
+
+/***/ },
 /* 4 */
+/*!**********************!*\
+  !*** ./lib/frame.js ***!
+  \**********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = getFrame();
+	
+	function getFrame() {
+	  var lastTime = 0;
+	
+	  // Browsers
+	  if (typeof window !== 'undefined') {
+	    var vendors = ['ms', 'moz', 'webkit', 'o'];
+	    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+	    var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+	    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+	    var isChrome = !!window.chrome && !isOpera;
+	
+	    for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+	      window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+	      window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+	    }
+	
+	    if (!window.requestAnimationFrame) {
+	      window.requestAnimationFrame = timeoutFrame;
+	      window.cancelAnimationFrame = cancelTimeoutFrame;
+	    }
+	
+	    return {
+	      onFrame: window.requestAnimationFrame.bind(window),
+	      cancelFrame: window.cancelAnimationFrame.bind(window)
+	    };
+	  }
+	
+	  // Node
+	  return {
+	    onFrame: timeoutFrame,
+	    cancelFrame: cancelTimeoutFrame
+	  };
+	
+	  function timeoutFrame(simulator, element) {
+	    var currTime = new Date().getTime();
+	    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+	    var id = setTimeout(function() { simulator(currTime + timeToCall); }, timeToCall);
+	    lastTime = currTime + timeToCall;
+	    return id;
+	  }
+	
+	  function cancelTimeoutFrame(id) {
+	    clearTimeout(id);
+	  }
+	}
+
+
+/***/ },
+/* 5 */
+/*!**********************************************!*\
+  !*** ./lib/renderers/gl-renderer/gl-util.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var POINT_VS = [
+	  'uniform vec2 viewport;',
+	  'attribute vec3 position;',
+	  'attribute float size;',
+	
+	  'void main() {',
+	    'vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;',
+	    'vec2 flipped = vec2(scaled.x, -scaled.y);',
+	
+	    'gl_Position = vec4(flipped, 0, 1);',
+	    'gl_PointSize = size + 1.0;',
+	  '}'
+	].join('\n');
+	
+	var CIRCLE_FS = [
+	  'precision mediump float;',
+	  'uniform sampler2D texture;',
+	
+	  'void main() {',
+	    'gl_FragColor = texture2D(texture, gl_PointCoord);',
+	  '}'
+	].join('\n');
+	
+	module.exports = {
+	  getGLContext: getGLContext,
+	  createCircleTexture: createCircleTexture,
+	  createCircleShader: createCircleShader,
+	  createShaderProgram: createShaderProgram,
+	  createTexture: createTexture
+	};
+	
+	function getGLContext(canvas) {
+	  var names = [
+	    'webgl',
+	    'experimental-webgl',
+	    'webkit-3d',
+	    'moz-webgl'
+	  ];
+	
+	  var i = 0, gl;
+	  while (!gl && i++ < names.length) {
+	    try {
+	      gl = canvas.getContext(names[i]);
+	    } catch(e) {}
+	  }
+	  return gl;
+	}
+	
+	function createCircleTexture(gl, size) {
+	  size = size || 32;
+	
+	  var canvas = document.createElement('canvas');
+	  canvas.width = canvas.height = size;
+	  var ctx = canvas.getContext('2d');
+	  var rad = size * 0.5;
+	
+	  ctx.beginPath();
+	  ctx.arc(rad, rad, rad, 0, Math.PI * 2, false);
+	  ctx.closePath();
+	  ctx.fillStyle = '#fff';
+	  ctx.fill();
+	
+	  return createTexture(gl, canvas);
+	}
+	
+	function createTexture(gl, data) {
+	  var texture = gl.createTexture();
+	
+	  gl.bindTexture(gl.TEXTURE_2D, texture);
+	  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
+	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	  gl.generateMipmap(gl.TEXTURE_2D);
+	  gl.bindTexture(gl.TEXTURE_2D, null);
+	
+	  return texture;
+	}
+	
+	function createShaderProgram(gl, vsText, fsText) {
+	  var vs = gl.createShader(gl.VERTEX_SHADER);
+	  var fs = gl.createShader(gl.FRAGMENT_SHADER);
+	
+	  gl.shaderSource(vs, vsText);
+	  gl.shaderSource(fs, fsText);
+	
+	  gl.compileShader(vs);
+	  gl.compileShader(fs);
+	
+	  if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+	    console.error('error compiling VS shaders:', gl.getShaderInfoLog(vs));
+	    throw new Error('shader failure');
+	  }
+	
+	  if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+	    console.error('error compiling FS shaders:', gl.getShaderInfoLog(fs));
+	    throw new Error('shader failure');
+	  }
+	
+	  var program = gl.createProgram();
+	
+	  gl.attachShader(program, vs);
+	  gl.attachShader(program, fs);
+	  gl.linkProgram(program);
+	
+	  return program;
+	}
+	
+	function createCircleShader(gl, viewportArray, viewportAttr, positionAttr, sizeAttr) {
+	  viewportAttr = viewportAttr || 'viewport';
+	  positionAttr = positionAttr || 'position';
+	  sizeAttr = sizeAttr || 'size';
+	
+	  var shader = createShaderProgram(gl, POINT_VS, CIRCLE_FS);
+	  shader.uniforms = {
+	    viewport: gl.getUniformLocation(shader, viewportAttr)
+	  };
+	  shader.attributes = {
+	    position: gl.getAttribLocation(shader, positionAttr),
+	    size: gl.getAttribLocation(shader, sizeAttr)
+	  };
+	  gl.useProgram(shader);
+	  gl.uniform2fv(shader.uniforms.viewport, viewportArray);
+	
+	  return shader;
+	}
+
+
+/***/ },
+/* 6 */
 /*!****************************!*\
   !*** ./lib/accumulator.js ***!
   \****************************/
@@ -568,7 +605,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 5 */
+/* 7 */
 /*!*********************!*\
   !*** ./lib/body.js ***!
   \*********************/
@@ -600,13 +637,145 @@ this["Newton"] =
 
 
 /***/ },
-/* 6 */
+/* 8 */
+/*!*******************************************!*\
+  !*** ./lib/constraints/box-constraint.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Constraint = __webpack_require__(/*! ../constraint */ 2);
+	var Vector = __webpack_require__(/*! ../vector */ 1);
+	
+	function BoxConstraint(x, y, width, height) {
+	  if (!(this instanceof BoxConstraint)) return new BoxConstraint(x, y, width, height);
+	  Constraint.call(this);
+	
+	  this._min = Vector(x, y);
+	  this._max = Vector(x + width, y + width);
+	}
+	
+	BoxConstraint.prototype = Object.create(Constraint.prototype);
+	
+	BoxConstraint.prototype.priority = 0;
+	
+	BoxConstraint.prototype.correct = function(time, particles) {
+	  for (var i = 0; i < particles.length; i++) {
+	    particles[i].bound(this._min, this._max);
+	  }
+	};
+	
+	module.exports = BoxConstraint;
+
+
+/***/ },
+/* 9 */
+/*!************************************************!*\
+  !*** ./lib/constraints/distance-constraint.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Vector = __webpack_require__(/*! ../vector */ 1);
+	var Constraint = __webpack_require__(/*! ../constraint */ 2);
+	
+	function DistanceConstraint(p1, p2) {
+	  if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2);
+	  Constraint.call(this);
+	
+	  this._p1 = p1;
+	  this._p2 = p2;
+	  this._distance = this.getDistance();
+	  this._stiffness = 1;
+	}
+	
+	DistanceConstraint.prototype = Object.create(Constraint.prototype);
+	
+	DistanceConstraint.prototype.getDistance = function() {
+	  return Vector.getDistance(this._p1.position, this._p2.position);
+	};
+	
+	DistanceConstraint.prototype.correct = function(time, particles) {
+	  var pos1 = this._p1.position;
+	  var pos2 = this._p2.position;
+	  var delta = pos2.pool().sub(pos1);
+	  var length = delta.getLength();
+	  var offBy = length - this._distance;
+	  // TODO: handle different masses
+	  var factor = offBy / length * this._stiffness;
+	  var correction1 = delta.pool().scale(factor * 1);
+	  var correction2 = delta.scale(-factor * 1);
+	
+	  this._p1.correct(correction1);
+	  this._p2.correct(correction2);
+	
+	  delta.free();
+	  correction1.free();
+	};
+	
+	module.exports = DistanceConstraint;
+
+
+/***/ },
+/* 10 */
+/*!*******************************************!*\
+  !*** ./lib/constraints/pin-constraint.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Constraint = __webpack_require__(/*! ../constraint */ 2);
+	
+	function PinConstraint(particle) {
+	  if (!(this instanceof PinConstraint)) return new PinConstraint(particle);
+	  Constraint.call(this);
+	
+	  this._particle = particle;
+	  this._position = particle.position.clone();
+	}
+	
+	PinConstraint.prototype = Object.create(Constraint.prototype);
+	
+	PinConstraint.prototype.priority = 0;
+	
+	PinConstraint.prototype.correct = function(time, particles) {
+	  this._particle.place(this._position);
+	};
+	
+	module.exports = PinConstraint;
+
+
+/***/ },
+/* 11 */
+/*!************************************!*\
+  !*** ./lib/forces/linear-force.js ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Force = __webpack_require__(/*! ../force */ 3);
+	var Vector = __webpack_require__(/*! ../vector */ 1);
+	
+	function LinearForce(strength, angle) {
+	  if (!(this instanceof LinearForce)) return new LinearForce(strength, angle);
+	  Force.call(this);
+	
+	  this._vector = Vector(strength, 0).rotate(angle);
+	}
+	
+	LinearForce.prototype = Object.create(Force.prototype);
+	
+	LinearForce.prototype.applyTo = function(particle) {
+	  particle.accelerate(this._vector);
+	};
+	
+	module.exports = LinearForce;
+
+
+/***/ },
+/* 12 */
 /*!*************************!*\
   !*** ./lib/particle.js ***!
   \*************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Vector = __webpack_require__(/*! ./vector */ 3);
+	var Vector = __webpack_require__(/*! ./vector */ 1);
 	
 	function Particle(x, y, size) {
 	  if (!(this instanceof Particle)) return new Particle(x, y, size);
@@ -657,7 +826,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 7 */
+/* 13 */
 /*!*************************!*\
   !*** ./lib/renderer.js ***!
   \*************************/
@@ -675,16 +844,16 @@ this["Newton"] =
 
 
 /***/ },
-/* 8 */
+/* 14 */
 /*!********************************************!*\
   !*** ./lib/renderers/gl-renderer/index.js ***!
   \********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Renderer = __webpack_require__(/*! ../../renderer */ 7);
-	var GLUtil = __webpack_require__(/*! ./gl-util */ 2);
-	var onFrame = __webpack_require__(/*! ../../frame */ 1).onFrame;
-	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 9);
+	var Renderer = __webpack_require__(/*! ../../renderer */ 13);
+	var GLUtil = __webpack_require__(/*! ./gl-util */ 5);
+	var onFrame = __webpack_require__(/*! ../../frame */ 4).onFrame;
+	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 15);
 	
 	var MAX_PARTICLES = 10000;
 	
@@ -720,13 +889,13 @@ this["Newton"] =
 
 
 /***/ },
-/* 9 */
+/* 15 */
 /*!*****************************************************!*\
   !*** ./lib/renderers/gl-renderer/point-renderer.js ***!
   \*****************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var GLUtil = __webpack_require__(/*! ./gl-util */ 2);
+	var GLUtil = __webpack_require__(/*! ./gl-util */ 5);
 	
 	var MAX_POINTS = 10000;
 	
@@ -867,15 +1036,15 @@ this["Newton"] =
 
 
 /***/ },
-/* 10 */
+/* 16 */
 /*!**************************!*\
   !*** ./lib/simulator.js ***!
   \**************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Emitter = __webpack_require__(/*! eventemitter2 */ 11);
-	var onFrame = __webpack_require__(/*! ./frame */ 1).onFrame;
-	var Accumulator = __webpack_require__(/*! ./accumulator */ 4);
+	var Emitter = __webpack_require__(/*! eventemitter2 */ 17);
+	var onFrame = __webpack_require__(/*! ./frame */ 4).onFrame;
+	var Accumulator = __webpack_require__(/*! ./accumulator */ 6);
 	
 	function Simulator() {
 	  if (!(this instanceof Simulator)) return new Simulator();
@@ -904,7 +1073,10 @@ this["Newton"] =
 	Simulator.prototype.add = function(entity) {
 	  if (entity.type === 'Particle') this._particles.push(entity);
 	  else if (entity.type === 'Force') this._forces.push(entity);
-	  else if (entity.type === 'Constraint') this._constraints.push(entity);
+	  else if (entity.type === 'Constraint') {
+	    this._constraints.push(entity);
+	    this._constraints.sort(prioritySort);
+	  }
 	  else if (entity.type === 'Body') {
 	    this._bodies.push(entity);
 	    entity.setSimulator(this);
@@ -959,10 +1131,14 @@ this["Newton"] =
 	};
 	
 	module.exports = Simulator;
+	
+	function prioritySort(a, b) {
+	  return b.priority - a.priority || a.id - b.id;
+	}
 
 
 /***/ },
-/* 11 */
+/* 17 */
 /*!**********************************************!*\
   !*** ./~/eventemitter2/lib/eventemitter2.js ***!
   \**********************************************/
@@ -1529,168 +1705,6 @@ this["Newton"] =
 	  }
 	
 	}(typeof process !== 'undefined' && typeof process.title !== 'undefined' && typeof exports !== 'undefined' ? exports : window);
-
-
-/***/ },
-/* 12 */
-/*!***************************!*\
-  !*** ./lib/constraint.js ***!
-  \***************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	function Constraint() {
-	
-	}
-	
-	Constraint.prototype.type = 'Constraint';
-	Constraint.prototype.correct = function() {};
-	
-	module.exports = Constraint;
-
-
-/***/ },
-/* 13 */
-/*!************************************************!*\
-  !*** ./lib/constraints/distance-constraint.js ***!
-  \************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var Vector = __webpack_require__(/*! ../vector */ 3);
-	var Constraint = __webpack_require__(/*! ../constraint */ 12);
-	
-	function DistanceConstraint(p1, p2) {
-	  if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2);
-	  Constraint.call(this);
-	
-	  this._p1 = p1;
-	  this._p2 = p2;
-	  this._distance = this.getDistance();
-	  this._stiffness = 1;
-	}
-	
-	DistanceConstraint.prototype = Object.create(Constraint.prototype);
-	
-	DistanceConstraint.prototype.getDistance = function() {
-	  return Vector.getDistance(this._p1.position, this._p2.position);
-	};
-	
-	DistanceConstraint.prototype.correct = function(time, particles) {
-	  var pos1 = this._p1.position;
-	  var pos2 = this._p2.position;
-	  var delta = pos2.pool().sub(pos1);
-	  var length = delta.getLength();
-	  var offBy = length - this._distance;
-	  // TODO: handle different masses
-	  var factor = offBy / length * this._stiffness;
-	  var correction1 = delta.pool().scale(factor * 1);
-	  var correction2 = delta.scale(-factor * 1);
-	
-	  this._p1.correct(correction1);
-	  this._p2.correct(correction2);
-	
-	  delta.free();
-	  correction1.free();
-	};
-	
-	module.exports = DistanceConstraint;
-
-
-/***/ },
-/* 14 */
-/*!*******************************************!*\
-  !*** ./lib/constraints/pin-constraint.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var Constraint = __webpack_require__(/*! ../constraint */ 12);
-	
-	function PinConstraint(particle) {
-	  if (!(this instanceof PinConstraint)) return new PinConstraint(particle);
-	  Constraint.call(this);
-	
-	  this._particle = particle;
-	  this._position = particle.position.clone();
-	}
-	
-	PinConstraint.prototype = Object.create(Constraint.prototype);
-	
-	PinConstraint.prototype.correct = function(time, particles) {
-	  this._particle.place(this._position);
-	};
-	
-	module.exports = PinConstraint;
-
-
-/***/ },
-/* 15 */
-/*!**********************!*\
-  !*** ./lib/force.js ***!
-  \**********************/
-/***/ function(module, exports, __webpack_require__) {
-
-	function Force() {
-	
-	}
-	
-	Force.prototype.type = 'Force';
-	Force.prototype.apply = function() {};
-	
-	module.exports = Force;
-
-
-/***/ },
-/* 16 */
-/*!************************************!*\
-  !*** ./lib/forces/linear-force.js ***!
-  \************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var Force = __webpack_require__(/*! ../force */ 15);
-	var Vector = __webpack_require__(/*! ../vector */ 3);
-	
-	function LinearForce(strength, angle) {
-	  if (!(this instanceof LinearForce)) return new LinearForce(strength, angle);
-	  Force.call(this);
-	
-	  this._vector = Vector(strength, 0).rotate(angle);
-	}
-	
-	LinearForce.prototype = Object.create(Force.prototype);
-	
-	LinearForce.prototype.applyTo = function(particle) {
-	  particle.accelerate(this._vector);
-	};
-	
-	module.exports = LinearForce;
-
-
-/***/ },
-/* 17 */
-/*!*******************************************!*\
-  !*** ./lib/constraints/box-constraint.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var Constraint = __webpack_require__(/*! ../constraint */ 12);
-	var Vector = __webpack_require__(/*! ../vector */ 3);
-	
-	function BoxConstraint(x, y, width, height) {
-	  if (!(this instanceof BoxConstraint)) return new BoxConstraint(x, y, width, height);
-	  Constraint.call(this);
-	
-	  this._min = Vector(x, y);
-	  this._max = Vector(x + width, y + width);
-	}
-	
-	BoxConstraint.prototype = Object.create(Constraint.prototype);
-	
-	BoxConstraint.prototype.correct = function(time, particles) {
-	  for (var i = 0; i < particles.length; i++) {
-	    particles[i].bound(this._min, this._max);
-	  }
-	};
-	
-	module.exports = BoxConstraint;
 
 
 /***/ }
