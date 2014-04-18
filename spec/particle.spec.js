@@ -41,7 +41,7 @@ describe('Particle', function() {
 
   describe('#accelerate', function() {
 
-    it('from (1, 2) by (3, 4) should yield (4, 6)', function() {
+    it('should yield (4, 6) from (1, 2) + (3, 4)', function() {
       var p = Particle();
       assert.equal(p.acceleration.x, 0);
       assert.equal(p.acceleration.y, 0);
@@ -51,6 +51,24 @@ describe('Particle', function() {
       p.accelerate(Vector(3, 4));
       assert.equal(p.acceleration.x, 4);
       assert.equal(p.acceleration.y, 6);
+    });
+
+  });
+
+  describe('#bound', function() {
+
+    it('should stay above min', function() {
+      var p = Particle(40, 50);
+      p.bound(Vector(75, 75), Vector(100, 100));
+      assert.equal(p.position.x, 75);
+      assert.equal(p.position.y, 75);
+    });
+
+    it('should stay below max', function() {
+      var p = Particle(40, 50);
+      p.bound(Vector(0, 0), Vector(25, 25));
+      assert.equal(p.position.x, 25);
+      assert.equal(p.position.y, 25);
     });
 
   });
