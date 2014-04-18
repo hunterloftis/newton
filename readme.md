@@ -39,7 +39,7 @@ If you'd like to help, please get in touch!
 
 ## Roadmap
 
-- ☑ [Getting started guide](https://github.com/hunterloftis/newton/blob/master/docs/guide.md)
+- ☑ [Getting started guide](http://hunterloftis.github.io/newton/docs/guide.html)
 - ◻ Feature completeness with getting started guide demos
 - ◻ Unit tests
 - ◻ API docs
