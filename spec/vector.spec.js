@@ -119,6 +119,28 @@ describe('Vector', function() {
     });
   });
 
+  describe('equals()', function() {
+
+    before(function() {
+      this.a = Vector(1, 2);
+      this.b = Vector(1, 3);
+      this.c = Vector(4, 2);
+      this.d = Vector(1, 2);
+    });
+
+    it('should fail with different y values', function() {
+      assert.ok(!this.a.equals(this.b));
+    });
+
+    it('should fail with different x values', function() {
+      assert.ok(!this.a.equals(this.c));
+    });
+
+    it('should succeed with matching x and y', function() {
+      assert.ok(this.a.equals(this.d));
+    });
+  });
+
   describe('zero()', function() {
 
     it('should zero out a vector', function() {

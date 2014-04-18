@@ -103,7 +103,32 @@ describe('Particle', function() {
 
   describe('#integrate', function() {
 
-    // TODO: tests
+    describe('a stationary particle', function() {
+
+      describe('with zero acceleration', function() {
+
+        var p = Particle();
+
+        it('should stay in the same place', function() {
+          p.integrate(20);
+          assert.deepEqual({x: 0, y: 0}, p.getPoint());
+        });
+
+      });
+
+      describe('with acceleration of (1, 2) units / sec / sec', function() {
+
+        var p = Particle();
+        p.accelerate(Vector(1, 2));
+
+        it('should move to (0.4, 0.8) after 20ms', function() {
+          p.integrate(20);
+          assert.deepEqual({ x: 0.4, y: 0.8 }, p.getPoint());
+        });
+
+      });
+
+    });
 
   });
 
