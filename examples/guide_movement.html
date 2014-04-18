@@ -10,13 +10,13 @@
   <canvas id="display" width="1000" height="600"></canvas>
 </div>
 
-<script type='text/javascript' src='../newton.js'></script>
+<script type='text/javascript' src='../build/newton.js'></script>
 <script>
   var sim = Newton.Simulator();
   var display = document.getElementById('display');
   var renderer = Newton.GLRenderer(display);
-
   var string = Newton.Body();
+
   var i = 22, last, current;
   while (i--) {
     current = string.add(Newton.Particle(500 + i * 20, 50));
@@ -28,7 +28,7 @@
   renderer.render(sim);
 
   sim.add(string);
-  sim.add(Newton.LinearForce(Math.PI * 2, 0.001));
+  sim.add(Newton.LinearForce(0.0001, Math.PI * 1.5));
   sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
   sim.start();
 </script>

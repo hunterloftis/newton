@@ -50,10 +50,17 @@ this["Newton"] =
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  Simulator: __webpack_require__(/*! ./lib/simulator */ 9),
-	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 7),
-	  Particle: __webpack_require__(/*! ./lib/particle */ 5),
-	  Vector: __webpack_require__(/*! ./lib/vector */ 3)
+	  Simulator: __webpack_require__(/*! ./lib/simulator */ 10),
+	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 8),
+	  Particle: __webpack_require__(/*! ./lib/particle */ 6),
+	  Vector: __webpack_require__(/*! ./lib/vector */ 3),
+	  Body: __webpack_require__(/*! ./lib/body */ 5),
+	  Constraint: __webpack_require__(/*! ./lib/constraint */ 12),
+	  PinConstraint: __webpack_require__(/*! ./lib/constraints/pin-constraint */ 14),
+	  DistanceConstraint: __webpack_require__(/*! ./lib/constraints/distance-constraint */ 13),
+	  BoxConstraint: __webpack_require__(/*! ./lib/constraints/box-constraint */ 17),
+	  Force: __webpack_require__(/*! ./lib/force */ 15),
+	  LinearForce: __webpack_require__(/*! ./lib/forces/linear-force */ 16)
 	};
 
 
@@ -256,13 +263,270 @@ this["Newton"] =
   \***********************/
 /***/ function(module, exports, __webpack_require__) {
 
+	var pool = [];  // Vector object pooling (avoid GC)
+	
 	function Vector(x, y) {
 	  if (!(this instanceof Vector)) return new Vector(x, y);
 	  this.x = x;
 	  this.y = y;
 	}
 	
+	
+	Vector.claim = function() {
+	  return pool.pop() || Vector();
+	};
+	
+	Vector.getDistance = function(a, b) {
+	  var dx = a.x - b.x;
+	  var dy = a.y - b.y;
+	  return Math.sqrt(dx * dx + dy * dy);
+	};
+	
+	Vector.pool = function(size) {
+	  if (typeof size !== 'undefined') {
+	    pool.length = 0;
+	    for (var i = 0; i < size; i++) {
+	      pool.push(Vector());
+	    }
+	  }
+	  else {
+	    return pool.length;
+	  }
+	};
+	
+	
+	Vector.prototype.add = function(v) {
+	  this.x += v.x;
+	  this.y += v.y;
+	  return this;
+	};
+	
+	Vector.prototype.clone = function() {
+	  return Vector(this.x, this.y);
+	};
+	
+	Vector.prototype.copy = function(v) {
+	  this.x = v.x;
+	  this.y = v.y;
+	  return this;
+	};
+	
+	Vector.prototype.pool = function() {
+	  return Vector.claim().copy(this);
+	};
+	
+	Vector.prototype.free = function() {
+	  pool.push(this);
+	  return this;
+	};
+	
+	Vector.prototype.getLength = function() {
+	  return Math.sqrt(this.x * this.x + this.y * this.y);
+	};
+	
+	Vector.prototype.min = function(v) {
+	  if (this.x < v.x) this.x = v.x;
+	  if (this.y < v.y) this.y = v.y;
+	  return this;
+	};
+	
+	Vector.prototype.max = function(v) {
+	  if (this.x > v.x) this.x = v.x;
+	  if (this.y > v.y) this.y = v.y;
+	  return this;
+	};
+	
+	Vector.prototype.rotate = function(angle) {
+	  var x = this.x;
+	  var y = -this.y;
+	  var sin = Math.sin(angle);
+	  var cos = Math.cos(angle);
+	  this.x = x * cos - y * sin;
+	  this.y = -(x * sin + y * cos);
+	  return this;
+	};
+	
+	Vector.prototype.scale = function(scalar) {
+	  this.x *= scalar;
+	  this.y *= scalar;
+	  return this;
+	};
+	
+	Vector.prototype.sub = function(v) {
+	  this.x -= v.x;
+	  this.y -= v.y;
+	  return this;
+	};
+	
+	Vector.prototype.zero = function() {
+	  this.x = this.y = 0;
+	  return this;
+	};
+	
+	
 	module.exports = Vector;
+	
+	
+	/*
+	
+	
+	// One-off vector for single computes
+	
+	Vector.scratch = new Vector();
+	
+	// Static methods
+	
+	// New instances
+	
+	// Setters
+	
+	Vector.prototype.set = function(x, y) {
+	  this.x = x;
+	  this.y = y;
+	  return this;
+	};
+	
+	// Add
+	
+	Vector.prototype.add = function(v) {
+	  this.x += v.x;
+	  this.y += v.y;
+	  return this;
+	};
+	
+	Vector.prototype.addXY = function(x, y) {
+	  this.x += x;
+	  this.y += y;
+	  return this;
+	};
+	
+	Vector.prototype.subXY = function(x, y) {
+	  this.x -= x;
+	  this.y -= y;
+	  return this;
+	};
+	
+	Vector.prototype.merge = function(v) {
+	  var dx = v.x - this.x;
+	  var dy = v.y - this.y;
+	  if (dx > 0 && this.x >= 0) this.x += dx;
+	  else if (dx < 0 && this.x <= 0) this.x += dx;
+	  if (dy > 0 && this.y >= 0) this.y += dy;
+	  else if (dy < 0 && this.y <= 0) this.y += dy;
+	  return this;
+	};
+	
+	// Scale
+	
+	Vector.prototype.mult = function(v) {
+	  this.x *= v.x;
+	  this.y *= v.y;
+	  return this;
+	};
+	
+	Vector.prototype.div = function(v) {
+	  this.x /= v.x;
+	  this.y /= v.y;
+	  return this;
+	};
+	
+	Vector.prototype.reverse = function() {
+	  this.x = -this.x;
+	  this.y = -this.y;
+	  return this;
+	};
+	
+	Vector.prototype.unit = function() {
+	  this.scale(1 / this.getLength());
+	  return this;
+	};
+	
+	// Rotate
+	
+	Vector.prototype.turnRight = function() {
+	  var x = this.x;
+	  var y = this.y;
+	  this.x = -y;
+	  this.y = x;
+	  return this;
+	};
+	
+	Vector.prototype.turnLeft = function() {
+	  var x = this.x;
+	  var y = this.y;
+	  this.x = y;
+	  this.y = -x;
+	  return this;
+	};
+	
+	Vector.prototype.rotateAbout = function(pivot, angle) {
+	  this.sub(pivot).rotateBy(angle).add(pivot);
+	  return this;
+	};
+	
+	// Get
+	
+	Vector.prototype.getDot = function(v) {
+	  return this.x * v.x + this.y * v.y;
+	};
+	
+	Vector.prototype.getCross = function(v) {
+	  return this.x * v.y + this.y * v.x;
+	};
+	
+	Vector.prototype.getLength = function() {
+	  return Math.sqrt(this.x * this.x + this.y * this.y);
+	};
+	
+	Vector.prototype.getLength2 = function() {
+	  // Squared length
+	  return this.x * this.x + this.y * this.y;
+	};
+	
+	Vector.prototype.getAngle = function() {
+	  return Math.atan2(-this.y, this.x);
+	};
+	
+	Vector.prototype.getAngleTo = function(v) {
+	  // The nearest angle between two vectors
+	  // (origin of 0,0 for both)
+	  var cos = this.x * v.x + this.y * v.y;
+	  var sin = this.y * v.x - this.x * v.y;
+	
+	  return Math.atan2(sin, cos);
+	};
+	
+	// If projection >= 0, it's in this half plane
+	// Otherwise, it isn't
+	Vector.prototype.getProjection = function(vPoint, vDir) {
+	  return this.clone().sub(vPoint).getDot(vDir);
+	};
+	
+	Vector.prototype.applyProjection = function(projection, vDir) {
+	  this.sub(dir.clone().scale(projection));
+	  return this;
+	};
+	
+	Vector.prototype.projectOnto = function(vPoint, vDir) {
+	  var projection = this.clone().sub(vPoint).getDot(vDir);
+	  this.sub(vDir.clone().scale(projection));
+	  return this;
+	};
+	
+	Vector.prototype.projectSegment = function(vA, vB) {
+	  var normal = vB.clone().sub(vA).turnLeft().unit();
+	  var projection = this.clone().sub(vA).getDot(normal);
+	  this.sub(normal.scale(projection));
+	
+	  if (this.x > vA.x && this.x > vB.x) this.x = Math.max(vA.x, vB.x);
+	  else if (this.x < vA.x && this.x < vB.x) this.x = Math.min(vA.x, vB.x);
+	  if (this.y > vA.y && this.y > vB.y) this.y = Math.max(vA.y, vB.y);
+	  else if (this.y < vA.y && this.y < vB.y) this.y = Math.min(vA.y, vB.y);
+	
+	  return this;
+	};
+	
+	*/
 
 
 /***/ },
@@ -305,6 +569,38 @@ this["Newton"] =
 
 /***/ },
 /* 5 */
+/*!*********************!*\
+  !*** ./lib/body.js ***!
+  \*********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Body() {
+	  if (!(this instanceof Body)) return new Body();
+	
+	  this._entities = [];
+	  this._sim = undefined;
+	}
+	
+	Body.prototype.type = 'Body';
+	
+	Body.prototype.add = function(entity) {
+	  this._entities.push(entity);
+	  if (this._sim) this._sim.add(entity);
+	  return entity;
+	};
+	
+	Body.prototype.setSimulator = function(sim) {
+	  this._sim = sim;
+	  for (var i = 0; i < this._entities.length; i++) {
+	    sim.add(this._entities[i]);
+	  }
+	};
+	
+	module.exports = Body;
+
+
+/***/ },
+/* 6 */
 /*!*************************!*\
   !*** ./lib/particle.js ***!
   \*************************/
@@ -315,15 +611,53 @@ this["Newton"] =
 	function Particle(x, y, size) {
 	  if (!(this instanceof Particle)) return new Particle(x, y, size);
 	  this.position = Vector(x, y);
+	  this.lastPosition = Vector(x, y);
+	  this.acceleration = Vector(0, 0);
+	  this._velocityBuffer = Vector(0, 0);
 	}
 	
 	Particle.prototype.type = 'Particle';
+	
+	Particle.prototype.accelerate = function(v) {
+	  this.acceleration.add(v);
+	};
+	
+	Particle.prototype.bound = function(min, max) {
+	  this.position.min(min).max(max);
+	};
+	
+	Particle.prototype.correct = function(v) {
+	  this.position.add(v);
+	};
+	
+	Particle.prototype.integrate = function(time) {
+	  this._velocityBuffer
+	    .copy(this.position)
+	    .sub(this.lastPosition);
+	
+	  this.acceleration
+	    .scale(time * time);
+	
+	  this.lastPosition.copy(this.position);
+	
+	  this.position
+	    .add(this._velocityBuffer)
+	    .add(this.acceleration);
+	
+	  this.acceleration.zero();
+	};
+	
+	Particle.prototype.place = function(v) {
+	  this.position.copy(v);
+	  this.lastPosition.copy(this.position);
+	  return this;
+	};
 	
 	module.exports = Particle;
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /*!*************************!*\
   !*** ./lib/renderer.js ***!
   \*************************/
@@ -341,16 +675,16 @@ this["Newton"] =
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /*!********************************************!*\
   !*** ./lib/renderers/gl-renderer/index.js ***!
   \********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Renderer = __webpack_require__(/*! ../../renderer */ 6);
+	var Renderer = __webpack_require__(/*! ../../renderer */ 7);
 	var GLUtil = __webpack_require__(/*! ./gl-util */ 2);
 	var onFrame = __webpack_require__(/*! ../../frame */ 1).onFrame;
-	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 8);
+	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 9);
 	
 	var MAX_PARTICLES = 10000;
 	
@@ -386,7 +720,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /*!*****************************************************!*\
   !*** ./lib/renderers/gl-renderer/point-renderer.js ***!
   \*****************************************************/
@@ -446,8 +780,8 @@ this["Newton"] =
 	
 	  for (var i = 0; i < points.length; i++) {
 	    point = points[i];
-	    vertices.push(particle.position.x, particle.position.y, 0);
-	    sizes.push(8);
+	    vertices.push(point.position.x, point.position.y, 0);
+	    sizes.push(4);
 	  }
 	
 	  vArray.set(vertices, 0);
@@ -533,13 +867,13 @@ this["Newton"] =
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /*!**************************!*\
   !*** ./lib/simulator.js ***!
   \**************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Emitter = __webpack_require__(/*! eventemitter2 */ 10);
+	var Emitter = __webpack_require__(/*! eventemitter2 */ 11);
 	var onFrame = __webpack_require__(/*! ./frame */ 1).onFrame;
 	var Accumulator = __webpack_require__(/*! ./accumulator */ 4);
 	
@@ -553,6 +887,10 @@ this["Newton"] =
 	  this._running = false;
 	  this._accumulator = undefined;
 	  this._particles = [];
+	  this._bodies = [];
+	  this._forces = [];
+	  this._constraints = [];
+	  this._iterations = 3;             // TODO: option
 	}
 	
 	Simulator.prototype = Object.create(Emitter.prototype);
@@ -565,11 +903,17 @@ this["Newton"] =
 	
 	Simulator.prototype.add = function(entity) {
 	  if (entity.type === 'Particle') this._particles.push(entity);
+	  else if (entity.type === 'Force') this._forces.push(entity);
+	  else if (entity.type === 'Constraint') this._constraints.push(entity);
+	  else if (entity.type === 'Body') {
+	    this._bodies.push(entity);
+	    entity.setSimulator(this);
+	  }
 	};
 	
 	Simulator.prototype.getParticles = function() {
 	  return this._particles;
-	}
+	};
 	
 	Simulator.prototype._step = function() {
 	  if (!this._running) return;
@@ -584,14 +928,41 @@ this["Newton"] =
 	};
 	
 	Simulator.prototype._simulate = function(time, totalTime) {
+	  this._integrate(time);
+	  this._constrain(time);
+	};
 	
+	Simulator.prototype._integrate = function(time) {
+	  var particles = this._particles;
+	  var forces = this._forces;
+	  var particle, force;
+	
+	  for (var p = 0; p < particles.length; p++) {
+	    particle = particles[p];
+	    for (var f = 0; f < forces.length; f++) {
+	      force = forces[f];
+	      force.applyTo(particle);
+	    }
+	    particle.integrate(time);
+	  }
+	};
+	
+	Simulator.prototype._constrain = function(time) {
+	  var constraints = this._constraints;
+	  var particles = this._particles;
+	
+	  for (var i = 0; i < this._iterations; i++) {
+	    for (var c = 0; c < constraints.length; c++) {
+	      constraints[c].correct(time, particles);
+	    }
+	  }
 	};
 	
 	module.exports = Simulator;
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /*!**********************************************!*\
   !*** ./~/eventemitter2/lib/eventemitter2.js ***!
   \**********************************************/
@@ -1158,6 +1529,168 @@ this["Newton"] =
 	  }
 	
 	}(typeof process !== 'undefined' && typeof process.title !== 'undefined' && typeof exports !== 'undefined' ? exports : window);
+
+
+/***/ },
+/* 12 */
+/*!***************************!*\
+  !*** ./lib/constraint.js ***!
+  \***************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Constraint() {
+	
+	}
+	
+	Constraint.prototype.type = 'Constraint';
+	Constraint.prototype.correct = function() {};
+	
+	module.exports = Constraint;
+
+
+/***/ },
+/* 13 */
+/*!************************************************!*\
+  !*** ./lib/constraints/distance-constraint.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Vector = __webpack_require__(/*! ../vector */ 3);
+	var Constraint = __webpack_require__(/*! ../constraint */ 12);
+	
+	function DistanceConstraint(p1, p2) {
+	  if (!(this instanceof DistanceConstraint)) return new DistanceConstraint(p1, p2);
+	  Constraint.call(this);
+	
+	  this._p1 = p1;
+	  this._p2 = p2;
+	  this._distance = this.getDistance();
+	  this._stiffness = 1;
+	}
+	
+	DistanceConstraint.prototype = Object.create(Constraint.prototype);
+	
+	DistanceConstraint.prototype.getDistance = function() {
+	  return Vector.getDistance(this._p1.position, this._p2.position);
+	};
+	
+	DistanceConstraint.prototype.correct = function(time, particles) {
+	  var pos1 = this._p1.position;
+	  var pos2 = this._p2.position;
+	  var delta = pos2.pool().sub(pos1);
+	  var length = delta.getLength();
+	  var offBy = length - this._distance;
+	  // TODO: handle different masses
+	  var factor = offBy / length * this._stiffness;
+	  var correction1 = delta.pool().scale(factor * 1);
+	  var correction2 = delta.scale(-factor * 1);
+	
+	  this._p1.correct(correction1);
+	  this._p2.correct(correction2);
+	
+	  delta.free();
+	  correction1.free();
+	};
+	
+	module.exports = DistanceConstraint;
+
+
+/***/ },
+/* 14 */
+/*!*******************************************!*\
+  !*** ./lib/constraints/pin-constraint.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Constraint = __webpack_require__(/*! ../constraint */ 12);
+	
+	function PinConstraint(particle) {
+	  if (!(this instanceof PinConstraint)) return new PinConstraint(particle);
+	  Constraint.call(this);
+	
+	  this._particle = particle;
+	  this._position = particle.position.clone();
+	}
+	
+	PinConstraint.prototype = Object.create(Constraint.prototype);
+	
+	PinConstraint.prototype.correct = function(time, particles) {
+	  this._particle.place(this._position);
+	};
+	
+	module.exports = PinConstraint;
+
+
+/***/ },
+/* 15 */
+/*!**********************!*\
+  !*** ./lib/force.js ***!
+  \**********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Force() {
+	
+	}
+	
+	Force.prototype.type = 'Force';
+	Force.prototype.apply = function() {};
+	
+	module.exports = Force;
+
+
+/***/ },
+/* 16 */
+/*!************************************!*\
+  !*** ./lib/forces/linear-force.js ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Force = __webpack_require__(/*! ../force */ 15);
+	var Vector = __webpack_require__(/*! ../vector */ 3);
+	
+	function LinearForce(strength, angle) {
+	  if (!(this instanceof LinearForce)) return new LinearForce(strength, angle);
+	  Force.call(this);
+	
+	  this._vector = Vector(strength, 0).rotate(angle);
+	}
+	
+	LinearForce.prototype = Object.create(Force.prototype);
+	
+	LinearForce.prototype.applyTo = function(particle) {
+	  particle.accelerate(this._vector);
+	};
+	
+	module.exports = LinearForce;
+
+
+/***/ },
+/* 17 */
+/*!*******************************************!*\
+  !*** ./lib/constraints/box-constraint.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Constraint = __webpack_require__(/*! ../constraint */ 12);
+	var Vector = __webpack_require__(/*! ../vector */ 3);
+	
+	function BoxConstraint(x, y, width, height) {
+	  if (!(this instanceof BoxConstraint)) return new BoxConstraint(x, y, width, height);
+	  Constraint.call(this);
+	
+	  this._min = Vector(x, y);
+	  this._max = Vector(x + width, y + width);
+	}
+	
+	BoxConstraint.prototype = Object.create(Constraint.prototype);
+	
+	BoxConstraint.prototype.correct = function(time, particles) {
+	  for (var i = 0; i < particles.length; i++) {
+	    particles[i].bound(this._min, this._max);
+	  }
+	};
+	
+	module.exports = BoxConstraint;
 
 
 /***/ }
