@@ -135,10 +135,8 @@ for (var i = 0; i < 25; i++) {
 Now things are getting interesting. Our little string has come to life!
 
 <p>
-  <iframe src="http://jsbin.com/jiduv/2" class=" foo" id="" style="width: 100%; height: 500px;"></iframe>
+  <iframe src="http://jsbin.com/jiduv/2" style="width: 100%; height: 520px;"></iframe>
 </p>
-
-[Play with the code](http://jsbin.com/facom/1/edit?js,output)
 
 ```js
 var sim = Newton.Simulator();
