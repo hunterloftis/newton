@@ -73,4 +73,15 @@ describe('Particle', function() {
 
   });
 
+  describe('#correct', function() {
+
+    it('should yield (4, 6) from (1, 2) + (3, 4)', function() {
+      var p = Particle(1, 2);
+      p.correct(Vector(3, 4));
+      assert.equal(p.position.x, 4);
+      assert.equal(p.position.y, 6);
+    });
+
+  });
+
 });
