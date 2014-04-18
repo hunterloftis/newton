@@ -14,29 +14,33 @@
   var sim = Newton.Simulator();
   var display = document.getElementById('display');
   var renderer = Newton.GLRenderer(display);
+
+  var gravity = Newton.LinearForce(7, Math.PI * 1.5);
+  var container = Newton.BoxConstraint(0, 0, 1000, 600);
   var string = Newton.Body();
+
   var prev, current;
 
-  // Build a string to dangle
+  // build a string to dangle
   for (var i = 0; i < 25; i++) {
+
+    // add a particle to the string
     current = string.add(Newton.Particle(500 + i * 20, 180));
 
-    // A PinConstraint pins a Particle in place
+    // a PinConstraint pins a Particle in place
     if (i === 0) string.add(Newton.PinConstraint(current));
 
-    // A RopeConstraint attaches this particle to the previous particle
+    // a RopeConstraint attaches this particle to the previous particle
     if (prev) string.add(Newton.RopeConstraint(prev, current));
     prev = current;
   }
 
-  sim.add(string);
   renderer.render(sim);
 
-  // A LinearForce simulates gravity
-  sim.add(Newton.LinearForce(7, Math.PI * 1.5));
+  sim.add(string);
+  sim.add(gravity);
+  sim.add(container);
 
-  // A BoxConstraint keeps our string within the viewport
-  sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
   sim.start();
 
 </script>

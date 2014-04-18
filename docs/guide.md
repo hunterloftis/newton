@@ -13,6 +13,7 @@
 
 ```js
 var sim = Newton.Simulator();
+
 sim.start();
 ```
 An empty simulation.
@@ -20,21 +21,26 @@ An empty simulation.
 ### Adding particles
 
 ```js
+var sim = Newton.Simulator();
 var particle = Newton.Particle(10, 20);  // x, y
+
 sim.add(particle);
+sim.start();
 ```
 Particles are the first basic elements of Newton.
 
 ### Rendering
 
 ```js
+var sim = Newton.Simulator();
 var display = document.getElementById('display');
-var renderer = Newton.GLRenderer(display)
+var renderer = Newton.GLRenderer(display);
 
-renderer.viewport(0, 0, 640, 480);  // x, y, width, height
 renderer.render(sim);
 ```
 Newton ships with a WebGL-based renderer for development and debugging.
+To use it, you'll need to create a canvas element on your page.
+In this case, we've called our canvas `#display`.
 
 You can render anyway you like - canvas, webgl, DOM, SVG, etc.
 All renderers support a simple interface.
@@ -45,10 +51,10 @@ All renderers support a simple interface.
 var sim = Newton.Simulator();
 var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
-var particle = Newton.Particle(500, 300);
+
+var particle = Newton.Particle(500, 180);
 
 renderer.render(sim);
-
 sim.add(particle);
 sim.start();
 ```
@@ -61,7 +67,7 @@ As you can see, we're up and running - but it's a little boring with just one Pa
 ### Adding forces
 
 ```js
-var gravity = Newton.LinearForce(6, Math.PI * 1.5);
+var gravity = Newton.LinearForce(7, Math.PI * 1.5);   // strength, direction
 sim.add(gravity);
 ```
 Forces are the second basic elements of Newton.
@@ -73,7 +79,7 @@ Force implementations tend to be very short (< 30 lines).
 ### Adding constraints
 
 ```js
-var container = Newton.BoxConstraint(0, 0, 100, 100);   // x, y, width, height
+var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
 sim.add(container);
 ```
 Constraints are the third basic elements of Newton.
@@ -88,12 +94,22 @@ Newton comes with a library of Constraints to which you can also add your own cu
 ### Grouping into bodies
 
 ```js
-var spring = Newton.Body();
-var p1 = spring.add(Newton.Particle(-10, 0));   // create a Particle and add it to the spring Body
-var p2 = spring.add(Newton.Particle(10, 0));
+var string = Newton.Body();
+var prev, current;
 
-spring.add(Newton.SpringConstraint(p1, p2, 0.5));
-sim.add(spring);
+// build a string to dangle
+for (var i = 0; i < 25; i++) {
+
+  // add a particle to the string
+  current = string.add(Newton.Particle(500 + i * 20, 180));
+
+  // a PinConstraint pins a Particle in place
+  if (i === 0) string.add(Newton.PinConstraint(current));
+
+  // a RopeConstraint attaches this particle to the previous particle
+  if (prev) string.add(Newton.RopeConstraint(prev, current));
+  prev = current;
+}
 ```
 When building a simulation, you frequently want to refer to
 a group of particles, forces, and constraints as a single entity.
@@ -113,29 +129,33 @@ They have no effect on collisions or any other part of the simulation.
 var sim = Newton.Simulator();
 var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
+
+var gravity = Newton.LinearForce(7, Math.PI * 1.5);
+var container = Newton.BoxConstraint(0, 0, 1000, 600);
 var string = Newton.Body();
+
 var prev, current;
 
-// Build a string to dangle
+// build a string to dangle
 for (var i = 0; i < 25; i++) {
+
+  // add a particle to the string
   current = string.add(Newton.Particle(500 + i * 20, 180));
 
-  // A PinConstraint pins a Particle in place
+  // a PinConstraint pins a Particle in place
   if (i === 0) string.add(Newton.PinConstraint(current));
 
-  // A RopeConstraint attaches this particle to the previous particle
+  // a RopeConstraint attaches this particle to the previous particle
   if (prev) string.add(Newton.RopeConstraint(prev, current));
   prev = current;
 }
 
-sim.add(string);
 renderer.render(sim);
 
-// A LinearForce simulates gravity
-sim.add(Newton.LinearForce(7, Math.PI * 1.5));
+sim.add(string);
+sim.add(gravity);
+sim.add(container);
 
-// A BoxConstraint keeps our string within the viewport
-sim.add(Newton.BoxConstraint(0, 0, 1000, 600));
 sim.start();
 ```
 [Try it out.](http://hunterloftis.github.io/newton/examples/guide_movement.html)
