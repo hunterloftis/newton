@@ -8,7 +8,12 @@ Newton is getting a reboot.
 
 A lot of folks have been excited by playing with this library -
 it introduces some new things to the JS physics landscape:
-fast soft-body simulation with a simple API and decoupled rendering.
+
+- blazing fast
+- soft bodies
+- simple API
+- decoupled rendering
+- deterministic
 
 However, I've been a bad project maintainer.
 Partly I've been busy, and partly Newton grew unwieldy and
