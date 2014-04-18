@@ -12,7 +12,7 @@
 ### Creating a simulation
 
 ```js
-var sim = newton.Simulator();
+var sim = Newton.Simulator();
 sim.start();
 ```
 An empty simulation.
@@ -20,7 +20,7 @@ An empty simulation.
 ### Adding particles
 
 ```js
-var particle = newton.Particle(10, 20);  // x, y
+var particle = Newton.Particle(10, 20);  // x, y
 sim.add(particle);
 ```
 Particles are the first basic elements of Newton.
@@ -29,7 +29,7 @@ Particles are the first basic elements of Newton.
 
 ```js
 var display = document.getElementById('display');
-var renderer = newton.GLRenderer(display)
+var renderer = Newton.GLRenderer(display)
 
 renderer.viewport(0, 0, 640, 480);  // x, y, width, height
 renderer.render(sim);
@@ -61,7 +61,7 @@ As you can see, we're up and running - but it's a little boring with just one Pa
 ### Adding forces
 
 ```js
-var gravity = newton.LinearForce(0, 1);
+var gravity = Newton.LinearForce(0, 1);
 sim.add(gravity);
 ```
 Forces are the second basic elements of Newton.
@@ -73,7 +73,7 @@ Force implementations tend to be very short (< 30 lines).
 ### Adding constraints
 
 ```js
-var container = newton.BoxConstraint(0, 0, 100, 100);   // x, y, width, height
+var container = Newton.BoxConstraint(0, 0, 100, 100);   // x, y, width, height
 sim.add(container);
 ```
 Constraints are the third basic elements of Newton.
@@ -88,11 +88,11 @@ Newton comes with a library of Constraints to which you can also add your own cu
 ### Grouping into bodies
 
 ```js
-var spring = newton.Body();
-var p1 = spring.add(newton.Particle(-10, 0));   // create a Particle and add it to the spring Body
-var p2 = spring.add(newton.Particle(10, 0));
+var spring = Newton.Body();
+var p1 = spring.add(Newton.Particle(-10, 0));   // create a Particle and add it to the spring Body
+var p2 = spring.add(Newton.Particle(10, 0));
 
-spring.add(newton.SpringConstraint(p1, p2, 0.5));
+spring.add(Newton.SpringConstraint(p1, p2, 0.5));
 sim.add(spring);
 ```
 When building a simulation, you frequently want to refer to
@@ -148,13 +148,13 @@ Now things are getting interesting. Our little chain has come to life!
 
 ```js
 var particles = [
-  newton.Particle(0, 0),
-  newton.Particle(10, 0),
-  newton.Particle(10, 10),
-  newton.Particle(0, 10)
+  Newton.Particle(0, 0),
+  Newton.Particle(10, 0),
+  Newton.Particle(10, 10),
+  Newton.Particle(0, 10)
 ];
 
-var volume = newton.Volume(particles);
+var volume = Newton.Volume(particles);
 ```
 At some point, you'll probably want some parts of your simulation to collide.
 For collision detection and resolution, Newton uses the concept of *Volumes*.
@@ -191,12 +191,12 @@ but the rain and character would not effect each other.
 ### Adding materials
 
 ```js
-var material = newton.Material({
+var material = Newton.Material({
   mass: 1,
   friction: 0.5,
   restitution: 0.5
 });
-var particle = newton.Particle(0, 0, material);
+var particle = Newton.Particle(0, 0, material);
 ```
 Particles can optionally have a Material.
 Materials impact the response of Particles during collisions.
@@ -209,12 +209,12 @@ Particles can also have materials, which overrides their Body material.
 ### Collisions demo
 
 ```js
-var sim = newton.Simulator();
+var sim = Newton.Simulator();
 var display = document.getElementById('display');
-var renderer = newton.GLRenderer(display);
+var renderer = Newton.GLRenderer(display);
 
 function Shape(material) {
-  newton.Body.call(this);
+  Newton.Body.call(this);
   var i = 8, angle = (Math.PI * 2) / i;
   var x0 = Math.random() * 320, y0 = Math.random() * 200;
   var particles;
@@ -229,10 +229,10 @@ function Shape(material) {
   this.setMaterial(material);
 }
 
-Shape.prototype = Object.create(newton.Body.prototype);
+Shape.prototype = Object.create(Newton.Body.prototype);
 
-var rock = newton.Material({ mass: 3, friction: 1, restitution: 0 });
-var plastic = newton.Material({ mass: 0.5, friction: 0.8, restitution: 0.5 });
+var rock = Newton.Material({ mass: 3, friction: 1, restitution: 0 });
+var plastic = Newton.Material({ mass: 0.5, friction: 0.8, restitution: 0.5 });
 
 renderer.render(sim);
 renderer.viewport(0, 0, 500, 500);
@@ -241,8 +241,8 @@ for (var i = 0; i < 30; i++) {
   sim.add(new Shape(rock), 'rocks');
   sim.add(new Shape(plastic), 'plastics');
 }
-sim.add(newton.BoxConstraint(0, 0, 320, 200));
-sim.add(newton.LinearGravity(0, 1, 1));
+sim.add(Newton.BoxConstraint(0, 0, 320, 200));
+sim.add(Newton.LinearGravity(0, 1, 1));
 sim.start();
 ```
 [Try it out.](#)
@@ -282,16 +282,16 @@ automatically remove itself.
 
 ```js
 function SquishyBall(x, y, r) {
-  newton.Body.call(this);
+  Newton.Body.call(this);
 
   for (var p = 0; p < 10; p++) {
     var x1 = x + Math.cos(p / 10 * Math.PI * 2);
     var y1 = y + Math.sin(p / 10 * Math.PI * 2);
-    this.add(newton.Particle(x1, y1));
+    this.add(Newton.Particle(x1, y1));
   }
 }
 
-SquishyBall.prototype = Object.create(newton.Body);
+SquishyBall.prototype = Object.create(Newton.Body);
 
 var body = new SquishyBall(0, 0, 20);
 ```
@@ -302,30 +302,30 @@ out of smaller, simpler parts.
 ### Behavior demo
 
 ```js
-var sim = newton.Simulator();
+var sim = Newton.Simulator();
 var display = document.getElementById('display');
-var renderer = newton.GLRenderer(display);
+var renderer = Newton.GLRenderer(display);
 
 function BoobyTrap(x, y) {
   var x1, top, bottom, lastTop, lastBottom;
-  newton.Body.call(this);
+  Newton.Body.call(this);
   this.time = 0;
-  this.pin = newton.Particle(x, y);
+  this.pin = Newton.Particle(x, y);
   this.add(pin);
   for (var i = 0; i < 4; i++) {
     x1 = (i - 1.5) * 30;
-    top = this.add(newton.Particle(x1, y + 40));
-    bottom = this.add(newton.Particle(x1, y + 70));
-    this.add(newton.DistanceConstraint(top, bottom));
-    if (i == 1 || i == 2) this.add(newton.DistanceConstraint(this.pin, top));
-    if (lastTop) this.add(newton.DistanceConstraint(lastTop, top));
-    if (lastBottom) this.add(newton.DistanceConstraint(lastBottom, bottom));
+    top = this.add(Newton.Particle(x1, y + 40));
+    bottom = this.add(Newton.Particle(x1, y + 70));
+    this.add(Newton.DistanceConstraint(top, bottom));
+    if (i == 1 || i == 2) this.add(Newton.DistanceConstraint(this.pin, top));
+    if (lastTop) this.add(Newton.DistanceConstraint(lastTop, top));
+    if (lastBottom) this.add(Newton.DistanceConstraint(lastBottom, bottom));
     lastTop = top;
     lastBottom = bottom;
   }
 }
 
-BoobyTrap.prototype = Object.create(newton.Body.prototype);
+BoobyTrap.prototype = Object.create(Newton.Body.prototype);
 
 BoobyTrap.prototype.launch = function() {
   this.pin.remove();
@@ -343,7 +343,7 @@ sim.on('step', function checkTime(time, sim) {
 });
 
 sim.add(bt);
-sim.add(newton.BoxConstraint(0, 0, 500, 500));
+sim.add(Newton.BoxConstraint(0, 0, 500, 500));
 sim.start();
 ```
 [Try it out.](#)
@@ -357,7 +357,7 @@ dangerous ones.
 ### Input
 
 ```js
-var renderer = newton.GLRenderer();
+var renderer = Newton.GLRenderer();
 
 renderer.on('pointerdown', function(x, y) {
   var body = sim.hitList(x, y)[0];
@@ -368,7 +368,7 @@ renderer.on('pointerdown', function(x, y) {
 ## Output (custom renderers)
 
 ```js
-var sim = newton.Simulator();
+var sim = Newton.Simulator();
 
 render();
 sim.start();
