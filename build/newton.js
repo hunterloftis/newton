@@ -50,69 +50,15 @@ this["Newton"] =
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  Simulator: __webpack_require__(/*! ./lib/simulator */ 8),
+	  Simulator: __webpack_require__(/*! ./lib/simulator */ 9),
 	  GLRenderer: __webpack_require__(/*! ./lib/renderers/gl-renderer */ 7),
-	  Particle: __webpack_require__(/*! ./lib/particle */ 4),
-	  Vector: __webpack_require__(/*! ./lib/vector */ 1)
+	  Particle: __webpack_require__(/*! ./lib/particle */ 5),
+	  Vector: __webpack_require__(/*! ./lib/vector */ 3)
 	};
 
 
 /***/ },
 /* 1 */
-/*!***********************!*\
-  !*** ./lib/vector.js ***!
-  \***********************/
-/***/ function(module, exports, __webpack_require__) {
-
-	function Vector(x, y) {
-	  if (!(this instanceof Vector)) return new Vector(x, y);
-	  this.x = x;
-	  this.y = y;
-	}
-	
-	module.exports = Vector;
-
-
-/***/ },
-/* 2 */
-/*!****************************!*\
-  !*** ./lib/accumulator.js ***!
-  \****************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	function Accumulator(interval, max) {
-	  this._interval = interval;
-	  this._max = max;
-	  this._total = 0;
-	  this._lastTime = 0;
-	  this._startTime = Date.now();
-	}
-	
-	Accumulator.prototype.freeze = function() {
-	  this._time = Date.now();
-	  this._buffer = this._time - this._lastTime;
-	  this._lastTime = this._time;
-	
-	  return this._interval;
-	};
-	
-	Accumulator.prototype.next = function() {
-	  if (this._buffer > this._max) {
-	    this._buffer = 0;
-	    return false;
-	  }
-	  if (this._buffer < this._interval) return false;
-	
-	  this._total += this._interval;
-	  this._buffer -= this._interval;
-	  return this._total;
-	};
-	
-	module.exports = Accumulator;
-
-
-/***/ },
-/* 3 */
 /*!**********************!*\
   !*** ./lib/frame.js ***!
   \**********************/
@@ -168,44 +114,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 4 */
-/*!*************************!*\
-  !*** ./lib/particle.js ***!
-  \*************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var Vector = __webpack_require__(/*! ./vector */ 1);
-	
-	function Particle(x, y, size) {
-	  if (!(this instanceof Particle)) return new Particle(x, y, size);
-	  this.position = Vector(x, y);
-	}
-	
-	Particle.prototype.type = 'Particle';
-	
-	module.exports = Particle;
-
-
-/***/ },
-/* 5 */
-/*!*************************!*\
-  !*** ./lib/renderer.js ***!
-  \*************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	function Renderer() {
-	
-	}
-	
-	Renderer.prototype.render = function(sim) {
-	  this._sim = sim;
-	};
-	
-	module.exports = Renderer;
-
-
-/***/ },
-/* 6 */
+/* 2 */
 /*!**********************************************!*\
   !*** ./lib/renderers/gl-renderer/gl-util.js ***!
   \**********************************************/
@@ -341,15 +250,107 @@ this["Newton"] =
 
 
 /***/ },
+/* 3 */
+/*!***********************!*\
+  !*** ./lib/vector.js ***!
+  \***********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Vector(x, y) {
+	  if (!(this instanceof Vector)) return new Vector(x, y);
+	  this.x = x;
+	  this.y = y;
+	}
+	
+	module.exports = Vector;
+
+
+/***/ },
+/* 4 */
+/*!****************************!*\
+  !*** ./lib/accumulator.js ***!
+  \****************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Accumulator(interval, max) {
+	  this._interval = interval;
+	  this._max = max;
+	  this._total = 0;
+	  this._lastTime = 0;
+	  this._startTime = Date.now();
+	}
+	
+	Accumulator.prototype.freeze = function() {
+	  this._time = Date.now();
+	  this._buffer = this._time - this._lastTime;
+	  this._lastTime = this._time;
+	
+	  return this._interval;
+	};
+	
+	Accumulator.prototype.next = function() {
+	  if (this._buffer > this._max) {
+	    this._buffer = 0;
+	    return false;
+	  }
+	  if (this._buffer < this._interval) return false;
+	
+	  this._total += this._interval;
+	  this._buffer -= this._interval;
+	  return this._total;
+	};
+	
+	module.exports = Accumulator;
+
+
+/***/ },
+/* 5 */
+/*!*************************!*\
+  !*** ./lib/particle.js ***!
+  \*************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var Vector = __webpack_require__(/*! ./vector */ 3);
+	
+	function Particle(x, y, size) {
+	  if (!(this instanceof Particle)) return new Particle(x, y, size);
+	  this.position = Vector(x, y);
+	}
+	
+	Particle.prototype.type = 'Particle';
+	
+	module.exports = Particle;
+
+
+/***/ },
+/* 6 */
+/*!*************************!*\
+  !*** ./lib/renderer.js ***!
+  \*************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	function Renderer() {
+	
+	}
+	
+	Renderer.prototype.render = function(sim) {
+	  this._sim = sim;
+	};
+	
+	module.exports = Renderer;
+
+
+/***/ },
 /* 7 */
 /*!********************************************!*\
   !*** ./lib/renderers/gl-renderer/index.js ***!
   \********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Renderer = __webpack_require__(/*! ../../renderer */ 5);
-	var GLUtil = __webpack_require__(/*! ./gl-util */ 6);
-	var onFrame = __webpack_require__(/*! ../../frame */ 3).onFrame;
+	var Renderer = __webpack_require__(/*! ../../renderer */ 6);
+	var GLUtil = __webpack_require__(/*! ./gl-util */ 2);
+	var onFrame = __webpack_require__(/*! ../../frame */ 1).onFrame;
+	var PointRenderer = __webpack_require__(/*! ./point-renderer */ 8);
 	
 	var MAX_PARTICLES = 10000;
 	
@@ -357,17 +358,9 @@ this["Newton"] =
 	  if (!(this instanceof GLRenderer)) return new GLRenderer(el);
 	
 	  this._drawFrame = this._drawFrame.bind(this);
-	  this._sim = undefined;
-	  this._el = el;
 	  this._gl = GLUtil.getGLContext(el);
-	  this._verticesAlloc = [];
-	  this._sizesAlloc = [];
 	  this._viewportArray = new Float32Array([el.width, el.height]);
-	  this._vArray = new Float32Array(MAX_PARTICLES * 3);
-	  this._sArray = new Float32Array(MAX_PARTICLES);
-	  this._particleTexture = GLUtil.createCircleTexture(this._gl);
-	  this._particleShader = GLUtil.createCircleShader(this._gl, this._viewportArray);
-	  this._particlePositionBuffer = this._gl.createBuffer();
+	  this._pointRenderer = new PointRenderer(this._gl, this._viewportArray);
 	}
 	
 	GLRenderer.prototype = Object.create(Renderer.prototype);
@@ -379,7 +372,7 @@ this["Newton"] =
 	
 	GLRenderer.prototype._drawFrame = function() {
 	  this._clear();
-	  this._drawParticles(this._sim.getParticles());
+	  this._pointRenderer.draw(this._sim.getParticles());
 	  onFrame(this._drawFrame);
 	};
 	
@@ -388,65 +381,169 @@ this["Newton"] =
 	  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	};
 	
-	GLRenderer.prototype._drawParticles = function(particles) {
-	  var gl = this._gl;
-	  var vertices = this._verticesAlloc;
-	  var sizes = this._sizesAlloc;
-	  var vArray = this._vArray;
-	  var sArray = this._sArray;
-	  var particleShader = this._particleShader;
-	
-	  vertices.length = 0;
-	  sizes.length = 0;
-	
-	  var particle;
-	
-	  for (var i = 0, ilen = particles.length; i < ilen; i++) {
-	    particle = particles[i];
-	    vertices.push(particle.position.x, particle.position.y, 0);
-	    sizes.push(particle.size < 8 ? particle.size : 8);
-	  }
-	
-	  if (vertices.length > vArray.length) throw new Error('vArray too small to hold vertices');
-	  vArray.set(vertices, 0);
-	  if (sizes.length > sArray.length) throw new Error('sArray too small to hold sizes');
-	  sArray.set(sizes, 0);
-	
-	  gl.activeTexture(gl.TEXTURE0);
-	  gl.bindTexture(gl.TEXTURE_2D, this._particleTexture);
-	
-	  // TODO: necessary?
-	  gl.useProgram(this.particleShader);
-	
-	  // position buffer
-	  gl.bindBuffer(gl.ARRAY_BUFFER, this._particlePositionBuffer);
-	  gl.bufferData(gl.ARRAY_BUFFER, vArray, gl.STATIC_DRAW);
-	  gl.vertexAttribPointer(particleShader.attributes.position, 3, gl.FLOAT, false, 0, 0);
-	  gl.enableVertexAttribArray(particleShader.attributes.position);
-	
-	  // size buffer
-	  gl.bindBuffer(gl.ARRAY_BUFFER, this._particleSizeBuffer);
-	  gl.bufferData(gl.ARRAY_BUFFER, sArray, gl.STATIC_DRAW);
-	  gl.vertexAttribPointer(particleShader.attributes.size, 1, gl.FLOAT, false, 0, 0);
-	  gl.enableVertexAttribArray(particleShader.attributes.size);
-	
-	  gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
-	};
-	
 	module.exports = GLRenderer;
 	
 
 
 /***/ },
 /* 8 */
+/*!*****************************************************!*\
+  !*** ./lib/renderers/gl-renderer/point-renderer.js ***!
+  \*****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var GLUtil = __webpack_require__(/*! ./gl-util */ 2);
+	
+	var MAX_POINTS = 10000;
+	
+	var VERTEX_SHADER = [
+	  'uniform vec2 viewport;',
+	  'attribute vec3 position;',
+	  'attribute float size;',
+	
+	  'void main() {',
+	    'vec2 scaled = ((position.xy / viewport) * 2.0) - 1.0;',
+	    'vec2 flipped = vec2(scaled.x, -scaled.y);',
+	
+	    'gl_Position = vec4(flipped, 0, 1);',
+	    'gl_PointSize = size + 1.0;',
+	  '}'
+	].join('\n');
+	
+	var FRAGMENT_SHADER = [
+	  'precision mediump float;',
+	  'uniform sampler2D texture;',
+	
+	  'void main() {',
+	    'gl_FragColor = texture2D(texture, gl_PointCoord);',
+	  '}'
+	].join('\n');
+	
+	function PointRenderer(gl, viewportArray) {
+	  this._gl = gl;
+	  this._viewportArray = viewportArray;
+	  this._verticesCache = [];
+	  this._sizesCache = [];
+	  this._vArray = new Float32Array(MAX_POINTS * 3);
+	  this._sArray = new Float32Array(MAX_POINTS);
+	  this._texture = createCircleTexture(gl);
+	  this._shader = createCircleShader(gl, viewportArray);
+	  this._positionBuffer = gl.createBuffer();
+	  this._sizeBuffer = gl.createBuffer();
+	}
+	
+	PointRenderer.prototype.draw = function(points) {
+	  var gl = this._gl;
+	  var vertices = this._verticesCache;
+	  var sizes = this._sizesCache;
+	  var vArray = this._vArray;
+	  var sArray = this._sArray;
+	  var attributes = this._shader.attributes;
+	  var point;
+	
+	  vertices.length = 0;
+	  sizes.length = 0;
+	
+	  for (var i = 0; i < points.length; i++) {
+	    point = points[i];
+	    vertices.push(particle.position.x, particle.position.y, 0);
+	    sizes.push(8);
+	  }
+	
+	  vArray.set(vertices, 0);
+	  sArray.set(sizes, 0);
+	
+	  gl.activeTexture(gl.TEXTURE0);
+	  gl.bindTexture(gl.TEXTURE_2D, this._texture);
+	
+	  gl.useProgram(this._shader);
+	
+	  // position buffer
+	  gl.bindBuffer(gl.ARRAY_BUFFER, this._positionBuffer);
+	  gl.bufferData(gl.ARRAY_BUFFER, vArray, gl.STATIC_DRAW);
+	  gl.vertexAttribPointer(attributes.position, 3, gl.FLOAT, false, 0, 0);
+	  gl.enableVertexAttribArray(attributes.position);
+	
+	  // size buffer
+	  gl.bindBuffer(gl.ARRAY_BUFFER, this._sizeBuffer);
+	  gl.bufferData(gl.ARRAY_BUFFER, sArray, gl.STATIC_DRAW);
+	  gl.vertexAttribPointer(attributes.size, 1, gl.FLOAT, false, 0, 0);
+	  gl.enableVertexAttribArray(attributes.size);
+	
+	  gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+	};
+	
+	module.exports = PointRenderer;
+	
+	function createCircleTexture(gl, size) {
+	  size = size || 128;
+	
+	  var canvas = document.createElement('canvas');
+	  canvas.width = canvas.height = size;
+	  var ctx = canvas.getContext('2d');
+	  var rad = size * 0.5;
+	
+	  ctx.beginPath();
+	  ctx.arc(rad, rad, rad, 0, Math.PI * 2, false);
+	  ctx.closePath();
+	  ctx.fillStyle = '#fff';
+	  ctx.fill();
+	
+	  return GLUtil.createTexture(gl, canvas);
+	}
+	
+	function createCircleShader(gl, viewportArray) {
+	  var vs = gl.createShader(gl.VERTEX_SHADER);
+	  var fs = gl.createShader(gl.FRAGMENT_SHADER);
+	
+	  gl.shaderSource(vs, VERTEX_SHADER);
+	  gl.shaderSource(fs, FRAGMENT_SHADER);
+	
+	  gl.compileShader(vs);
+	  gl.compileShader(fs);
+	
+	  if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+	    console.error('error compiling VS shaders:', gl.getShaderInfoLog(vs));
+	    throw new Error('shader failure');
+	  }
+	
+	  if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+	    console.error('error compiling FS shaders:', gl.getShaderInfoLog(fs));
+	    throw new Error('shader failure');
+	  }
+	
+	  var program = gl.createProgram();
+	
+	  gl.attachShader(program, vs);
+	  gl.attachShader(program, fs);
+	  gl.linkProgram(program);
+	
+	  program.uniforms = {
+	    viewport: gl.getUniformLocation(program, 'viewport')
+	  };
+	
+	  program.attributes = {
+	    position: gl.getAttribLocation(program, 'position'),
+	    size: gl.getAttribLocation(program, 'size')
+	  };
+	
+	  gl.useProgram(program);
+	  gl.uniform2fv(program.uniforms.viewport, viewportArray);
+	
+	  return program;
+	}
+
+
+/***/ },
+/* 9 */
 /*!**************************!*\
   !*** ./lib/simulator.js ***!
   \**************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Emitter = __webpack_require__(/*! eventemitter2 */ 9);
-	var onFrame = __webpack_require__(/*! ./frame */ 3).onFrame;
-	var Accumulator = __webpack_require__(/*! ./accumulator */ 2);
+	var Emitter = __webpack_require__(/*! eventemitter2 */ 10);
+	var onFrame = __webpack_require__(/*! ./frame */ 1).onFrame;
+	var Accumulator = __webpack_require__(/*! ./accumulator */ 4);
 	
 	function Simulator() {
 	  if (!(this instanceof Simulator)) return new Simulator();
@@ -496,7 +593,7 @@ this["Newton"] =
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /*!**********************************************!*\
   !*** ./~/eventemitter2/lib/eventemitter2.js ***!
   \**********************************************/

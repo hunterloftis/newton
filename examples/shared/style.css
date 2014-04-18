@@ -24,7 +24,6 @@ a:hover {
   margin-left: auto;
   margin-right: auto;
   display: block;
-  width: 1280px;
 }
 
 #display {
@@ -34,6 +33,7 @@ a:hover {
   cursor: crosshair;
   width: 1000px;
   height: 600px;
+  margin: 0 auto;
 }
 
 .caption {
