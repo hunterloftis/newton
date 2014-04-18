@@ -38,7 +38,9 @@ If you'd like to help, please get in touch!
 
 ## Contributing quick start
 
+`make build && open examples/guide_movement.html`
+
 - `make watch`: builds into `build/newton.js` and watches for changes
 - `make test`: runs unit tests
 - `make dist`: builds a minified distribution version
-- `open examples/guide_movement.html`: check out the examples
+

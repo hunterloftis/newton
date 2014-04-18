@@ -9,11 +9,12 @@
   },
   "devDependencies": {
     "matcha": "~0.4.1",
-    "watchify": "^0.7.0",
+    "watchify": "^0.6.4",
     "uglify-js": "^2.4.13",
     "mocha": "^1.18.2",
     "chai": "^1.9.1",
-    "browserify": "^3.43.0"
+    "browserify": "^3.43.0",
+    "eventemitter2": "^0.4.13"
   },
   "author": "Hunter Loftis <hunter@hunterloftis.com>",
   "license": "MIT",
