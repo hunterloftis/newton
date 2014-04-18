@@ -90,7 +90,15 @@ describe('Particle', function() {
 
   });
 
-  describe('.correct()', function() {
+  describe('getPoint()', function() {
+    var p = Particle(3, 4);
+
+    it('should return an object with x and y values', function() {
+      assert.deepEqual(p.getPoint(), { x: 3, y: 4 });
+    });
+  });
+
+  describe('.move()', function() {
 
     it('should yield (4, 6) from (1, 2) + (3, 4)', function() {
       var p = Particle(1, 2);
