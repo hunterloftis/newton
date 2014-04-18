@@ -11,14 +11,17 @@
 
 ### Creating a simulation
 
+An empty simulation.
+
 ```js
 var sim = Newton.Simulator();
 
 sim.start();
 ```
-An empty simulation.
 
 ### Adding particles
+
+Particles are the first basic elements of Newton.
 
 ```js
 var sim = Newton.Simulator();
@@ -27,9 +30,15 @@ var particle = Newton.Particle(10, 20);  // x, y
 sim.add(particle);
 sim.start();
 ```
-Particles are the first basic elements of Newton.
 
 ### Rendering
+
+Newton ships with a WebGL-based renderer for development and debugging.
+To use it, you'll need to create a canvas element on your page.
+In this case, we've called our canvas `#display`.
+
+You can render anyway you like - canvas, webgl, DOM, SVG, etc.
+All renderers support a simple interface.
 
 ```js
 var sim = Newton.Simulator();
@@ -38,14 +47,12 @@ var renderer = Newton.GLRenderer(display);
 
 renderer.render(sim);
 ```
-Newton ships with a WebGL-based renderer for development and debugging.
-To use it, you'll need to create a canvas element on your page.
-In this case, we've called our canvas `#display`.
-
-You can render anyway you like - canvas, webgl, DOM, SVG, etc.
-All renderers support a simple interface.
 
 ### Basics demo
+
+As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
+
+[Try it out.](http://hunterloftis.github.io/newton/examples/guide_basics.html)
 
 ```js
 var sim = Newton.Simulator();
@@ -58,40 +65,50 @@ renderer.render(sim);
 sim.add(particle);
 sim.start();
 ```
-[Try it out.](http://hunterloftis.github.io/newton/examples/guide_basics.html)
-
-As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
 
 ## Movement
 
 ### Adding forces
 
-```js
-var gravity = Newton.LinearForce(7, Math.PI * 1.5);   // strength, direction
-sim.add(gravity);
-```
 Forces are the second basic elements of Newton.
 By combining them with Particles, we can create movement.
 
 Newton comes with a library of Forces, to which you can also add your own.
 Force implementations tend to be very short (< 30 lines).
 
+```js
+var gravity = Newton.LinearForce(7, Math.PI * 1.5);   // strength, direction
+sim.add(gravity);
+```
+
 ### Adding constraints
 
-```js
-var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
-sim.add(container);
-```
 Constraints are the third basic elements of Newton.
 They create rules that Particles follow - for example,
 rules about distance can create springs,
 rules about location can create containers,
 and rules about angles can create hinges.
 
-The BoxConstraint above is a location rule that keeps a particle within a rectangular area.
+BoxConstraint is a location constraint that keeps a particle within a rectangular area.
 Newton comes with a library of Constraints to which you can also add your own custom implementations.
 
+```js
+var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
+sim.add(container);
+```
 ### Grouping into bodies
+
+When building a simulation, you frequently want to refer to
+a group of particles, forces, and constraints as a single entity.
+Newton uses the concept of *bodies* for grouping elements.
+
+Sub-bodies can be added to bodies to build up more complex entities.
+
+Keep in mind, bodies are just for bookkeeping -
+arrays of logically grouped particles, forces,
+and constraints so your code can be readable.
+They have no effect on collisions or any other part of the simulation.
+`sim.add(body)` just calls `sim.add(this)` on each element within `body`.
 
 ```js
 var string = Newton.Body();
@@ -112,19 +129,12 @@ for (var i = 0; i < 25; i++) {
   prev = current;
 }
 ```
-When building a simulation, you frequently want to refer to
-a group of particles, forces, and constraints as a single entity.
-Newton uses the concept of *bodies* for grouping elements.
-
-Sub-bodies can be added to bodies to build up more complex entities.
-
-Keep in mind, bodies are just for bookkeeping -
-arrays of logically grouped particles, forces,
-and constraints so your code can be readable.
-They have no effect on collisions or any other part of the simulation.
-`sim.add(body)` just calls `sim.add(this)` on each element within `body`.
 
 ### Movement demo
+
+Now things are getting interesting. Our little string has come to life!
+
+[Try it out.](http://hunterloftis.github.io/newton/examples/guide_movement.html)
 
 ```js
 var sim = Newton.Simulator();
@@ -160,9 +170,6 @@ sim.add(container);
 
 sim.start();
 ```
-[Try it out.](http://hunterloftis.github.io/newton/examples/guide_movement.html)
-
-Now things are getting interesting. Our little string has come to life!
 
 ## Behavior
 
