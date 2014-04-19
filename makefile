@@ -11,11 +11,15 @@ build: clean install
 watch: clean install
 	node_modules/.bin/watchify -d --standalone Newton index.js -o build/newton.js
 
-dist: install
-	-rm -rf dist
-	mkdir -p dist
-	node_modules/.bin/browserify --standalone Newton index.js > dist/newton.js
-	cat dist/newton.js | node_modules/.bin/uglifyjs > dist/newton.min.js
+publish: install test
+	@if [ "$(VERSION)" == "" ]; then echo "Error: try make publish VERSION=a.b.c\n"; exit 1; fi
+	npm version $(VERSION)
+	mkdir -p dist/$(VERSION)
+	mkdir -p dist/current
+	node_modules/.bin/browserify --standalone Newton index.js > dist/$(VERSION)/newton.js
+	cat dist/newton.js | node_modules/.bin/uglifyjs > dist/$(VERSION)/newton.min.js
+	cp dist/$(VERSION)/* dist/current/
+	sed -i '' 's/Download \(.*\)/Download \($(VERSION)\)/g' index.html
 
 test: install
 	npm test
