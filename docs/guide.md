@@ -1,4 +1,4 @@
-# Getting Started with Newton
+# Getting Started
 
 ## The basics
 
