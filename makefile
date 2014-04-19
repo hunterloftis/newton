@@ -21,6 +21,10 @@ publish: install test
 	cp dist/$(VERSION)/* dist/current/
 	sed -i '' 's/Download .*)/Download \($(VERSION)\)/g' index.html
 	npm publish
+	make pages
+
+pages:
+	git push github master:gh-pages
 
 test: install
 	npm test
