@@ -4,8 +4,8 @@
 
 ### Install the library
 
-- [newton.js](hunterloftis.github.io/newton/dist/newton.js)
-- [newton.min.js](hunterloftis.github.io/newton/dist/newton.min.js)
+- [newton.js](http://hunterloftis.github.io/newton/dist/current/newton.js)
+- [newton.min.js](http://hunterloftis.github.io/newton/dist/current/newton.min.js)
 
 **npm:** `npm install newton`
 
