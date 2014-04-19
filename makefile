@@ -17,7 +17,7 @@ publish: install test
 	mkdir -p dist/$(VERSION)
 	mkdir -p dist/current
 	node_modules/.bin/browserify --standalone Newton index.js > dist/$(VERSION)/newton.js
-	cat dist/newton.js | node_modules/.bin/uglifyjs > dist/$(VERSION)/newton.min.js
+	cat dist/$(VERSION)/newton.js | node_modules/.bin/uglifyjs > dist/$(VERSION)/newton.min.js
 	cp dist/$(VERSION)/* dist/current/
 	sed -i '' 's/Download .*)/Download \($(VERSION)\)/g' index.html
 	npm publish
