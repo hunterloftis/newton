@@ -20,6 +20,7 @@ publish: install test
 	cat dist/$(VERSION)/newton.js | node_modules/.bin/uglifyjs > dist/$(VERSION)/newton.min.js
 	cp dist/$(VERSION)/* dist/current/
 	sed -i '' 's/Download .*)/Download \($(VERSION)\)/g' index.html
+	git add --all dist
 	npm publish
 	make pages
 
