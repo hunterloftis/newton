@@ -177,7 +177,7 @@ sim.start();
 
 ## Behavior
 
-### Creating custom body factories
+### Body factories
 
 ```js
 function SquishyBall(x, y, r) {
