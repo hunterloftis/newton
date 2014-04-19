@@ -1,6 +1,6 @@
 {
   "name": "newton",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "index.js",
   "description": "A playful, particle-based physics engine designed from the ground up for JavaScript.",
   "repository": {
