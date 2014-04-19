@@ -1,68 +1,84 @@
 <!doctype html>
-<!--
-
-  Instructions:
-
-  - Save this file.
-  - Replace "hunterloftis" with your GitHub username.
-  - Replace "newton" with your GitHub repo name.
-  - Replace "Newton" with your project name.
-  - Upload this file (or commit to GitHub Pages).
-
-  Customize as you see fit!
-
--->
 <html>
 <head>
-  <meta charset='utf-8'>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width">
+  <title>Newton - Playful physics</title>
+  <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300' rel='stylesheet' type='text/css'>
+  <style type='text/css'>
 
-  <title>Newton</title>
+    * {
+      box-sizing: border-box;
+    }
 
-  <!-- Flatdoc -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script src='http://rstacruz.github.io/flatdoc/v/0.8.0/legacy.js'></script>
-  <script src='http://rstacruz.github.io/flatdoc/v/0.8.0/flatdoc.js'></script>
+    body {
+      font-family: 'helvetica neue', helvetica, arial, sans-serif;
+      font-weight: 200;
+    }
 
-  <!-- Flatdoc theme -->
-  <link  href='http://rstacruz.github.io/flatdoc/v/0.8.0/theme-white/style.css' rel='stylesheet'>
-  <script src='http://rstacruz.github.io/flatdoc/v/0.8.0/theme-white/script.js'></script>
+    .Landing {
+      background: #047070;
+    }
 
-  <!-- Meta -->
-  <meta content="Newton" property="og:title">
-  <meta content="Newton description goes here." name="description">
+    .Hero {
+      width: 500px;
+      margin: 200px auto 0 auto;
+      text-align: center;
+    }
 
-  <!-- Initializer -->
-  <script>
-    Flatdoc.run({
-      fetcher: Flatdoc.github('hunterloftis/newton')
-    });
-  </script>
+    .Hero-logo {
+      color: #fff;
+      font-family: 'Poiret One';
+      font-size: 72px;
+      padding: 0;
+      margin: 0;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .Hero-subtitle {
+      color: #fff;
+      font-family: 'Roboto Condensed';
+      font-size: 24px;
+      font-weight: 300;
+      line-height: 1.5;
+      margin: 20px 0;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    }
+
+    .Button {
+      background: #CACC42;
+      color: #000;
+      display: inline-block;
+      padding: 20px 20px;
+      margin: 0 3px;
+      text-decoration: none;
+      border-radius: 1px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      font-weight: 500;
+    }
+
+    .Fork {
+      position: absolute;
+      top: 0;
+      right: 0;
+      border: 0;
+      width: 149px;
+      height: 149px;
+    }
+
+  </style>
 </head>
-<body role='flatdoc'>
+<body class='Landing'>
 
-  <div class='header'>
-    <div class='left'>
-      <h1>Newton</h1>
-      <ul>
-        <li><a href='http://hunterloftis.github.io/newton/docs/guide.html'>Getting started guide</a></li>
-        <li><a href='https://github.com/hunterloftis/newton'>View on GitHub</a></li>
-        <li><a href='https://github.com/hunterloftis/newton/issues'>Issues</a></li>
-      </ul>
-    </div>
-    <div class='right'>
-      <!-- GitHub buttons: see http://ghbtns.com -->
-      <iframe src="http://ghbtns.com/github-btn.html?user=hunterloftis&amp;repo=newton&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
-    </div>
-  </div>
+<main class='Hero'>
+  <h1 class='Hero-logo'>Newton</h1>
+  <h2 class='Hero-subtitle'>A playful, particle-based physics engine designed from the ground up for JavaScript.</h2>
+  <a class='Button' href='https://raw.githubusercontent.com/hunterloftis/newton/0.2.1/dist/newton.js'>Download (0.2.1)</a>
+  <a class='Button' href='http://hunterloftis.github.io/newton/docs'>Documentation</a>
+</main>
 
-  <div class='content-root'>
-    <div class='menubar'>
-      <div class='menu section' role='flatdoc-menu'></div>
-    </div>
-    <div role='flatdoc-content' class='content'></div>
-  </div>
+<a href="https://github.com/hunterloftis/newton">
+  <img class='Fork' src="http://aral.github.com/fork-me-on-github-retina-ribbons/right-graphite@2x.png" alt="Fork me on GitHub">
+</a>
 
 </body>
 </html>
