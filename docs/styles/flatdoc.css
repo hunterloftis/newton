@@ -4,6 +4,14 @@ body {
   background: #f3f6fb;
 }
 
+a {
+  color: #3199B6;
+}
+
 .menubar {
   background: #fff;
+}
+
+.menu a {
+  color: #3199B6;
 }
