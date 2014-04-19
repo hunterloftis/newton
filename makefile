@@ -21,6 +21,7 @@ publish: install test
 	cp dist/$(VERSION)/* dist/current/
 	sed -i '' 's/Download .*)/Download \($(VERSION)\)/g' index.html
 	git add --all dist
+	git add index.html
 	git commit -m 'publishing version $(VERSION)'
 	npm publish
 	make pages
