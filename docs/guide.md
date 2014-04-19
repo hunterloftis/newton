@@ -53,7 +53,7 @@ renderer.render(sim);
 As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
 
 <p>
-  <iframe src="http://jsbin.com/xidod/2" style="width: 100%; height: 520px;"></iframe>
+  <iframe src="http://jsbin.com/xidod/4" style="width: 100%; height: 520px;"></iframe>
 </p>
 
 ```js
@@ -137,7 +137,7 @@ for (var i = 0; i < 25; i++) {
 Now things are getting interesting. Our little string has come to life!
 
 <p>
-  <iframe src="http://jsbin.com/jiduv/2" style="width: 100%; height: 520px;"></iframe>
+  <iframe src="http://jsbin.com/jiduv/4" style="width: 100%; height: 520px;"></iframe>
 </p>
 
 ```js
