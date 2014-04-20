@@ -110,20 +110,20 @@ Keep in mind, Bodies are just for bookkeeping - logical groupings so your code c
 They have no impact on the simulation.
 
 ```js
-var string = Newton.Body();
+var rope = Newton.Body();
 var prev, current;
 
-// build a string to dangle
+// build a rope to dangle
 for (var i = 0; i < 25; i++) {
 
-  // add a particle to the string
-  current = string.add(Newton.Particle(500 + i * 20, 180));
+  // add a particle to the rope
+  current = rope.add(Newton.Particle(500 + i * 20, 180));
 
   // a PinConstraint pins the first Particle in place
-  if (!prev) string.add(Newton.PinConstraint(current));
+  if (!prev) rope.add(Newton.PinConstraint(current));
 
   // a RopeConstraint attaches subsequent particles to the previous particle
-  else string.add(Newton.RopeConstraint(prev, current));
+  else rope.add(Newton.RopeConstraint(prev, current));
 
   prev = current;
 }
@@ -131,7 +131,7 @@ for (var i = 0; i < 25; i++) {
 
 ### Demo: Movement
 
-Now things are getting interesting. Our little string has come to life!
+Now things are getting interesting. Our little rope has come to life!
 
 <p>
   <iframe src="http://jsbin.com/jiduv/4" style="width: 100%; height: 520px;"></iframe>
@@ -153,28 +153,28 @@ var renderer = Newton.GLRenderer(display);
 
 var gravity = Newton.LinearForce(7, Math.PI * 1.5);
 var container = Newton.BoxConstraint(0, 0, 500, 500);
-var string = Newton.Body();
+var rope = Newton.Body();
 
 var prev, current;
 
-// build a string to dangle
+// build a rope to dangle
 for (var i = 0; i < 40; i++) {
 
-  // add a particle to the string
-  current = string.add(Newton.Particle(250 + i * 11, 100));
+  // add a particle to the rope
+  current = rope.add(Newton.Particle(250 + i * 11, 100));
 
   // a PinConstraint pins the first Particle in place
-  if (!prev) string.add(Newton.PinConstraint(current));
+  if (!prev) rope.add(Newton.PinConstraint(current));
 
   // a RopeConstraint attaches subsequent particles to the previous particle
-  else string.add(Newton.RopeConstraint(prev, current));
+  else rope.add(Newton.RopeConstraint(prev, current));
 
   prev = current;
 }
 
 renderer.render(sim);
 
-sim.add(string);
+sim.add(rope);
 sim.add(gravity);
 sim.add(container);
 
@@ -185,20 +185,34 @@ sim.start();
 
 ### Body factories
 
-```js
-function SquishyBall(x, y, r) {
-  Newton.Body.call(this);
+That's a lot of typing for just making a rope.
+Instead, let's extend Newton's Body type to create a Rope constructor.
 
-  for (var p = 0; p < 10; p++) {
-    var x1 = x + Math.cos(p / 10 * Math.PI * 2);
-    var y1 = y + Math.sin(p / 10 * Math.PI * 2);
-    this.add(Newton.Particle(x1, y1));
+```js
+function Rope(x, y, length) {
+  Newton.Body.call(this);       // call Body's constructor
+
+  var segmentLength = 3;
+  var segments = length / segmentLength;
+  var prev, current;
+
+  for (var i = 0; i < segments; i++) {
+    current = this.add(Newton.Particle(x, y));
+
+    // expose a reference to the head Particle of the rope
+    if (!prev) this.head = current;
+
+    // stack particles in the same place with rope constraints between them
+    else this.add(Newton.RopeConstraint(prev, current, segmentLength));
   }
 }
 
-SquishyBall.prototype = Object.create(Newton.Body);
+// extend Body's prototype
+Rope.prototype = Object.create(Newton.Body.prototype);
 
-var body = new SquishyBall(0, 0, 20);
+var rope = new Rope(225, 10, 300);
+rope.add(Newton.PinConstraint(rope.head));
+
 ```
 Extending Body allows you to create higher-level abstractions in your simulation.
 Since Bodies can include sub-Bodies, you can compose larger components
