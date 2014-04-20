@@ -27,4 +27,16 @@ describe('Constraint', function() {
       assert.equal(c.priority, 2);
     });
   });
+
+  describe('id', function() {
+
+    it('should be unique', function() {
+      var a = Constraint();
+      var b = Constraint();
+
+      assert.ok(a.id !== b.id);
+    });
+
+  });
+
 });
