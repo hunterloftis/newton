@@ -30,11 +30,11 @@ describe('Constraint', function() {
 
   describe('id', function() {
 
-    it('should be unique', function() {
+    it('should increase', function() {
       var a = Constraint();
       var b = Constraint();
 
-      assert.ok(a.id !== b.id);
+      assert.ok(a.id < b.id);
     });
 
   });
