@@ -11,7 +11,8 @@
 
 ### Create a simulation
 
-An empty simulation.
+Newton.Simulator is responsible for *integrating Particles,* *applying Forces,* and *resolving Constraints.*
+**All the high-level and advanced functionality of Newton is based on these three simple steps.**
 
 ```js
 var sim = Newton.Simulator();
@@ -19,9 +20,10 @@ var sim = Newton.Simulator();
 sim.start();
 ```
 
-### Add particles
+### Add Particles
 
-Particles are the first basic elements of Newton.
+Newton has three building blocks: Particles, Forces, and Constraints.
+Particles are points in space that have X and Y coordinates as well as mass (size).
 
 ```js
 var sim = Newton.Simulator();
@@ -48,7 +50,7 @@ var renderer = Newton.GLRenderer(display);
 renderer.render(sim);
 ```
 
-### Demo: Basics
+### Demo: Hello, World
 
 As you can see, we're up and running - but it's a little boring with just one Particle sitting still.
 
@@ -68,49 +70,44 @@ sim.add(particle);
 sim.start();
 ```
 
-## Movement
+### Add Forces
 
-### Add forces
+Forces are the second basic element of Newton.
+Each frame, the Simulator applies Forces to Particles in order to create movement.
 
-Forces are the second basic elements of Newton.
-By combining them with Particles, we can create movement.
-
-Newton comes with a library of Forces, to which you can also add your own.
-Force implementations tend to be very short (< 30 lines).
+Newton comes with a library of Forces, and you can easily add your own.
 
 ```js
-var gravity = Newton.LinearForce(7, Math.PI * 1.5);   // strength, direction
+var gravity = Newton.LinearForce(1, Math.PI * 1.5);   // strength, direction
+
 sim.add(gravity);
 ```
 
-### Add constraints
+### Add Constraints
 
-Constraints are the third basic elements of Newton.
-They create rules that Particles follow - for example,
-rules about distance can create springs,
-rules about location can create containers,
-and rules about angles can create hinges.
+Constraints are the third basic element of Newton and are one of its most powerful features.
+
+They create rules that are applied to Particles after integration, like
+"All particles should stay within this rectangle," or "These two particles should be connected."
 
 BoxConstraint is a location constraint that keeps a particle within a rectangular area.
-Newton comes with a library of Constraints to which you can also add your own custom implementations.
+Newton comes with a library of Constraints.
 
 ```js
 var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
+
 sim.add(container);
 ```
-### Group into bodies
+### Group into Bodies
 
 When building a simulation, you frequently want to refer to
-a group of particles, forces, and constraints as a single entity.
-Newton uses the concept of *bodies* for grouping elements.
+a group of Particles, Forces, and Constraints as a single entity.
+Newton uses the concept of *Bodies* for grouping elements.
 
-Sub-bodies can be added to bodies to build up more complex entities.
+Sub-Bodies can be added to Bodies to build up more complex entities.
 
-Keep in mind, bodies are just for bookkeeping -
-arrays of logically grouped particles, forces,
-and constraints so your code can be readable.
-They have no effect on collisions or any other part of the simulation.
-`sim.add(body)` just calls `sim.add(this)` on each element within `body`.
+Keep in mind, Bodies are just for bookkeeping - logical groupings so your code can be readable.
+They have no impact on the simulation.
 
 ```js
 var string = Newton.Body();
@@ -140,8 +137,17 @@ Now things are getting interesting. Our little string has come to life!
   <iframe src="http://jsbin.com/jiduv/4" style="width: 100%; height: 520px;"></iframe>
 </p>
 
+We've given our Simulator a `solve` option.
+Newton uses an iterative, convergent solver, which means that constraints are run repeatedly
+each frame to converge at an approximate solution for the whole system.
+The `solve` option tells the Simulator which constraints are most important.
+Try changing the priority order to see how it affects the simulation.
+
 ```js
-var sim = Newton.Simulator();
+var sim = Newton.Simulator({
+  // The PinConstraint should be solved most accurately
+  solve: [ Newton.PinConstraint, Newton.BoxConstraint, Newton.RopeConstraint ]
+});
 var display = document.getElementById('display');
 var renderer = Newton.GLRenderer(display);
 

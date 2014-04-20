@@ -1,4 +1,5 @@
 .DS_Store
 node_modules
 *.log
-build
+/build
+/scratch
