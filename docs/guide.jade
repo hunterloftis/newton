@@ -1,7 +1,12 @@
 extends _layout
 
-mixin section(name, title)
-  h3 #{title}
+mixin section(level, name, title)
+  - if (level === 1)
+    h1 #{title}
+  - else if (level === 2)
+    h2 #{title}
+  - else if (level === 3)
+    h3 #{title}
     a(name=name)
 
 block nav
@@ -12,18 +17,25 @@ block nav
       li: a(href='#install') Install the library
       li: a(href='#simulation') Create a simulation
       li: a(href='#particles') Add particles
+      li: a(href='#render') Render the scene
+      li: a(href='#demo_basics') Demo
 
 block content
-  h1 Guide
+  +section(1, 'top', 'Guide')
 
-  +section('basics', 'The basics')
+  +section(2, 'basics', 'The basics')
   include guide/basics
 
-  +section('install', 'Install the library')
+  +section(3, 'install', 'Install the library')
   include guide/install
 
-  +section('simulation', 'Create a simulation')
+  +section(3, 'simulation', 'Create a simulation')
   include guide/simulation
 
-  +section('particles', 'Add particles')
+  +section(3, 'particles', 'Add particles')
   include guide/particles
+
+  +section(3, 'render', 'Render the scene')
+
+  +section(3, 'demo_basics', 'Demo')
+
