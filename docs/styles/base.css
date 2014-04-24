@@ -1,3 +1,10 @@
 body {
-  background: #ccc;
+  background: #eee;
+  font-family: 'helvetica neue', helvetica, arial, sans-serif;
+  font-weight: 200;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: 200;
 }

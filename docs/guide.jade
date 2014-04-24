@@ -1,4 +1,29 @@
 extends _layout
 
+mixin section(name, title)
+  h3 #{title}
+    a(name=name)
+
+block nav
+  h1 Guide
+  ul
+    li: a(href='#basics') The basics
+    ul
+      li: a(href='#install') Install the library
+      li: a(href='#simulation') Create a simulation
+      li: a(href='#particles') Add particles
+
 block content
-  h1 test
+  h1 Guide
+
+  +section('basics', 'The basics')
+  include guide/basics
+
+  +section('install', 'Install the library')
+  include guide/install
+
+  +section('simulation', 'Create a simulation')
+  include guide/simulation
+
+  +section('particles', 'Add particles')
+  include guide/particles

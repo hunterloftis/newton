@@ -3,5 +3,23 @@ html(lang='en')
   head
     title Newton - docs
     link(rel='stylesheet' type='text/css' href='styles/base.css')
+    link(rel='stylesheet' type='text/css' href='styles/smart-grid.css')
+
   body
-    block content
+    .container
+
+      header.row.Header
+        .columns.six
+          h1 Newton
+        .columns.six
+          a(href='#') Guide
+          a(href='#') API Reference
+          a(href='#') Github
+          a(href='#') Issues
+
+    .container
+      nav.columns.three
+        block nav
+
+      main.columns.nine
+        block content

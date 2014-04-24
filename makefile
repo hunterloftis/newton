@@ -29,8 +29,7 @@ publish: install test
 	make pages
 
 docs:
-	mkdir -p dist/docs
-	cp -r docs/styles dist/docs
+	mkdir -p dist/docs && cp -r docs/styles dist/docs
 	$(JADE) --path docs/guide.jade --pretty < docs/guide.jade > dist/docs/guide.html
 
 pages:
