@@ -1,3 +1,5 @@
+JADE = ./node_modules/.bin/jade
+
 clean:
 	-rm -rf build
 	mkdir -p build
@@ -26,10 +28,15 @@ publish: install test
 	npm publish
 	make pages
 
+docs:
+	mkdir -p dist/docs
+	cp -r docs/styles dist/docs
+	$(JADE) --path docs/guide.jade --pretty < docs/guide.jade > dist/docs/guide.html
+
 pages:
 	git push github master:gh-pages
 
 test: install
 	npm test
 
-.phony: build docs examples lib node_modules old spec
+.PHONY: build docs examples lib node_modules old spec
