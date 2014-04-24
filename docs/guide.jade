@@ -14,12 +14,18 @@ block nav
   h2= test
   ul
     li: a(href='#hello') Hello, World
-    ul
-      li: a(href='#install') Install the library
-      li: a(href='#simulation') Create a simulation
-      li: a(href='#particles') Add particles
-      li: a(href='#render') Render the scene
-      li: a(href='#demo_basics') Demo
+      ul
+        li: a(href='#install') Install the library
+        li: a(href='#simulation') Create a simulation
+        li: a(href='#particle') Add a particle
+        li: a(href='#render') Render the scene
+        li: a(href='#demo_hello') Demo: Hello, World
+    li: a(href='#basics') The basics
+      ul
+        li: a(href='#particles') Particles
+        li: a(href='#forces') Forces
+        li: a(href='#constraints') Constraints
+        li: a(href='#demo_basics') Demo: Rope
 
 block content
   +section(1, 'top', 'Guide')
@@ -30,7 +36,7 @@ block content
   +section(3, 'simulation', 'Create a simulation')
     include guide/simulation
   +section(3, 'particle', 'Add a particle')
-    include guide/particles
+    include guide/particle
   +section(3, 'render', 'Render the scene')
   +section(3, 'demo_hello', 'Demo: Hello, World')
 
