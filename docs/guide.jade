@@ -1,18 +1,19 @@
 extends _layout
 
 mixin section(level, name, title)
-  - if (level === 1)
-    h1 #{title}
-  - else if (level === 2)
-    h2 #{title}
-  - else if (level === 3)
-    h3 #{title}
-    a(name=name)
+  a(name=name)
+  case level
+    when 1: h1 #{title}
+    when 2: h2 #{title}
+    when 3: h3 #{title}
+  if block
+    block
 
 block nav
   h1 Guide
+  h2= test
   ul
-    li: a(href='#basics') The basics
+    li: a(href='#hello') Hello, World
     ul
       li: a(href='#install') Install the library
       li: a(href='#simulation') Create a simulation
@@ -23,19 +24,25 @@ block nav
 block content
   +section(1, 'top', 'Guide')
 
-  +section(2, 'basics', 'The basics')
-  include guide/basics
-
+  +section(2, 'hello', 'Hello, World')
   +section(3, 'install', 'Install the library')
-  include guide/install
-
+    include guide/install
   +section(3, 'simulation', 'Create a simulation')
-  include guide/simulation
-
-  +section(3, 'particles', 'Add particles')
-  include guide/particles
-
+    include guide/simulation
+  +section(3, 'particle', 'Add a particle')
+    include guide/particles
   +section(3, 'render', 'Render the scene')
+  +section(3, 'demo_hello', 'Demo: Hello, World')
 
-  +section(3, 'demo_basics', 'Demo')
+  +section(2, 'basics', 'The basics')
+  +section(3, 'particles', 'Particles')
+  +section(3, 'forces', 'Forces')
+  +section(3, 'constraints', 'Constraints')
+  +section(3, 'demo_basics', 'Demo: Rope')
 
+  +section(2, 'behavior', 'Behavior')
+  +section(3, 'bodies', 'Bodies')
+  +section(3, 'extending_body', 'Extending Body')
+  +section(3, 'interaction', 'Interaction')
+  +section(3, 'events', 'Events')
+  +section(3, 'demo_behavior', 'Demo: Rope Weapon')
