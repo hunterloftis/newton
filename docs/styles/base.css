@@ -29,6 +29,7 @@ h2 {
   text-transform: uppercase;
   font-family: 'Roboto';
   line-height: 0.95;
+  padding: 0 5px;
 }
 
 h3 {
