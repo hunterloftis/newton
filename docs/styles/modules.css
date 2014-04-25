@@ -4,14 +4,27 @@
 
 .Code {
   font-family: monospace;
-  background: #eee;
   padding: 1px;
+  color: #000;
+}
+
+.CodeBlock {
+  font-family: monospace;
+  padding: 0 10px;
+  color: #000;
+  font-weight: 600;
+  width: 100%;
+  overflow-x: scroll;
 }
 
 .Demo {
   width: 100%;
   height: 450px;
   border: none;
+}
+
+.Demo.is-short {
+  height: 130px;
 }
 
 .SideBar {
@@ -70,7 +83,7 @@
   }
 }
 
-@media only screen and (min-width : 768px) {
+@media only screen and (min-width : 481px) {
   .SideBar {
     display: block;
     font-size: 12px;
@@ -79,9 +92,8 @@
   }
 
   .SideBar ul {
-    margin-bottom: 10px;
     list-style-type: none;
-    margin: 0;
+    margin: 0 0 10px 0;
     padding: 0;
   }
 

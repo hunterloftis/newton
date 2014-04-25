@@ -33,9 +33,8 @@
                   <li><a href="#render">Render the scene</a></li>
                   <li><a href="#demo_hello">Demo: Hello, World</a></li>
                 </ul></a></li>
-            <li><a href="#basics">The basics
+            <li><a href="#basics">Movement
                 <ul>
-                  <li><a href="#particles">Particles</a></li>
                   <li><a href="#forces">Forces</a></li>
                   <li><a href="#constraints">Constraints</a></li>
                   <li><a href="#demo_basics">Demo: Rope</a></li>
@@ -46,7 +45,7 @@
                   <li><a href="#extending_body">Extending Body</a></li>
                   <li><a href="#interaction">Interaction</a></li>
                   <li><a href="#events">Events</a></li>
-                  <li><a href="#demo_behavior">Demo: Rope Weapon</a></li>
+                  <li><a href="#demo_behavior">Demo: Interactive Rope</a></li>
                 </ul></a></li>
           </ul>
         </nav>
@@ -54,36 +53,157 @@
           <h2>Hello, World</h2><a name="install"></a>
           <h3>Install the library</h3>
           <div class="Section-content">
-            <ul>
-              <li><a href="http://hunterloftis.github.io/newton/dist/current/newton.js">newton.js</a></li>
-              <li><a href="http://hunterloftis.github.io/newton/dist/current/newton.min.js">newton.min.js</a></li>
-            </ul>
-            <p><strong>npm:&nbsp;</strong><span class="Code">install newton</span></p>
+            <p>
+              <ul>
+                <li><a href="http://hunterloftis.github.io/newton/dist/current/newton.js">newton.js</a></li>
+                <li><a href="http://hunterloftis.github.io/newton/dist/current/newton.min.js">newton.min.js</a></li>
+              </ul>
+            </p>
+            <p>Or with npm:
+              <pre class="CodeBlock">npm install --save newton</pre>
+              <pre class="CodeBlock">var Newton = require('newton');</pre>
+            </p>
           </div><a name="simulation"></a>
           <h3>Create a simulation</h3>
           <div class="Section-content">
-            <p>This is simulation</p>
+            <p>
+              The Simulator is responsible for
+              integrating Particles, applying Forces, and resolving Constraints.
+            </p>
+            <p>
+              All the high-level and advanced functionality of Newton is based on these three simple steps.
+              
+            </p>
+            <pre class="CodeBlock">var sim = Newton.Simulator();
+sim.start();</pre>
           </div><a name="particle"></a>
-          <h3>Add a particle</h3><a name="render"></a>
-          <h3>Render the scene</h3><a name="demo_hello"></a>
+          <h3>Add a particle</h3>
+          <div class="Section-content">
+            <p>
+              Newton has three building blocks: Particles, Forces, and Constraints.
+              Particles are points in space that have X and Y coordinates as well as mass (size).
+              
+            </p>
+            <pre class="CodeBlock">var particle = Newton.Particle(10, 20);  // x, y
+sim.add(particle);
+</pre>
+          </div><a name="render"></a>
+          <h3>Render the scene</h3>
+          <div class="Section-content">
+            <p>
+              Newton ships with a WebGL-based renderer for development and debugging.
+              To use it, you'll need to create a canvas element on your page.
+              In this case, we've called our canvas `#display`.
+            </p>
+            <p>
+              You can render anyway you like - canvas, webgl, DOM, SVG, etc.
+              All renderers support a simple interface.
+              
+            </p>
+            <pre class="CodeBlock">var display = document.getElementById('display');
+var renderer = Newton.GLRenderer(display);
+renderer.render(sim);
+</pre>
+          </div><a name="demo_hello"></a>
           <h3>Demo: Hello, World</h3>
           <div class="Section-content">
+            <p>
+              As you can see, we're up and running -
+              but it's a little boring with just one Particle sitting still.
+              
+            </p>
             <iframe src="http://jsfiddle.net/hunterloftis/yDY6r/1/embedded/js,result,html" class="Demo"></iframe>
           </div><a name="basics"></a>
-          <h2>The basics</h2><a name="particles"></a>
-          <h3>Particles</h3><a name="forces"></a>
-          <h3>Forces</h3><a name="constraints"></a>
-          <h3>Constraints</h3><a name="demo_basics"></a>
+          <h2>Movement</h2><a name="forces"></a>
+          <h3>Forces</h3>
+          <div class="Section-content">
+            <p>
+              Forces are the second basic element of Newton.
+              Each frame, the Simulator applies Forces to Particles in order to create movement.
+            </p>
+            <p>
+              Newton comes with a library of Forces, and you can easily add your own.
+              
+            </p>
+            <pre class="CodeBlock">var gravity = Newton.LinearForce(1, Math.PI * 1.5);   // strength, direction
+sim.add(gravity);
+</pre>
+          </div><a name="constraints"></a>
+          <h3>Constraints</h3>
+          <div class="Section-content">
+            <p>Constraints are the third basic element of Newton and are one of its most powerful features.</p>
+            <p>
+              They create rules that are applied to Particles after integration, like
+              "All particles should stay within this rectangle," or "These two particles should be connected."
+            </p>
+            <p>
+              BoxConstraint is a location constraint that keeps a particle within a rectangular area.
+              Newton comes with a library of Constraints.
+              
+            </p>
+            <pre class="CodeBlock">var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
+sim.add(container);</pre>
+          </div><a name="demo_basics"></a>
           <h3>Demo: Rope</h3>
           <div class="Section-content">
+            <p>
+              Now things are getting interesting. Our little rope has come to life!
+              
+            </p>
             <iframe src="http://jsfiddle.net/hunterloftis/pZD5q/5/embedded/js,result,html" class="Demo"></iframe>
+            <p>
+              We've given our Simulator a `solve` option.
+              Newton uses an iterative, convergent solver, which means that constraints are run repeatedly
+              each frame to converge at an approximate solution for the whole system.
+              The `solve` option tells the Simulator which constraints are most important.
+              Try changing the priority order to see how it affects the simulation.
+            </p>
           </div><a name="behavior"></a>
           <h2>Behavior</h2><a name="bodies"></a>
-          <h3>Bodies</h3><a name="extending_body"></a>
-          <h3>Extending Body</h3><a name="interaction"></a>
+          <h3>Bodies</h3>
+          <div class="Section-content">
+            <p>
+              When building a simulation, you frequently want to refer to
+              a group of Particles, Forces, and Constraints as a single entity.
+              Newton uses the concept of *Bodies* for grouping elements.
+            </p>
+            <p>Sub-Bodies can be added to Bodies to build up more complex entities.</p>
+            <p>
+              Keep in mind, Bodies are just for bookkeeping - logical groupings so your code can be readable.
+              They have no impact on the simulation.
+              
+            </p>
+            <pre class="CodeBlock">var rope = Newton.Body();
+// ...
+rope.add(Newton.Particle(500 + i * 20, 180));
+rope.add(Newton.RopeConstraint(prev, current));
+// ...
+sim.add(rope);</pre>
+          </div><a name="extending_body"></a>
+          <h3>Extending Body</h3>
+          <div class="Section-content">
+            <p>
+              That's a lot of typing for just making a rope.
+              Instead, let's extend Newton's Body type to create a Rope constructor.
+              
+            </p>
+            <pre class="CodeBlock">function Rope(x, y, length) {
+  Newton.Body.call(this);   // call Body's constructor
+}
+
+Rope.prototype = Object.create(Newton.Body.prototype);  // extend Body's prototype
+
+var rope = new Rope(225, 10, 300);
+</pre>
+            <p>
+              Extending Body allows you to create higher-level abstractions in your simulation.
+              Since Bodies can include sub-Bodies, you can compose larger components
+              out of smaller, simpler parts.
+            </p>
+          </div><a name="interaction"></a>
           <h3>Interaction</h3><a name="events"></a>
           <h3>Events</h3><a name="demo_behavior"></a>
-          <h3>Demo: Rope Weapon</h3>
+          <h3>Demo: Interactive Rope</h3>
         </main>
       </div>
     </div>
