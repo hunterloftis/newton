@@ -1,0 +1,10 @@
+p.
+  Forces are the second basic element of Newton.
+  Each frame, the Simulator applies Forces to Particles in order to create movement.
+p.
+  Newton comes with a library of Forces, and you can easily add your own.
+
+pre.CodeBlock.
+  var gravity = Newton.LinearForce(1, Math.PI * 1.5);   // strength, direction
+  sim.add(gravity);
+

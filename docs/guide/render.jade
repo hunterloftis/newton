@@ -1,0 +1,13 @@
+p.
+  Newton ships with a WebGL-based renderer for development and debugging.
+  To use it, you'll need to create a canvas element on your page.
+  In this case, we've called our canvas `#display`.
+p.
+  You can render anyway you like - canvas, webgl, DOM, SVG, etc.
+  All renderers support a simple interface.
+
+pre.CodeBlock.
+  var display = document.getElementById('display');
+  var renderer = Newton.GLRenderer(display);
+  renderer.render(sim);
+

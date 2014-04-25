@@ -1,8 +1,10 @@
-ul
-  li: a(href='http://hunterloftis.github.io/newton/dist/current/newton.js') newton.js
-  li: a(href='http://hunterloftis.github.io/newton/dist/current/newton.min.js') newton.min.js
-
 p
-  strong npm:&nbsp;
-  span.Code install newton
+  ul
+    li: a(href='http://hunterloftis.github.io/newton/dist/current/newton.js') newton.js
+    li: a(href='http://hunterloftis.github.io/newton/dist/current/newton.min.js') newton.min.js
 
+p Or with npm:
+  pre.CodeBlock.
+    npm install --save newton
+  pre.CodeBlock.
+    var Newton = require('newton');

@@ -1,0 +1,17 @@
+p.
+  When building a simulation, you frequently want to refer to
+  a group of Particles, Forces, and Constraints as a single entity.
+  Newton uses the concept of *Bodies* for grouping elements.
+p.
+  Sub-Bodies can be added to Bodies to build up more complex entities.
+p.
+  Keep in mind, Bodies are just for bookkeeping - logical groupings so your code can be readable.
+  They have no impact on the simulation.
+
+pre.CodeBlock.
+  var rope = Newton.Body();
+  // ...
+  rope.add(Newton.Particle(500 + i * 20, 180));
+  rope.add(Newton.RopeConstraint(prev, current));
+  // ...
+  sim.add(rope);

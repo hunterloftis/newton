@@ -20,9 +20,8 @@ block nav
         li: a(href='#render') Render the scene
         li: a(href='#demo_hello') Demo: Hello, World
 
-    li: a(href='#basics') The basics
+    li: a(href='#basics') Movement
       ul
-        li: a(href='#particles') Particles
         li: a(href='#forces') Forces
         li: a(href='#constraints') Constraints
         li: a(href='#demo_basics') Demo: Rope
@@ -33,7 +32,7 @@ block nav
         li: a(href='#extending_body') Extending Body
         li: a(href='#interaction') Interaction
         li: a(href='#events') Events
-        li: a(href='#demo_behavior') Demo: Rope Weapon
+        li: a(href='#demo_behavior') Demo: Interactive Rope
 
 block content
 
@@ -43,20 +42,25 @@ block content
   +section(3, 'simulation', 'Create a simulation')
     include guide/simulation
   +section(3, 'particle', 'Add a particle')
+    include guide/particle
   +section(3, 'render', 'Render the scene')
+    include guide/render
   +section(3, 'demo_hello', 'Demo: Hello, World')
-    iframe.Demo(src='http://jsfiddle.net/hunterloftis/yDY6r/1/embedded/js,result,html')
+    include guide/demo_hello
 
-  +section(2, 'basics', 'The basics')
-  +section(3, 'particles', 'Particles')
+  +section(2, 'basics', 'Movement')
   +section(3, 'forces', 'Forces')
+    include guide/forces
   +section(3, 'constraints', 'Constraints')
+    include guide/constraints
   +section(3, 'demo_basics', 'Demo: Rope')
-    iframe.Demo(src='http://jsfiddle.net/hunterloftis/pZD5q/5/embedded/js,result,html')
+    include guide/demo_basics
 
   +section(2, 'behavior', 'Behavior')
   +section(3, 'bodies', 'Bodies')
+    include guide/bodies
   +section(3, 'extending_body', 'Extending Body')
+    include guide/extending_body
   +section(3, 'interaction', 'Interaction')
   +section(3, 'events', 'Events')
-  +section(3, 'demo_behavior', 'Demo: Rope Weapon')
+  +section(3, 'demo_behavior', 'Demo: Interactive Rope')
