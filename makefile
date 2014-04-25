@@ -27,8 +27,8 @@ docs:
 	$(JADE) --path docs/landing.jade --pretty < docs/landing.jade > dist/index.html
 
 publish:
-	git push
-	git subtree push --prefix dist github gh-pages
+	-git push
+	-git subtree push --prefix dist github gh-pages
 
 test: install
 	npm test
