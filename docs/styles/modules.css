@@ -15,6 +15,7 @@
   font-weight: 600;
   width: 100%;
   overflow-x: scroll;
+  border-right: solid 10px #eee;
 }
 
 .Demo-container {
