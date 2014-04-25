@@ -144,7 +144,19 @@ sim.add(gravity);
               
             </p>
             <pre class="CodeBlock">var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
-sim.add(container);</pre>
+sim.add(container);
+</pre>
+            <p>
+              The simulator runs constraints repeatedly to converge at an approximate solution.
+              Since constraints can conflict with each other, it's a good idea to give Newton
+              a hint about which constraints are most important. You can do this via the Simulator's
+              <span class='Code'>solve</span> option:
+              
+            </p>
+            <pre class="CodeBlock">var sim = Newton.Simulator({
+  solve: [ Newton.PinConstraint, Newton.RopeConstraint ]
+});
+</pre>
           </div><a name="demo_basics"></a>
           <h3>Demo: Rope</h3>
           <div class="Section-content">
@@ -153,7 +165,7 @@ sim.add(container);</pre>
               
             </p>
             <div class="Demo-container">
-              <iframe src="http://jsfiddle.net/hunterloftis/pZD5q/7/embedded/js,result,html" class="Demo"></iframe>
+              <iframe src="http://jsfiddle.net/hunterloftis/X7x2P/1/embedded/js,result,html" class="Demo"></iframe>
             </div>
             <p>
               We've given our Simulator a `solve` option.

@@ -10,3 +10,15 @@ p.
 pre.CodeBlock.
   var container = Newton.BoxConstraint(0, 0, 1000, 600);   // x, y, width, height
   sim.add(container);
+
+p.
+  The simulator runs constraints repeatedly to converge at an approximate solution.
+  Since constraints can conflict with each other, it's a good idea to give Newton
+  a hint about which constraints are most important. You can do this via the Simulator's
+  <span class='Code'>solve</span> option:
+
+pre.CodeBlock.
+  var sim = Newton.Simulator({
+    solve: [ Newton.PinConstraint, Newton.RopeConstraint ]
+  });
+
