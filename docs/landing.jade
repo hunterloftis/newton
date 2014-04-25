@@ -1,0 +1,73 @@
+doctype html
+html
+  head
+    title Newton - Playful physics
+    link(href='http://fonts.googleapis.com/css?family=Poiret+One', rel='stylesheet', type='text/css')
+    link(href='http://fonts.googleapis.com/css?family=Roboto:300', rel='stylesheet', type='text/css')
+    style(type='text/css').
+      * {
+      box-sizing: border-box;
+      }
+      body {
+      font-family: 'Roboto', helvetica, arial, sans-serif;
+      font-weight: 300;
+      }
+      .Landing {
+      background: #fff;
+      color: #333;
+      }
+      .Hero {
+      width: 550px;
+      margin: 200px auto 0 auto;
+      text-align: center;
+      position: relative;
+      z-index: 50;
+      }
+      .Hero-logo {
+      color: #000;
+      font-family: 'Poiret One';
+      font-size: 72px;
+      padding: 0;
+      margin: 0;
+      }
+      .Hero-subtitle {
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1.5;
+      margin: 20px 0;
+      }
+      .Button {
+      background: #3199B6;
+      color: #fff;
+      display: inline-block;
+      padding: 20px 20px;
+      margin: 0 3px;
+      text-decoration: none;
+      border-radius: 1px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      }
+      .Fork {
+      position: absolute;
+      top: 0;
+      right: 0;
+      border: 0;
+      width: 149px;
+      height: 149px;
+      z-index: 100;
+      }
+      #Demo {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 100%;
+      z-index: 0;
+      }
+  body.Landing
+    main.Hero
+      h1.Hero-logo Newton
+      h2.Hero-subtitle Powerful 2D physics with a simple API for browsers and node.js.
+      a.Button(href='http://hunterloftis.github.io/newton/dist/current/newton.min.js') Download (0.2.7)
+      a.Button(href='http://hunterloftis.github.io/newton/dist/docs/guide.html') Documentation
+    a(href='https://github.com/hunterloftis/newton')
+      img.Fork(src='docs/styles/images/fork-me-right-graphite@2x.png', alt='Fork me on GitHub')
