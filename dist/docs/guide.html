@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Newton - docs</title>
+    <title>Newton - guide</title>
     <link href="http://fonts.googleapis.com/css?family=Poiret+One" rel="stylesheet" type="text/css">
     <link href="http://fonts.googleapis.com/css?family=Roboto:400" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="styles/base.css">
@@ -12,11 +12,10 @@
     <div class="Header">
       <div class="container">
         <header class="row">
-          <div class="columns four">
-            <h1 class="Logo">Newton</h1>
-          </div>
+          <div class="columns four"><a href="../..">
+              <h1 class="Logo">Newton</h1></a></div>
           <div class="columns eight">
-            <div class="MainMenu"><a href="#">Guide</a><a href="#">API Reference</a><a href="#">Github</a><a href="#">Issues</a></div>
+            <div class="MainMenu"><a href="/dist/docs/guide.html" class="active">Guide</a><a href="#">API Reference</a><a href="https://github.com/hunterloftis/newton">Github</a><a href="https://github.com/hunterloftis/newton/issues?direction=desc&amp;sort=created&amp;state=open">Issues</a></div>
           </div>
         </header>
       </div>
@@ -174,10 +173,10 @@ sim.add(container);</pre>
               
             </p>
             <pre class="CodeBlock">var rope = Newton.Body();
-// ...
+
 rope.add(Newton.Particle(500 + i * 20, 180));
 rope.add(Newton.RopeConstraint(prev, current));
-// ...
+
 sim.add(rope);</pre>
           </div><a name="extending_body"></a>
           <h3>Extending Body</h3>

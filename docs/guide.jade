@@ -3,15 +3,8 @@ extends _layout
 append config
   - page='guide'
 
-mixin section(level, name, title)
-  a(name=name)
-  case level
-    when 1: h1 #{title}
-    when 2: h2 #{title}
-    when 3: h3 #{title}
-  if block
-    .Section-content
-      block
+block title
+  title Newton - guide
 
 block nav
   ul

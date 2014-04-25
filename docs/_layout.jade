@@ -1,9 +1,20 @@
 block config
 
+mixin section(level, name, title)
+  a(name=name)
+  case level
+    when 1: h1 #{title}
+    when 2: h2 #{title}
+    when 3: h3 #{title}
+  if block
+    .Section-content
+      block
+
 doctype html
 html(lang='en')
   head
-    title Newton - docs
+    block title
+      title Newton
     link(href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css')
     link(href='http://fonts.googleapis.com/css?family=Roboto:400' rel='stylesheet' type='text/css')
     link(rel='stylesheet' type='text/css' href='styles/base.css')
@@ -11,20 +22,18 @@ html(lang='en')
     link(rel='stylesheet' type='text/css' href='styles/modules.css')
 
   body
-
-    h1= page
-
     .Header
       .container
         header.row
           .columns.four
-            h1.Logo Newton
+            a(href='../..')
+              h1.Logo Newton
           .columns.eight
             .MainMenu
-              a(href='#') Guide
+              a(href='/dist/docs/guide.html' class=(page === 'guide' ? 'active' : '')) Guide
               a(href='#') API Reference
-              a(href='#') Github
-              a(href='#') Issues
+              a(href='https://github.com/hunterloftis/newton') Github
+              a(href='https://github.com/hunterloftis/newton/issues?direction=desc&sort=created&state=open') Issues
 
     .container
       .row
