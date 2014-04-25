@@ -46,18 +46,13 @@
   padding: 0 10px;
 }
 
-.Header {
-  border-bottom: solid 1px #dfe2e7;
-}
-
 .Logo {
   font-family: 'Poiret One';
-  font-size: 26px;
+  font-size: 2rem;
   text-align: left;
-  height: 40px;
   line-height: 40px;
   vertical-align: middle;
-  padding: 0;
+  padding: 5px 0 5px 5px;
   margin: 0;
   text-decoration: none;
   color: #000;
@@ -65,15 +60,18 @@
 
 .MainMenu a {
   display: block;
-  height: 32px;
+  height: 52px;
   line-height: 32px;
   vertical-align: middle;
   text-align: left;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 1rem;
   color: #000;
+  background: #eee;
   text-decoration: none;
+  padding: 10px;
+  margin-bottom: 1px;
 }
 
 .MainMenu a.active {
@@ -81,10 +79,16 @@
 }
 
 @media only screen and (min-width : 481px) {
+
+  .Header {
+    border-bottom: solid 1px #dfe2e7;
+  }
+
   .Logo {
     text-align: left;
     height: 64px;
     line-height: 64px;
+    padding: 0;
   }
 
   .MainMenu {
@@ -97,6 +101,9 @@
     line-height: 64px;
     text-align: center;
     margin-left: 30px;
+    margin-bottom: 0;
+    padding: 0;
+    background: none;
   }
 
   h2 {
@@ -113,7 +120,7 @@
 
   .SideBar {
     display: block;
-    font-size: 12px;
+    font-size: 1rem;
     padding-top: 21px;
     text-align: right;
   }
