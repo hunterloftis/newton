@@ -33,7 +33,7 @@ docs:
 	$(JADE) --path docs/guide.jade --pretty < docs/guide.jade > dist/docs/guide.html
 
 pages:
-	git push github master:gh-pages
+	git subtree push --prefix dist github gh-pages
 
 test: install
 	npm test
