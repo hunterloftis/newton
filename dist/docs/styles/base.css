@@ -10,6 +10,7 @@ body {
   background: #fff;
   font-family: helvetica, arial, sans-serif;
   font-weight: 200;
+  line-height: 1.5;
   color: #333;
   padding: 0;
   margin: 0;
@@ -27,20 +28,20 @@ h2 {
   font-size: 2rem;
   text-transform: uppercase;
   font-family: 'Roboto';
+  line-height: 0.95;
 }
 
 h3 {
   font-size: 1.1rem;
   color: #aaa;
-  border-bottom: solid 1px #ccc;
-  padding-bottom: 5px;
+  border-bottom: solid 1px #dfe2e7;
   font-weight: 500;
+  margin-top: 25px;
 }
 
 ul {
-  list-style-type: none;
   margin: 0;
-  padding: 0 0 0 15px;
+  padding: 0 0 0 25px;
 }
 
 li {

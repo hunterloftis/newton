@@ -7,7 +7,8 @@ mixin section(level, name, title)
     when 2: h2 #{title}
     when 3: h3 #{title}
   if block
-    block
+    .Section-content
+      block
 
 block nav
   ul
@@ -44,12 +45,14 @@ block content
   +section(3, 'particle', 'Add a particle')
   +section(3, 'render', 'Render the scene')
   +section(3, 'demo_hello', 'Demo: Hello, World')
+    iframe.Demo(src='http://jsfiddle.net/hunterloftis/yDY6r/1/embedded/js,result,html')
 
   +section(2, 'basics', 'The basics')
   +section(3, 'particles', 'Particles')
   +section(3, 'forces', 'Forces')
   +section(3, 'constraints', 'Constraints')
   +section(3, 'demo_basics', 'Demo: Rope')
+    iframe.Demo(src='http://jsfiddle.net/hunterloftis/pZD5q/5/embedded/js,result,html')
 
   +section(2, 'behavior', 'Behavior')
   +section(3, 'bodies', 'Bodies')
