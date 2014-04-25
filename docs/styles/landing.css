@@ -37,11 +37,12 @@ body {
 }
 
 .Button {
+  min-width: 180px;
   background: #3199B6;
   color: #fff;
   display: inline-block;
   padding: 20px 20px;
-  margin: 0 3px;
+  margin: 0 3px 8px 3px;
   text-decoration: none;
   border-radius: 1px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
