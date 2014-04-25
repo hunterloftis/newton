@@ -33,7 +33,7 @@ docs:
 	$(JADE) --path docs/guide.jade --pretty < docs/guide.jade > dist/docs/guide.html
 	$(JADE) --path docs/landing.jade --pretty < docs/landing.jade > dist/index.html
 
-pages:
+pages: docs
 	git subtree push --prefix dist github gh-pages
 
 test: install
