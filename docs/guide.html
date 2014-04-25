@@ -2,70 +2,76 @@
 <html lang="en">
   <head>
     <title>Newton - docs</title>
+    <link href="http://fonts.googleapis.com/css?family=Poiret+One" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Roboto:400" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="styles/base.css">
     <link rel="stylesheet" type="text/css" href="styles/smart-grid.css">
+    <link rel="stylesheet" type="text/css" href="styles/modules.css">
   </head>
   <body>
-    <div class="container">
-      <header class="row Header">
-        <div class="columns six">
-          <h1>Newton</h1>
-        </div>
-        <div class="columns six"><a href="#">Guide</a><a href="#">API Reference</a><a href="#">Github</a><a href="#">Issues</a></div>
-      </header>
+    <div class="Header">
+      <div class="container">
+        <header class="row">
+          <div class="columns four">
+            <h1 class="Logo">Newton</h1>
+          </div>
+          <div class="columns eight">
+            <div class="MainMenu"><a href="#">Guide</a><a href="#">API Reference</a><a href="#">Github</a><a href="#">Issues</a></div>
+          </div>
+        </header>
+      </div>
     </div>
     <div class="container">
-      <nav class="columns three">
-        <h1>Guide</h1>
-        <h2></h2>
-        <ul>
-          <li><a href="#hello">Hello, World
-              <ul>
-                <li><a href="#install">Install the library</a></li>
-                <li><a href="#simulation">Create a simulation</a></li>
-                <li><a href="#particle">Add a particle</a></li>
-                <li><a href="#render">Render the scene</a></li>
-                <li><a href="#demo_hello">Demo: Hello, World</a></li>
-              </ul></a></li>
-          <li><a href="#basics">The basics
-              <ul>
-                <li><a href="#particles">Particles</a></li>
-                <li><a href="#forces">Forces</a></li>
-                <li><a href="#constraints">Constraints</a></li>
-                <li><a href="#demo_basics">Demo: Rope</a></li>
-              </ul></a></li>
-          <li><a href="#behavior">Behavior
-              <ul>
-                <li><a href="#bodies">Bodies</a></li>
-                <li><a href="#extending_body">Extending Body</a></li>
-                <li><a href="#interaction">Interaction</a></li>
-                <li><a href="#events">Events</a></li>
-                <li><a href="#demo_behavior">Demo: Rope Weapon</a></li>
-              </ul></a></li>
-        </ul>
-      </nav>
-      <main class="columns nine"><a name="top"></a>
-        <h1>Guide</h1><a name="hello"></a>
-        <h2>Hello, World</h2><a name="install"></a>
-        <h3>Install the library</h3>
-        <p>This is install</p><a name="simulation"></a>
-        <h3>Create a simulation</h3>
-        <p>This is simulation</p><a name="particle"></a>
-        <h3>Add a particle</h3><a name="render"></a>
-        <h3>Render the scene</h3><a name="demo_hello"></a>
-        <h3>Demo: Hello, World</h3><a name="basics"></a>
-        <h2>The basics</h2><a name="particles"></a>
-        <h3>Particles</h3><a name="forces"></a>
-        <h3>Forces</h3><a name="constraints"></a>
-        <h3>Constraints</h3><a name="demo_basics"></a>
-        <h3>Demo: Rope</h3><a name="behavior"></a>
-        <h2>Behavior</h2><a name="bodies"></a>
-        <h3>Bodies</h3><a name="extending_body"></a>
-        <h3>Extending Body</h3><a name="interaction"></a>
-        <h3>Interaction</h3><a name="events"></a>
-        <h3>Events</h3><a name="demo_behavior"></a>
-        <h3>Demo: Rope Weapon</h3>
-      </main>
+      <div class="row">
+        <nav class="columns three SideBar">
+          <ul>
+            <li><a href="#hello">Hello, World
+                <ul>
+                  <li><a href="#install">Install the library</a></li>
+                  <li><a href="#simulation">Create a simulation</a></li>
+                  <li><a href="#particle">Add a particle</a></li>
+                  <li><a href="#render">Render the scene</a></li>
+                  <li><a href="#demo_hello">Demo: Hello, World</a></li>
+                </ul></a></li>
+            <li><a href="#basics">The basics
+                <ul>
+                  <li><a href="#particles">Particles</a></li>
+                  <li><a href="#forces">Forces</a></li>
+                  <li><a href="#constraints">Constraints</a></li>
+                  <li><a href="#demo_basics">Demo: Rope</a></li>
+                </ul></a></li>
+            <li><a href="#behavior">Behavior
+                <ul>
+                  <li><a href="#bodies">Bodies</a></li>
+                  <li><a href="#extending_body">Extending Body</a></li>
+                  <li><a href="#interaction">Interaction</a></li>
+                  <li><a href="#events">Events</a></li>
+                  <li><a href="#demo_behavior">Demo: Rope Weapon</a></li>
+                </ul></a></li>
+          </ul>
+        </nav>
+        <main class="columns nine"><a name="hello"></a>
+          <h2>Hello, World</h2><a name="install"></a>
+          <h3>Install the library</h3>
+          <p>This is install</p><a name="simulation"></a>
+          <h3>Create a simulation</h3>
+          <p>This is simulation</p><a name="particle"></a>
+          <h3>Add a particle</h3><a name="render"></a>
+          <h3>Render the scene</h3><a name="demo_hello"></a>
+          <h3>Demo: Hello, World</h3><a name="basics"></a>
+          <h2>The basics</h2><a name="particles"></a>
+          <h3>Particles</h3><a name="forces"></a>
+          <h3>Forces</h3><a name="constraints"></a>
+          <h3>Constraints</h3><a name="demo_basics"></a>
+          <h3>Demo: Rope</h3><a name="behavior"></a>
+          <h2>Behavior</h2><a name="bodies"></a>
+          <h3>Bodies</h3><a name="extending_body"></a>
+          <h3>Extending Body</h3><a name="interaction"></a>
+          <h3>Interaction</h3><a name="events"></a>
+          <h3>Events</h3><a name="demo_behavior"></a>
+          <h3>Demo: Rope Weapon</h3>
+        </main>
+      </div>
     </div>
   </body>
 </html>
