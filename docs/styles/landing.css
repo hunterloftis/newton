@@ -14,11 +14,18 @@ body {
 
 .Hero {
   max-width: 550px;
-  margin: 200px auto 0 auto;
+  margin: 50px auto 0 auto;
   text-align: center;
   position: relative;
   z-index: 50;
   overflow: hidden;
+  padding-bottom: 30px;
+}
+
+@media only screen and (min-height : 550px) {
+  .Hero {
+    margin: 200px auto 0 auto;
+  }
 }
 
 .Hero-logo {
