@@ -24,7 +24,7 @@ bump:
 docs:
 	mkdir -p dist/docs && cp -r docs/styles dist/docs
 	$(JADE) --path docs/guide.jade --pretty < docs/guide.jade > dist/docs/guide.html
-	$(JADE) --path docs/landing.jade --pretty < docs/landing.jade > dist/index.html
+	$(JADE) --path docs/landing.jade --pretty -O package.json < docs/landing.jade > dist/index.html
 
 publish:
 	-git push
