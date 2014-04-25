@@ -1,17 +1,15 @@
 p.
-  That's a lot of typing for just making a rope.
-  Instead, let's extend Newton's Body type to create a Rope constructor.
+  In most cases, you'll extend Newton's base Body to create reusable custom Body types.
+  For example, let's create a Rope Body:
 
 pre.CodeBlock.
   function Rope(x, y, length) {
     Newton.Body.call(this);   // call Body's constructor
+
+    // implementation here
   }
 
   Rope.prototype = Object.create(Newton.Body.prototype);  // extend Body's prototype
 
   var rope = new Rope(225, 10, 300);
 
-p.
-  Extending Body allows you to create higher-level abstractions in your simulation.
-  Since Bodies can include sub-Bodies, you can compose larger components
-  out of smaller, simpler parts.

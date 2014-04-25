@@ -22,11 +22,15 @@ block nav
         li: a(href='#constraints') Constraints
         li: a(href='#demo_basics') Demo: Rope
 
-    li: a(href='#behavior') Behavior
+    li: a(href='#bodies_group') Bodies
       ul
-        li: a(href='#bodies') Bodies
+        li: a(href='#bodies') Create a Body
         li: a(href='#extending_body') Extending Body
-        li: a(href='#interaction') Interaction
+        li: a(href='#demo_bodies') Demo: Rope Body
+
+    li: a(href='#interaction') Interaction
+      ul
+        li: a(href='#input') Input
         li: a(href='#events') Events
         li: a(href='#demo_behavior') Demo: Interactive Rope
 
@@ -52,11 +56,15 @@ block content
   +section(3, 'demo_basics', 'Demo: Rope')
     include guide/demo_basics
 
-  +section(2, 'behavior', 'Behavior')
-  +section(3, 'bodies', 'Bodies')
+  +section(2, 'bodies_group', 'Bodies')
+  +section(3, 'bodies', 'Create a Body')
     include guide/bodies
   +section(3, 'extending_body', 'Extending Body')
     include guide/extending_body
-  +section(3, 'interaction', 'Interaction')
+  +section(3, 'demo_bodies', 'Demo: Rope Body')
+    include guide/demo_bodies
+
+  +section(2, 'interaction', 'Interaction')
+  +section(3, 'input', 'Input')
   +section(3, 'events', 'Events')
   +section(3, 'demo_behavior', 'Demo: Interactive Rope')

@@ -39,11 +39,15 @@
                   <li><a href="#constraints">Constraints</a></li>
                   <li><a href="#demo_basics">Demo: Rope</a></li>
                 </ul></a></li>
-            <li><a href="#behavior">Behavior
+            <li><a href="#bodies_group">Bodies
                 <ul>
-                  <li><a href="#bodies">Bodies</a></li>
+                  <li><a href="#bodies">Create a Body</a></li>
                   <li><a href="#extending_body">Extending Body</a></li>
-                  <li><a href="#interaction">Interaction</a></li>
+                  <li><a href="#demo_bodies">Demo: Rope Body</a></li>
+                </ul></a></li>
+            <li><a href="#interaction">Interaction
+                <ul>
+                  <li><a href="#input">Input</a></li>
                   <li><a href="#events">Events</a></li>
                   <li><a href="#demo_behavior">Demo: Interactive Rope</a></li>
                 </ul></a></li>
@@ -133,7 +137,7 @@ sim.add(gravity);
           </div><a name="constraints"></a>
           <h3>Constraints</h3>
           <div class="Section-content">
-            <p>Constraints are the third basic element of Newton and are one of its most powerful features.</p>
+            <p>Constraints are the third basic element of Newton and are its most powerful feature.</p>
             <p>
               They create rules that are applied to Particles after integration, like
               "All particles should stay within this rectangle," or "These two particles should be connected."
@@ -167,26 +171,18 @@ sim.add(container);
             <div class="Demo-container">
               <iframe src="http://jsfiddle.net/hunterloftis/X7x2P/1/embedded/js,result,html" class="Demo"></iframe>
             </div>
-            <p>
-              We've given our Simulator a `solve` option.
-              Newton uses an iterative, convergent solver, which means that constraints are run repeatedly
-              each frame to converge at an approximate solution for the whole system.
-              The `solve` option tells the Simulator which constraints are most important.
-              Try changing the priority order to see how it affects the simulation.
-            </p>
-          </div><a name="behavior"></a>
-          <h2>Behavior</h2><a name="bodies"></a>
-          <h3>Bodies</h3>
+          </div><a name="bodies_group"></a>
+          <h2>Bodies</h2><a name="bodies"></a>
+          <h3>Create a Body</h3>
           <div class="Section-content">
             <p>
               When building a simulation, you frequently want to refer to
               a group of Particles, Forces, and Constraints as a single entity.
-              Newton uses the concept of *Bodies* for grouping elements.
+              Newton uses the concept of Bodies for grouping elements.
             </p>
-            <p>Sub-Bodies can be added to Bodies to build up more complex entities.</p>
             <p>
-              Keep in mind, Bodies are just for bookkeeping - logical groupings so your code can be readable.
-              They have no impact on the simulation.
+              Instead of adding Particles and Constraints directly to the Simulator,
+              we can instead add them as a group in a Body:
               
             </p>
             <pre class="CodeBlock">var rope = Newton.Body();
@@ -194,30 +190,48 @@ sim.add(container);
 rope.add(Newton.Particle(500 + i * 20, 180));
 rope.add(Newton.RopeConstraint(prev, current));
 
-sim.add(rope);</pre>
+sim.add(rope);
+</pre>
+            <p>
+              Keep in mind, Bodies are just for bookkeeping - logical groupings so your code can be readable.
+              They have no impact on the simulation.
+            </p>
           </div><a name="extending_body"></a>
           <h3>Extending Body</h3>
           <div class="Section-content">
             <p>
-              That's a lot of typing for just making a rope.
-              Instead, let's extend Newton's Body type to create a Rope constructor.
+              In most cases, you'll extend Newton's base Body to create reusable custom Body types.
+              For example, let's create a Rope Body:
               
             </p>
             <pre class="CodeBlock">function Rope(x, y, length) {
   Newton.Body.call(this);   // call Body's constructor
+  
+  // implementation here
 }
 
 Rope.prototype = Object.create(Newton.Body.prototype);  // extend Body's prototype
 
 var rope = new Rope(225, 10, 300);
 </pre>
+          </div><a name="demo_bodies"></a>
+          <h3>Demo: Rope Body</h3>
+          <div class="Section-content">
             <p>
-              Extending Body allows you to create higher-level abstractions in your simulation.
-              Since Bodies can include sub-Bodies, you can compose larger components
-              out of smaller, simpler parts.
+              Reuse! We now have a drop-in Rope Body that we can use as many times as we like:
+              
+            </p>
+            <div class="Demo-container">
+              <iframe src="http://jsfiddle.net/hunterloftis/6FJtv/3/embedded/js,result,html" class="Demo"></iframe>
+            </div>
+            <p>
+              We can also extend Rope with new data and behaviors.
+              We've already given it a head property - we could also add a tail property
+              or methods like coil() or snap()
             </p>
           </div><a name="interaction"></a>
-          <h3>Interaction</h3><a name="events"></a>
+          <h2>Interaction</h2><a name="input"></a>
+          <h3>Input</h3><a name="events"></a>
           <h3>Events</h3><a name="demo_behavior"></a>
           <h3>Demo: Interactive Rope</h3>
         </main>
