@@ -15,6 +15,7 @@
   font-weight: 600;
   width: 100%;
   overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
   border-right: solid 10px #eee;
 }
 
