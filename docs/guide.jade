@@ -10,10 +10,7 @@ mixin section(level, name, title)
     block
 
 block nav
-  h1 Guide
-  h2= test
   ul
-
     li: a(href='#hello') Hello, World
       ul
         li: a(href='#install') Install the library
@@ -38,7 +35,6 @@ block nav
         li: a(href='#demo_behavior') Demo: Rope Weapon
 
 block content
-  +section(1, 'top', 'Guide')
 
   +section(2, 'hello', 'Hello, World')
   +section(3, 'install', 'Install the library')

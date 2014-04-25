@@ -2,24 +2,30 @@ doctype html
 html(lang='en')
   head
     title Newton - docs
+    link(href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css')
+    link(href='http://fonts.googleapis.com/css?family=Roboto:400' rel='stylesheet' type='text/css')
     link(rel='stylesheet' type='text/css' href='styles/base.css')
     link(rel='stylesheet' type='text/css' href='styles/smart-grid.css')
+    link(rel='stylesheet' type='text/css' href='styles/modules.css')
 
   body
+
+    .Header
+      .container
+        header.row
+          .columns.four
+            h1.Logo Newton
+          .columns.eight
+            .MainMenu
+              a(href='#') Guide
+              a(href='#') API Reference
+              a(href='#') Github
+              a(href='#') Issues
+
     .container
+      .row
+        nav.columns.three.SideBar
+          block nav
 
-      header.row.Header
-        .columns.six
-          h1 Newton
-        .columns.six
-          a(href='#') Guide
-          a(href='#') API Reference
-          a(href='#') Github
-          a(href='#') Issues
-
-    .container
-      nav.columns.three
-        block nav
-
-      main.columns.nine
-        block content
+        main.columns.nine
+          block content

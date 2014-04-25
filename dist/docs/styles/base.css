@@ -1,10 +1,49 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 12px;
+}
+
 body {
-  background: #eee;
-  font-family: 'helvetica neue', helvetica, arial, sans-serif;
+  background: #fff;
+  font-family: helvetica, arial, sans-serif;
   font-weight: 200;
   color: #333;
+  padding: 0;
+  margin: 0;
 }
 
 h1, h2, h3, h4, h5 {
-  font-weight: 200;
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 2rem;
+  text-transform: uppercase;
+  font-family: 'Roboto';
+}
+
+h3 {
+  font-size: 1.1rem;
+  color: #aaa;
+  border-bottom: solid 1px #ccc;
+  padding-bottom: 5px;
+  font-weight: 500;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0 0 0 15px;
+}
+
+li {
+  margin: 0;
+  padding: 0;
 }
