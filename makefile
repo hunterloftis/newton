@@ -3,12 +3,16 @@ JADE = ./node_modules/.bin/jade
 clean:
 	-rm -rf build
 	mkdir -p build
+	-rm -rf node_modules
 
 install:
 	npm install
 
+serve:
+	node_modules/.bin/static -p 8000 -c 1 build
+
 watch: install
-	node_modules/.bin/watchify -d --standalone Newton index.js -o build/newton.js
+	node_modules/.bin/watchify -d -v --standalone Newton index.js -o build/newton.js
 
 version: clean install test bump docs
 
