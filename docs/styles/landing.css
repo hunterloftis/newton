@@ -1,21 +1,26 @@
 * {
   box-sizing: border-box;
 }
+
 body {
   font-family:'Roboto', helvetica, arial, sans-serif;
   font-weight: 300;
 }
+
 .Landing {
   background: #fff;
   color: #333;
 }
+
 .Hero {
-  width: 550px;
+  max-width: 550px;
   margin: 200px auto 0 auto;
   text-align: center;
   position: relative;
   z-index: 50;
+  overflow: hidden;
 }
+
 .Hero-logo {
   color: #000;
   font-family:'Poiret One';
@@ -23,12 +28,14 @@ body {
   padding: 0;
   margin: 0;
 }
+
 .Hero-subtitle {
   font-size: 22px;
   font-weight: 300;
   line-height: 1.5;
   margin: 20px 0;
 }
+
 .Button {
   background: #3199B6;
   color: #fff;
@@ -39,6 +46,7 @@ body {
   border-radius: 1px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
+
 .Fork {
   position: absolute;
   top: 0;
@@ -48,6 +56,7 @@ body {
   height: 149px;
   z-index: 100;
 }
+
 #Demo {
   position: absolute;
   left: 0;
@@ -56,3 +65,4 @@ body {
   height: 100%;
   z-index: 0;
 }
+
