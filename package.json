@@ -28,6 +28,7 @@
     "url": "https://github.com/hunterloftis/newton/issues"
   },
   "dependencies": {
-    "eventemitter2": "~0.4.13"
+    "eventemitter2": "~0.4.13",
+    "lodash": "^2.4.1"
   }
 }
