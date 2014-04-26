@@ -48,7 +48,8 @@
             <li><a href="#interaction">Interaction
                 <ul>
                   <li><a href="#input">Input</a></li>
-                  <li><a href="#events">Events</a></li>
+                  <li><a href="#removal">Removal</a></li>
+                  <li><a href="#destruction">Destruction</a></li>
                   <li><a href="#demo_behavior">Demo: Interactive Rope</a></li>
                 </ul></a></li>
           </ul>
@@ -231,9 +232,77 @@ var rope = new Rope(225, 10, 300);
             </p>
           </div><a name="interaction"></a>
           <h2>Interaction</h2><a name="input"></a>
-          <h3>Input</h3><a name="events"></a>
-          <h3>Events</h3><a name="demo_behavior"></a>
+          <h3>Input</h3>
+          <div class="Section-content">
+            <p>
+              Interacting with Newton is easy -
+              just inject Forces, Particles, or Constraints into the system
+              based on your user's behavior.
+              
+            </p>
+            <pre class="CodeBlock">var mousePin = null;
+
+renderer.on('pointerdown', function(point) {
+    var particle = sim.findNearest(point, 30);
+    if (particle) mousePin = sim.add(Newton.PinConstraint(particle, point));
+});
+</pre>
+            <p>
+              In this case, we've added a PinConstraint to represent the user.
+              When the user clicks on a Particle,
+              we bind the Particle to a new constraint, which we update to follow
+              wherever the user moves her mouse.
+              
+            </p>
+          </div><a name="removal"></a>
+          <h3>Removal</h3>
+          <div class="Section-content">
+            <p>
+              Just like add() adds Particles, Forces, and Constraints to a simulation,
+              remove() removes them.
+              
+            </p>
+            <p>
+              In this case, we want to remove the PinConstraint whenever the user releases her mouse,
+              so she can "let go" of the dragged Particle:
+              
+            </p>
+            <pre class="CodeBlock">renderer.on('pointerup', function(point) {
+   if (!mousePin) return;
+   sim.remove(mousePin);
+   mousePin = null;
+});</pre>
+          </div><a name="destruction"></a>
+          <h3>Destruction</h3>
+          <div class="Section-content">
+            <p>
+              Some Constraints can receive options that include some sort of strength value.
+              If a Simulation reaches a point where the Constraint is acting beyond its strength,
+              it will destroy itself to create realistic deformations and structural behavior.
+              
+            </p>
+            <p>
+              RopeConstraints can have a tensile strength. Here, we specify that once the
+              Constraint stretches to 3x its original length, it should break:
+              
+            </p>
+            <pre class="CodeBlock">this.add(Newton.RopeConstraint(prev, current, {
+    length: segmentLength,
+    stiffness: 0.9,         // slightly springy
+    strength: 3             // break when stretched to 3x length
+} ));</pre>
+          </div><a name="demo_behavior"></a>
           <h3>Demo: Interactive Rope</h3>
+          <div class="Section-content">
+            <p>
+              Now we can drag our ropes around!
+              If we stretch them too far they'll even realistically break.
+              
+            </p>
+            <div class="Demo-container">
+              <iframe src="http://jsfiddle.net/hunterloftis/HTS7d/3/embedded/js,result,html" class="Demo"></iframe>
+            </div>
+          </div>
         </main>
       </div>
     </div>

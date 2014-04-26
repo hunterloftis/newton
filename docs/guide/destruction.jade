@@ -1,0 +1,15 @@
+p.
+  Some Constraints can receive options that include some sort of strength value.
+  If a Simulation reaches a point where the Constraint is acting beyond its strength,
+  it will destroy itself to create realistic deformations and structural behavior.
+
+p.
+  RopeConstraints can have a tensile strength. Here, we specify that once the
+  Constraint stretches to 3x its original length, it should break:
+
+pre.CodeBlock.
+  this.add(Newton.RopeConstraint(prev, current, {
+      length: segmentLength,
+      stiffness: 0.9,         // slightly springy
+      strength: 3             // break when stretched to 3x length
+  } ));

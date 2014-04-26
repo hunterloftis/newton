@@ -1,0 +1,14 @@
+p.
+  Just like add() adds Particles, Forces, and Constraints to a simulation,
+  remove() removes them.
+
+p.
+  In this case, we want to remove the PinConstraint whenever the user releases her mouse,
+  so she can "let go" of the dragged Particle:
+
+pre.CodeBlock.
+  renderer.on('pointerup', function(point) {
+     if (!mousePin) return;
+     sim.remove(mousePin);
+     mousePin = null;
+  });

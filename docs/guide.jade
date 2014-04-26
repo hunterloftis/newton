@@ -31,7 +31,8 @@ block nav
     li: a(href='#interaction') Interaction
       ul
         li: a(href='#input') Input
-        li: a(href='#events') Events
+        li: a(href='#removal') Removal
+        li: a(href='#destruction') Destruction
         li: a(href='#demo_behavior') Demo: Interactive Rope
 
 block content
@@ -66,5 +67,10 @@ block content
 
   +section(2, 'interaction', 'Interaction')
   +section(3, 'input', 'Input')
-  +section(3, 'events', 'Events')
+    include guide/input
+  +section(3, 'removal', 'Removal')
+    include guide/removal
+  +section(3, 'destruction', 'Destruction')
+    include guide/destruction
   +section(3, 'demo_behavior', 'Demo: Interactive Rope')
+    include guide/demo_interaction

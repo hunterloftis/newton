@@ -1,0 +1,19 @@
+p.
+  Interacting with Newton is easy -
+  just inject Forces, Particles, or Constraints into the system
+  based on your user's behavior.
+
+pre.CodeBlock.
+  var mousePin = null;
+
+  renderer.on('pointerdown', function(point) {
+      var particle = sim.findNearest(point, 30);
+      if (particle) mousePin = sim.add(Newton.PinConstraint(particle, point));
+  });
+
+p.
+  In this case, we've added a PinConstraint to represent the user.
+  When the user clicks on a Particle,
+  we bind the Particle to a new constraint, which we update to follow
+  wherever the user moves her mouse.
+
