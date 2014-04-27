@@ -23,7 +23,6 @@ bump:
 	node_modules/.bin/browserify --standalone Newton index.js > dist/$(VERSION)/newton.js
 	cat dist/$(VERSION)/newton.js | node_modules/.bin/uglifyjs > dist/$(VERSION)/newton.min.js
 	cp dist/$(VERSION)/* dist/current/
-	npm publish
 
 docs:
 	mkdir -p dist/docs && cp -r docs/styles dist/docs
@@ -33,6 +32,7 @@ docs:
 publish:
 	-git push
 	-git subtree push --prefix dist github gh-pages
+	-npm publish
 
 test: install
 	npm test
