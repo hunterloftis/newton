@@ -32,7 +32,7 @@ docs:
 publish:
 	-git push
 	-git subtree push --prefix dist github gh-pages
-	-npm publish
+	@echo "Pushed to github. Use 'npm publish' to push to npm."
 
 test: install
 	npm test

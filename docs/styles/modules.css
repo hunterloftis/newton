@@ -40,6 +40,10 @@
   height: 130px;
 }
 
+.DocBody {
+  padding-bottom: 30px;
+}
+
 .SideBar {
   display: none;
 }
