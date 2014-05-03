@@ -4,39 +4,13 @@ A playful, particle-based physics engine designed from the ground up for JavaScr
 
 [![Build Status](https://travis-ci.org/hunterloftis/newton.svg?branch=master)](https://travis-ci.org/hunterloftis/newton)
 
-## Reboot
-
-Newton is getting a reboot.
-
-A lot of folks have been excited by playing with this library -
-it introduces some new things to the JS physics landscape:
-
-- blazing fast
-- soft bodies
-- simple API
-- decoupled rendering
-- deterministic
-
-However, I've been a bad project maintainer.
-Partly I've been busy, and partly Newton grew unwieldy and
-difficult to maintain.
-
-So instead of leaving it in shambles, I'm rebooting Newton
-from the ground up, focusing on maintainability:
-
-- documentation
-- automated tests
-- minimal API
-- a roadmap
-
-If you'd like to help, please get in touch!
-[@hunterloftis](http://twitter.com/hunterloftis)
+[Read the docs](http://hunterloftis.github.io/newton/)
 
 ## Roadmap
 
 - ☑ [Getting started guide](http://hunterloftis.github.io/newton/docs/guide.html)
-- ◻ Feature completeness with getting started guide demos
-- ◻ Unit tests
+- ☑ Feature completeness with getting started guide demos
+- ◻ 90% Test coverage
 - ◻ API docs
 - ◻ Performance benchmarks
 - ◻ Shape Constraint (rigid bodies)
@@ -44,6 +18,8 @@ If you'd like to help, please get in touch!
 - ◻ Web Workers (offloading from the main CPU)
 
 ## Contributing quick start
+
+Contributions welcome! Check out the roadmap. Constraints are always handy. Force and Body libraries too.
 
 `make build && open examples/guide_movement.html`
 
